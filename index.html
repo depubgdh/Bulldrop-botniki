@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bulldrop Mini App — demo</title>
+  <style>
+    body{font-family:system-ui;background:#10141c;color:#f4f6fa;margin:0;padding:20px}
+    .wrap{max-width:430px;margin:auto}.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .cell{aspect-ratio:1;border:0;border-radius:10px;background:#293241;color:white;font-size:24px}
+    .green{background:#1d8b50}.muted{color:#aeb8c7;font-size:14px}
+    button.action{width:100%;padding:14px;margin-top:16px;border:0;border-radius:10px;background:#16834b;color:white;font-size:16px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h2>📡 Bulldrop Saper — demo</h2>
+  <p class="muted">Bu namoyish tasodifiy kataklarni ko‘rsatadi. Haqiqiy o‘yin natijasini bashorat qilmaydi.</p>
+  <label>O‘yin ID: <input id="gameId" placeholder="O‘yin ID sini kiriting"></label>
+  <button class="action" onclick="showDemo()">Signalni ko‘rsatish</button>
+  <p id="status" class="muted"></p>
+  <div id="grid" class="grid"></div>
+  <button class="action" onclick="location.reload()">✔️ Tugatish</button>
+</div>
+<script>
+function showDemo(){
+  const id=document.getElementById('gameId').value.trim();
+  if(!id){document.getElementById('status').textContent='Avval o‘yin ID sini kiriting.';return;}
+  const status=document.getElementById('status');
+  const grid=document.getElementById('grid');
+  grid.innerHTML=''; status.textContent='⏳ Signal tayyorlanmoqda...';
+  setTimeout(()=>{
+    const picks=new Set();
+    while(picks.size<3)picks.add(Math.floor(Math.random()*25));
+    for(let i=0;i<25;i++){
+      const b=document.createElement('div'); b.className='cell'+(picks.has(i)?' green':'');
+      b.textContent=picks.has(i)?'🟩':'☑️'; grid.appendChild(b);
+    }
+    status.textContent=`Mana [${id}] shu ID o‘yini!`;
+  },2000);
+}
+</script>
+</body>
+</html>
