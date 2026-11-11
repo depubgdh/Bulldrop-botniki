@@ -55,6 +55,33 @@ def init_db():
                 FOREIGN KEY(case_id) REFERENCES cases(id) ON DELETE CASCADE
             )
         """)
+        # Eski bazalar uchun: referal ustunini qo'shish
+        cols = [row["name"] for row in con.execute("PRAGMA table_info(users)")]
+        if "referrer_id" not in cols:
+            con.execute("ALTER TABLE users ADD COLUMN referrer_id INTEGER")
+
+
+def register_referral(user_id, referrer_id):
+    """Yangi foydalanuvchini taklif qilgan odamga bog'laydi. Faqat yangi foydalanuvchi uchun ishlaydi."""
+    if user_id == referrer_id:
+        return False
+    with connect() as con:
+        if con.execute("SELECT 1 FROM users WHERE user_id=?", (user_id,)).fetchone():
+            return False
+        if not con.execute("SELECT 1 FROM users WHERE user_id=?", (referrer_id,)).fetchone():
+            return False
+        con.execute("INSERT INTO users(user_id, referrer_id) VALUES (?, ?)", (user_id, referrer_id))
+        return True
+
+
+def count_referrals(user_id):
+    """Ro'yxatdan to'liq o'tgan (telefon yuborgan) taklif qilingan do'stlar soni."""
+    with connect() as con:
+        row = con.execute(
+            "SELECT COUNT(*) AS n FROM users WHERE referrer_id=? AND phone IS NOT NULL",
+            (user_id,),
+        ).fetchone()
+        return int(row["n"])
 
 
 def get_user(user_id):
@@ -115,6 +142,26 @@ def add_case_item(case_id, name, price, image_url="", probability=0.0, rarity="c
             "INSERT INTO case_items(case_id, name, price, image_url, probability, rarity) VALUES (?, ?, ?, ?, ?, ?)",
             (int(case_id), name, int(price), image_url or "", float(probability), rarity or "common")
         )
+
+
+def deactivate_case(case_id):
+    with connect() as con:
+        con.execute("UPDATE cases SET is_active=0 WHERE id=?", (int(case_id),))
+
+
+def get_case_item(item_id):
+    with connect() as con:
+        return con.execute("SELECT * FROM case_items WHERE id=? AND is_active=1", (int(item_id),)).fetchone()
+
+
+def deactivate_item(item_id):
+    """Sovg'ani o'chiradi va u tegishli bo'lgan quti ID sini qaytaradi."""
+    item = get_case_item(item_id)
+    if not item:
+        return None
+    with connect() as con:
+        con.execute("UPDATE case_items SET is_active=0 WHERE id=?", (int(item_id),))
+    return item["case_id"]
 
 
 def get_case_items(case_id):

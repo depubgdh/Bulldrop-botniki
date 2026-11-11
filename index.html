@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#101722">
   <title>BULLDROP — Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -12,16 +12,612 @@
       color-scheme: dark;
       --bg: #101722;
       --card: #1b2735;
+      --card2: #223247;
       --line: #334256;
       --text: #f4f6fa;
       --muted: #a9b5c5;
       --pink: #ff4d9e;
       --purple: #9b68ff;
       --gold: #e4b85c;
+      --r-common: #8794a8;
+      --r-rare: #4da3ff;
+      --r-epic: #9b68ff;
+      --r-legendary: #e4b85c;
+      --r-mythic: #ff4d9e;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body { margin: 0; background: var(--bg); color: var(--text); }
 
     body {
-      margin: 0;
-      padding: 14px
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 14px 14px calc(92px + env(safe-area-inset-bottom));
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+    button { font: inherit; color: inherit; border: 0; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: default; }
+
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .note { color: var(--muted); font-size: 12px; text-align: center; margin: 10px 0 4px; }
+    .row { display: flex; align-items: center; gap: 10px; }
+    .between { justify-content: space-between; }
+    .page-title { font-size: 22px; font-weight: 800; margin: 4px 2px 14px; }
+    .sec { font-size: 16px; font-weight: 700; margin: 20px 2px 10px; }
+
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; }
+
+    /* ---------- Home ---------- */
+    .profile { display: flex; align-items: center; gap: 12px; margin: 2px 2px 14px; }
+    .avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--card2); border: 1px solid var(--line); flex: none; }
+    .avatar .emoji { font-size: 20px; font-weight: 700; }
+    .hello { font-size: 13px; color: var(--muted); }
+    .uname { font-size: 18px; font-weight: 800; }
+
+    .hero {
+      border-radius: 22px; padding: 20px 18px;
+      background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
+      box-shadow: 0 10px 30px rgba(155, 104, 255, .28);
+    }
+    .hero h2 { font-size: 24px; font-weight: 900; letter-spacing: .5px; }
+    .hero p { margin: 6px 0 16px; font-size: 14px; line-height: 1.4; opacity: .95; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .stat { padding: 12px 8px; text-align: center; }
+    .stat b { display: block; font-size: 20px; }
+    .stat span { font-size: 12px; color: var(--muted); }
+
+    .hscroll { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; }
+    .hscroll::-webkit-scrollbar { display: none; }
+
+    /* ---------- Buttons ---------- */
+    .btn { border-radius: 14px; padding: 12px 16px; font-weight: 700; background: var(--card2); border: 1px solid var(--line); }
+    .btn.primary { background: linear-gradient(135deg, var(--pink), var(--purple)); border: 0; color: #fff; }
+    .btn.white { background: #fff; color: #1b1030; border: 0; }
+    .btn.big { width: 100%; padding: 15px; font-size: 16px; }
+    .btn:active:not(:disabled) { transform: scale(.98); }
+
+    /* ---------- Media ---------- */
+    .media { display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+    .media img, .media video { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .media .emoji { font-size: 36px; line-height: 1; }
+
+    /* ---------- Cases grid (NFT sovg‘alar ko‘rinishi) ---------- */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .case {
+      padding: 10px; text-align: left; width: 100%;
+      background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+      transition: transform .12s ease;
+    }
+    .case:active { transform: scale(.97); }
+    .case .media {
+      aspect-ratio: 1 / 1; border-radius: 14px;
+      background: radial-gradient(circle at 50% 35%, rgba(155, 104, 255, .35), rgba(255, 77, 158, .08) 70%), var(--card2);
+    }
+    .case .media .emoji { font-size: 56px; }
+    .case .name { font-weight: 800; font-size: 15px; margin: 10px 2px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .case .sub { color: var(--muted); font-size: 12px; margin: 0 2px 8px; }
+    .pill {
+      display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 800;
+      background: rgba(228, 184, 92, .14); color: var(--gold); border: 1px solid rgba(228, 184, 92, .35);
+    }
+
+    .skeleton { height: 200px; border-radius: 18px; background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%); background-size: 200% 100%; animation: shine 1.2s infinite linear; }
+    @keyframes shine { to { background-position: -200% 0; } }
+
+    .empty { padding: 28px 18px; text-align: center; }
+    .empty .big { font-size: 44px; margin-bottom: 8px; }
+
+    /* ---------- Gift cards ---------- */
+    .gift {
+      --c: var(--r-common);
+      background: var(--card);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--c) 20%, var(--card)), var(--card));
+      border: 1px solid var(--line); border-bottom: 3px solid var(--c);
+      border-radius: 14px; padding: 8px; text-align: center; min-width: 0;
+    }
+    .gift .media { aspect-ratio: 1 / 1; }
+    .gift .gname { font-size: 12px; font-weight: 700; margin-top: 6px; line-height: 1.25; max-height: 30px; overflow: hidden; }
+    .gift .gprice { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .gift .gpct { font-size: 11px; font-weight: 800; color: var(--c); margin-top: 2px; }
+    .gift.small { width: 112px; flex: none; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+    /* ---------- Friends ---------- */
+    .friends-hero { padding: 20px 18px; text-align: center; }
+    .friends-hero .big { font-size: 46px; }
+    .friends-hero h2 { font-size: 20px; margin: 8px 0 6px; }
+    .count { font-size: 38px; font-weight: 900; margin: 14px 0 2px; background: linear-gradient(135deg, var(--pink), var(--purple)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .linkbox { margin-top: 14px; padding: 12px; font-size: 13px; word-break: break-all; text-align: left; background: var(--bg); border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); }
+    .btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+
+    /* ---------- Bottom tabs ---------- */
+    .tabbar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+      background: rgba(16, 23, 34, .94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid var(--line);
+    }
+    .tab { background: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; font-size: 12px; font-weight: 700; color: var(--muted); transition: color .15s; }
+    .tab svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .tab.active { color: var(--pink); }
+    .tab.active svg { filter: drop-shadow(0 0 8px rgba(255, 77, 158, .55)); }
+
+    /* ---------- Bottom sheet ---------- */
+    .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, .62); display: flex; align-items: flex-end; animation: fade .2s ease; }
+    .sheet {
+      position: relative; width: 100%; max-height: 92vh; overflow-y: auto;
+      background: var(--bg); border-top: 1px solid var(--line); border-radius: 24px 24px 0 0;
+      padding: 14px 14px calc(22px + env(safe-area-inset-bottom)); animation: up .26s ease;
+    }
+    .grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 12px; }
+    .x { position: absolute; top: 12px; right: 12px; z-index: 5; width: 34px; height: 34px; border-radius: 50%; background: var(--card2); font-size: 15px; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); }
+    .hero-media { height: 170px; border-radius: 18px; background: radial-gradient(circle at 50% 40%, rgba(155, 104, 255, .4), rgba(255, 77, 158, .08) 72%), var(--card2); }
+    .hero-media .emoji { font-size: 76px; }
+    .sheet-title { font-size: 22px; font-weight: 900; margin: 14px 2px 4px; }
+    .sheet .row { margin: 10px 2px 12px; }
+
+    .roulette { display: none; position: relative; overflow: hidden; height: 128px; margin: 4px 0 12px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
+    .roulette.show { display: block; }
+    .track { display: flex; gap: 8px; padding: 10px 0; will-change: transform; }
+    .mini { --c: var(--r-common); flex: none; width: 92px; height: 106px; padding: 6px; border-radius: 12px; text-align: center; background: var(--card2); border: 1px solid var(--line); border-bottom: 3px solid var(--c); }
+    .mini .media { height: 62px; }
+    .mini .media .emoji { font-size: 30px; }
+    .mini .gname { font-size: 11px; font-weight: 700; margin-top: 4px; line-height: 1.2; max-height: 26px; overflow: hidden; }
+    .marker { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px; background: var(--pink); box-shadow: 0 0 14px var(--pink); pointer-events: none; }
+
+    .result { display: none; margin-bottom: 12px; padding: 18px; text-align: center; border-radius: 18px; background: var(--card); border: 1px solid var(--c, var(--line)); animation: pop .35s ease; }
+    .result.show { display: block; }
+    .result .media { width: 120px; height: 120px; margin: 0 auto; }
+    .result .media .emoji { font-size: 64px; }
+    .result .rar { margin-top: 10px; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--c); }
+    .result .rname { font-size: 20px; font-weight: 900; margin: 4px 0; }
+
+    #toast { position: fixed; left: 50%; bottom: calc(100px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); z-index: 80; max-width: 86%; padding: 11px 16px; border-radius: 12px; background: #000c; border: 1px solid var(--line); font-size: 14px; text-align: center; opacity: 0; pointer-events: none; transition: .25s; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @keyframes up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pop { from { transform: scale(.9); opacity: 0; } to { transform: none; opacity: 1; } }
+  </style>
+</head>
+<body>
+  <main id="view"></main>
+  <nav class="tabbar" id="tabbar"></nav>
+  <div id="sheet-root"></div>
+  <div id="toast"></div>
+  <noscript>Mini App ishlashi uchun JavaScript yoqilgan bo‘lishi kerak.</noscript>
+
+  <script>
+  (function () {
+    "use strict";
+
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if (tg) {
+      try {
+        tg.ready();
+        tg.expand();
+        if (tg.setHeaderColor) tg.setHeaderColor("#101722");
+        if (tg.setBackgroundColor) tg.setBackgroundColor("#101722");
+        if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+      } catch (e) { /* eski versiyalar */ }
+    }
+
+    var RARITY = {
+      common:    { label: "Oddiy",     color: "var(--r-common)" },
+      rare:      { label: "Noyob",     color: "var(--r-rare)" },
+      epic:      { label: "Epik",      color: "var(--r-epic)" },
+      legendary: { label: "Afsonaviy", color: "var(--r-legendary)" },
+      mythic:    { label: "Mifik",     color: "var(--r-mythic)" }
+    };
+    function rar(key) { return RARITY[key] || RARITY.common; }
+
+    var ICONS = {
+      home:    '<svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>',
+      case:    '<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M3 12h18"/><path d="M12 8v12"/><path d="M12 8c-2.5 0-4-1-4-2.5S9.5 3 12 8c2.5-5 4-3.5 4-2.5S14.5 8 12 8z"/></svg>',
+      friends: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.5 0 4 2 4 5"/></svg>'
+    };
+    var TABS = [
+      { id: "home", label: "Home" },
+      { id: "case", label: "Case" },
+      { id: "friends", label: "Friends" }
+    ];
+
+    var state = { tab: "home", cases: [], loaded: false, error: "", me: null };
+
+    var view = document.getElementById("view");
+    var tabbar = document.getElementById("tabbar");
+    var sheetRoot = document.getElementById("sheet-root");
+    var toastEl = document.getElementById("toast");
+
+    /* ---------- yordamchilar ---------- */
+    function h(tag, attrs) {
+      var n = document.createElement(tag);
+      attrs = attrs || {};
+      Object.keys(attrs).forEach(function (k) {
+        var v = attrs[k];
+        if (v === null || v === undefined || v === false) return;
+        if (k === "class") n.className = v;
+        else if (k === "style") n.style.cssText = v;
+        else if (k.indexOf("on") === 0 && typeof v === "function") n.addEventListener(k.slice(2), v);
+        else n.setAttribute(k, v);
+      });
+      for (var i = 2; i < arguments.length; i++) append(n, arguments[i]);
+      return n;
+    }
+    function append(parent, kid) {
+      if (kid === null || kid === undefined || kid === false) return;
+      if (Array.isArray(kid)) { kid.forEach(function (k) { append(parent, k); }); return; }
+      if (typeof kid === "string" || typeof kid === "number") parent.appendChild(document.createTextNode(String(kid)));
+      else parent.appendChild(kid);
+    }
+
+    function fmt(n) {
+      return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " so‘m";
+    }
+    function pct(n) {
+      var v = Math.round((Number(n) || 0) * 100) / 100;
+      return v + "%";
+    }
+    function safeUrl(u) {
+      if (!u) return "";
+      try {
+        var x = new URL(u, location.href);
+        return (x.protocol === "https:" || x.protocol === "http:") ? x.href : "";
+      } catch (e) { return ""; }
+    }
+
+    function media(url, emoji, cls) {
+      var box = h("div", { class: "media " + (cls || "") });
+      var src = safeUrl(url);
+      function fallback() { box.textContent = ""; box.appendChild(h("span", { class: "emoji" }, emoji)); }
+      if (!src) { fallback(); return box; }
+      if (/\.(mp4|webm)(\?|#|$)/i.test(src)) {
+        var v = h("video", { src: src, autoplay: "", loop: "", playsinline: "", preload: "metadata" });
+        v.muted = true;
+        v.addEventListener("error", fallback);
+        box.appendChild(v);
+      } else {
+        var img = h("img", { src: src, alt: "", loading: "lazy" });
+        img.addEventListener("error", fallback);
+        box.appendChild(img);
+      }
+      return box;
+    }
+
+    function haptic(kind) {
+      try {
+        if (!tg || !tg.HapticFeedback) return;
+        if (kind === "success") tg.HapticFeedback.notificationOccurred("success");
+        else tg.HapticFeedback.impactOccurred("light");
+      } catch (e) {}
+    }
+
+    var toastTimer = null;
+    function toast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2600);
+    }
+
+    function api(path, body) {
+      var opt = {};
+      if (body) {
+        var payload = {};
+        Object.keys(body).forEach(function (k) { payload[k] = body[k]; });
+        payload.init_data = tg ? tg.initData : "";
+        opt = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) };
+      }
+      return fetch(path, opt).then(function (r) {
+        if (!r.ok) {
+          return r.text().then(function (t) { throw new Error(t || ("Xatolik " + r.status)); });
+        }
+        return r.json();
+      });
+    }
+
+    /* ---------- kartalar ---------- */
+    function giftCard(item, opts) {
+      opts = opts || {};
+      var r = rar(item.rarity);
+      var card = h("div", { class: "gift" + (opts.small ? " small" : ""), style: "--c:" + r.color },
+        media(item.image_url, "🎁"),
+        h("div", { class: "gname" }, item.name),
+        h("div", { class: "gprice" }, fmt(item.price)),
+        opts.percent ? h("div", { class: "gpct" }, pct(item.percent)) : h("div", { class: "gpct" }, r.label)
+      );
+      if (opts.onclick) { card.style.cursor = "pointer"; card.addEventListener("click", opts.onclick); }
+      return card;
+    }
+
+    function caseCard(c) {
+      return h("button", { class: "case", onclick: function () { haptic(); openSheet(c); } },
+        media(c.image_url, "🎁"),
+        h("div", { class: "name" }, c.name),
+        h("div", { class: "sub" }, c.items.length + " ta sovg‘a"),
+        h("span", { class: "pill" }, fmt(c.price))
+      );
+    }
+
+    /* ---------- sahifalar ---------- */
+    function viewHome() {
+      var u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+      var name = u ? (u.first_name || u.username || "Do‘st") : "Mehmon";
+      var initial = (name || "?").charAt(0).toUpperCase();
+      var itemsTotal = state.cases.reduce(function (s, c) { return s + c.items.length; }, 0);
+
+      var top = [];
+      state.cases.forEach(function (c) {
+        c.items.forEach(function (i) { top.push({ item: i, c: c }); });
+      });
+      top.sort(function (a, b) { return Number(b.item.price) - Number(a.item.price); });
+      top = top.slice(0, 12);
+
+      var page = h("div", null,
+        h("div", { class: "profile" },
+          media(u && u.photo_url, initial, "avatar"),
+          h("div", null,
+            h("div", { class: "hello" }, "Xush kelibsiz,"),
+            h("div", { class: "uname" }, name)
+          )
+        ),
+        h("div", { class: "hero" },
+          h("h2", null, "BULLDROP"),
+          h("p", null, "Qutilarni oching va noyob sovg‘alarni qo‘lga kiriting."),
+          h("button", { class: "btn white", onclick: function () { go("case"); } }, "🎁 Qutilarga o‘tish")
+        ),
+        h("div", { class: "stats" },
+          h("div", { class: "card stat" }, h("b", null, state.cases.length), h("span", null, "Qutilar")),
+          h("div", { class: "card stat" }, h("b", null, itemsTotal), h("span", null, "Sovg‘alar")),
+          h("div", { class: "card stat" }, h("b", null, state.me ? state.me.referrals : "—"), h("span", null, "Do‘stlar"))
+        )
+      );
+
+      if (top.length) {
+        page.appendChild(h("h3", { class: "sec" }, "🔥 Top sovg‘alar"));
+        page.appendChild(h("div", { class: "hscroll" },
+          top.map(function (t) {
+            return giftCard(t.item, { small: true, onclick: function () { openSheet(t.c); } });
+          })
+        ));
+      }
+      page.appendChild(h("p", { class: "note" }, "Demo rejim: haqiqiy pul qabul qilinmaydi va yechilmaydi."));
+      return page;
+    }
+
+    function viewCases() {
+      var page = h("div", null, h("h1", { class: "page-title" }, "🎁 Qutilar"));
+      if (!state.loaded) {
+        page.appendChild(h("div", { class: "grid2" },
+          [1, 2, 3, 4].map(function () { return h("div", { class: "skeleton" }); })));
+        return page;
+      }
+      if (state.error) {
+        page.appendChild(h("div", { class: "card empty" },
+          h("div", { class: "big" }, "⚠️"),
+          h("p", { class: "muted" }, state.error),
+          h("button", { class: "btn primary", style: "margin-top:14px", onclick: load }, "Qayta urinish")
+        ));
+        return page;
+      }
+      if (!state.cases.length) {
+        page.appendChild(h("div", { class: "card empty" },
+          h("div", { class: "big" }, "📦"),
+          h("p", null, "Hozircha qutilar yo‘q."),
+          h("p", { class: "muted", style: "margin-top:6px" }, "Qutilar tez orada qo‘shiladi.")
+        ));
+        return page;
+      }
+      page.appendChild(h("div", { class: "grid2" }, state.cases.map(caseCard)));
+      return page;
+    }
+
+    function referralLink() {
+      if (!state.me || !state.me.bot_username) return "";
+      return "https://t.me/" + state.me.bot_username + "?start=ref_" + state.me.id;
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+      }
+      return new Promise(function (resolve, reject) {
+        try {
+          var ta = h("textarea", { style: "position:fixed;opacity:0" });
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          resolve();
+        } catch (e) { reject(e); }
+      });
+    }
+
+    function viewFriends() {
+      var link = referralLink();
+      var box = h("div", { class: "card friends-hero" },
+        h("div", { class: "big" }, "👥"),
+        h("h2", null, "Do‘stlarni taklif qiling"),
+        h("p", { class: "muted" }, "Havolangiz orqali botga qo‘shilgan va ro‘yxatdan o‘tgan do‘stlar shu yerda hisoblanadi.")
+      );
+      if (state.me) {
+        box.appendChild(h("div", { class: "count" }, state.me.referrals));
+        box.appendChild(h("div", { class: "muted" }, "Taklif qilingan do‘stlar"));
+      }
+      if (link) {
+        box.appendChild(h("div", { class: "linkbox" }, link));
+        box.appendChild(h("div", { class: "btnrow" },
+          h("button", { class: "btn", onclick: function () {
+            copyText(link).then(function () { haptic("success"); toast("Havola nusxalandi ✅"); },
+                                function () { toast("Nusxalab bo‘lmadi"); });
+          } }, "📋 Nusxalash"),
+          h("button", { class: "btn primary", onclick: function () {
+            var url = "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent("BULLDROP — qutilarni oching 🎁");
+            if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
+          } }, "📤 Ulashish")
+        ));
+      } else {
+        box.appendChild(h("p", { class: "note" },
+          state.me ? "Bot username sozlanmagan (BOT_USERNAME)." : "Havolani olish uchun Mini App’ni Telegram ichida oching."));
+      }
+      return h("div", null, h("h1", { class: "page-title" }, "👥 Friends"), box);
+    }
+
+    /* ---------- quti sheet ---------- */
+    function closeSheet() {
+      sheetRoot.textContent = "";
+      document.body.style.overflow = "";
+    }
+
+    function spin(c, winner, host) {
+      return new Promise(function (resolve) {
+        host.textContent = "";
+        host.classList.add("show");
+        var pool = c.items.length ? c.items : [winner];
+        var N = 42, W = 36, CARD = 92, GAP = 8, STEP = CARD + GAP;
+        var track = h("div", { class: "track" });
+        for (var i = 0; i < N; i++) {
+          var it = (i === W) ? winner : pool[Math.floor(Math.random() * pool.length)];
+          track.appendChild(h("div", { class: "mini", style: "--c:" + rar(it.rarity).color },
+            media(it.image_url, "🎁"),
+            h("div", { class: "gname" }, it.name)));
+        }
+        host.appendChild(track);
+        host.appendChild(h("div", { class: "marker" }));
+        var offset = W * STEP + CARD / 2 - host.clientWidth / 2 + (Math.random() * 30 - 15);
+        var finished = false;
+        function finish() { if (finished) return; finished = true; resolve(); }
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            track.style.transition = "transform 4.6s cubic-bezier(.12,.7,.08,1)";
+            track.style.transform = "translateX(" + (-offset) + "px)";
+          });
+        });
+        track.addEventListener("transitionend", finish);
+        setTimeout(finish, 5300);
+      });
+    }
+
+    function openSheet(c) {
+      closeSheet();
+      var busy = false;
+      var btn = h("button", { class: "btn primary big" }, "🎁 Ochish (demo)");
+      var roulette = h("div", { class: "roulette" });
+      var result = h("div", { class: "result" });
+
+      if (!c.items.length) { btn.disabled = true; btn.textContent = "Sovg‘a qo‘shilmagan"; }
+
+      function showResult(item) {
+        var r = rar(item.rarity);
+        roulette.classList.remove("show");
+        result.textContent = "";
+        result.style.setProperty("--c", r.color);
+        result.appendChild(media(item.image_url, "🎁"));
+        result.appendChild(h("div", { class: "rar" }, r.label));
+        result.appendChild(h("div", { class: "rname" }, item.name));
+        result.appendChild(h("div", { class: "pill" }, fmt(item.price)));
+        result.appendChild(h("p", { class: "note" }, "Demo: sovg‘a hisobingizga qo‘shilmaydi."));
+        result.classList.add("show");
+      }
+
+      btn.addEventListener("click", function () {
+        if (busy) return;
+        busy = true;
+        btn.disabled = true;
+        result.classList.remove("show");
+        haptic();
+        api("/api/open", { case_id: c.id })
+          .then(function (res) { return spin(c, res.item, roulette).then(function () { return res; }); })
+          .then(function (res) { haptic("success"); showResult(res.item); })
+          .catch(function (e) { roulette.classList.remove("show"); toast(e.message || "Xatolik"); })
+          .then(function () {
+            busy = false;
+            btn.disabled = false;
+            btn.textContent = "🎁 Yana ochish (demo)";
+          });
+      });
+
+      var sheet = h("div", { class: "sheet", onclick: function (e) { e.stopPropagation(); } },
+        h("div", { class: "grab" }),
+        h("button", { class: "x", "aria-label": "Yopish", onclick: closeSheet }, "✕"),
+        media(c.image_url, "🎁", "hero-media"),
+        h("h2", { class: "sheet-title" }, c.name),
+        c.description ? h("p", { class: "muted" }, c.description) : null,
+        h("div", { class: "row between" },
+          h("span", { class: "pill" }, "Narxi: " + fmt(c.price)),
+          h("span", { class: "muted" }, c.items.length + " ta sovg‘a")),
+        roulette,
+        result,
+        btn,
+        h("p", { class: "note" }, "Demo rejim: pul yechilmaydi."),
+        h("h3", { class: "sec" }, "Qutidagi sovg‘alar"),
+        c.items.length
+          ? h("div", { class: "grid3" }, c.items.map(function (i) { return giftCard(i, { percent: true }); }))
+          : h("p", { class: "muted" }, "Bu qutiga hali sovg‘a qo‘shilmagan.")
+      );
+      sheetRoot.appendChild(h("div", { class: "overlay", onclick: closeSheet }, sheet));
+      document.body.style.overflow = "hidden";
+    }
+
+    /* ---------- navigatsiya ---------- */
+    function buildTabs() {
+      tabbar.textContent = "";
+      TABS.forEach(function (t) {
+        var b = h("button", { class: "tab", "data-tab": t.id, onclick: function () { go(t.id); } });
+        b.innerHTML = ICONS[t.id === "case" ? "case" : t.id];
+        b.appendChild(h("span", null, t.label));
+        tabbar.appendChild(b);
+      });
+    }
+
+    function go(tab) {
+      if (tab !== state.tab) haptic();
+      state.tab = tab;
+      closeSheet();
+      render();
+      window.scrollTo(0, 0);
+    }
+
+    function render() {
+      Array.prototype.forEach.call(tabbar.children, function (b) {
+        b.classList.toggle("active", b.getAttribute("data-tab") === state.tab);
+      });
+      view.textContent = "";
+      try {
+        if (state.tab === "case") view.appendChild(viewCases());
+        else if (state.tab === "friends") view.appendChild(viewFriends());
+        else view.appendChild(viewHome());
+      } catch (e) {
+        view.appendChild(h("div", { class: "card empty" }, h("p", null, "Xatolik: " + e.message)));
+      }
+    }
+
+    function load() {
+      state.loaded = false;
+      state.error = "";
+      render();
+      api("/api/cases")
+        .then(function (d) { state.cases = d.cases || []; })
+        .catch(function () { state.error = "Qutilarni yuklab bo‘lmadi. Internetni tekshiring."; })
+        .then(function () { state.loaded = true; render(); });
+      if (tg && tg.initData) {
+        api("/api/me", {}).then(function (me) { state.me = me; render(); }).catch(function () {});
+      }
+    }
+
+    window.addEventListener("error", function (e) {
+      if (!view.firstChild) view.appendChild(h("div", { class: "card empty" }, h("p", null, "Xatolik: " + e.message)));
+    });
+
+    buildTabs();
+    load();
+  })();
+  </script>
+</body>
+</html>
