@@ -10,7 +10,7 @@ ADMIN_IDS = {
     if item.strip().isdigit()
 }
 BOT_USERNAME = os.getenv("BOT_USERNAME", "").strip().lstrip("@")
-SUPPORT_USERNAME = os.getenv("SUPPORT_USERNAME", "").strip().lstrip("@")
+SUPPORT_USERNAME = os.getenv("SUPPORT_USERNAME", "x1000dollor").strip().lstrip("@")
 WEBAPP_URL = os.getenv("WEBAPP_URL", "").strip()
 
 TERMS_TEXT = (
