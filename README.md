@@ -1,53 +1,30 @@
-# Bulldrop Telegram bot — test starter
+# BULLDROP Telegram bot + Mini App prototype
 
-Bu loyiha hozircha **sinov prototipi**. Unda haqiqiy pul qabul qilish, pul yechish, pullik tarif yoki haqiqiy o‘yin natijasini bashorat qilish yo‘q.
+Telegram botning mavjud demo prototipiga Mini App sahifasi va Web App tugmasi qo‘shilgan.
 
-## Fayllar
-- `main.py` — ishga tushirish nuqtasi
-- `bot.py` — Telegram bot va polling
-- `features.py` — menyular, ro‘yxatdan o‘tish, Crash/Saper demo oqimlari
-- `db.py` — SQLite foydalanuvchi va Saper tarixini saqlash
-- `config.py` — `.env` sozlamalari
-- `admins.py` — admin ID tekshiruvi
-- `index.html` — oddiy Saper Mini App demo
-- `requirements.txt` — Python kutubxonalari
+## Holati
 
-## GitHub'ga yuklash va ishga tushirish
-1. Barcha fayllarni repozitoriyga alohida yuklang.
-2. `.env.example` faylidan nusxa olib, nusxasini `.env` deb nomlang.
-3. `.env` ichida `BOT_TOKEN` qiymatiga BotFather bergan tokenni yozing.
-4. `ADMIN_IDS` ichiga Telegram numeric user ID'ingizni yozing.
-5. Terminalda:
-   ```bash
-   python -m venv .venv
-   # Windows:
-   .venv\\Scripts\\activate
-   # Linux/macOS:
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   python main.py
-   ```
+Bu **demo/prototip**: real pul qabul qilish, pul yechish, tikish, sovrinli o‘yinlar yoki uchinchi tomon o‘yini natijalarini bashorat qilish yo‘q. `/admin` faqat admin ID ni tekshiradi va demo xabar ko‘rsatadi; balans va to‘lovlarni tahrirlamaydi.
 
-## Muhim
-- Bot tokenini GitHub'ga hech qachon yuklamang. `.env` faylini `.gitignore`ga qo‘shing.
-- Mini App uchun `index.html` HTTPS manzilda joylashtirilishi kerak. `WEBAPP_URL` hozircha kelajakdagi ulash uchun tayyorlangan.
-- Hozirgi Saper kataklari tasodifiy demo. Ular uchinchi tomon o‘yinidagi xavfsiz kataklarni aniqlamaydi.
-- Signal koeffitsiyentlari ham tasodifiy demo qiymatlardir.
+## Render sozlamalari
 
+- Web Service, Python
+- Build: `pip install -r requirements.txt`
+- Start: `python main.py`
+- Health check: `/healthz`
+- `BOT_TOKEN`, `ADMIN_IDS`, `BOT_USERNAME`, `SUPPORT_USERNAME`, `WEBAPP_URL` environment variables qo‘shing.
+- `WEBAPP_URL` sifatida deploy qilingan saytning HTTPS manzili va `/miniapp` yo‘lini kiriting, masalan `https://your-service.onrender.com/miniapp`.
+- Render `PORT` ni avtomatik beradi; qo‘lda belgilamang.
 
-## Render Web Service sozlamalari
+`/` va `/miniapp` Mini App sahifasini beradi; `/healthz` health check uchun. Bot menyusida HTTPS URL bo‘lsa, Mini App tugmasi ko‘rinadi. Telegram ichida ochish uchun hosting manzili HTTPS bo‘lishi kerak.
 
-- Service type: **Web Service**
-- Runtime: **Python**
-- Build Command: `pip install -r requirements.txt`
-- Start Command: `python main.py`
-- Health Check Path: `/healthz` (agar Render panelida mavjud bo‘lsa)
-- Environment Variables: `BOT_TOKEN`, `ADMIN_IDS`, `BOT_USERNAME`, `WEBAPP_URL`
-- `PORT` ni qo‘lda belgilamang: Render uni avtomatik beradi.
+## Mahalliy ishga tushirish
 
-`main.py` bir jarayonda ikkita vazifani bajaradi:
-1. `0.0.0.0:$PORT` manzilida `/` va `/healthz` HTTP endpointlarini ochadi.
-2. Telegram botni long polling orqali ishga tushiradi.
+`.env.example` dan `.env` nusxa yarating, haqiqiy qiymatlarni faqat lokal muhit/Render dashboard’iga kiriting, keyin:
 
-Mahalliy sinovda `PORT` berilmagan bo‘lsa, fallback port `10000` ishlatiladi.
-Bu Render uchun qattiq kodlangan port emas.
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+Bot tokeni yoki to‘lov sirlarini GitHub’ga commit qilmang. To‘lov va withdrawal ulashdan oldin qonuniy talablar, provayderlar, foydalanuvchi verifikatsiyasi, audit va xatolarni qayta tiklash mexanizmlarini mustaqil tekshirish zarur.

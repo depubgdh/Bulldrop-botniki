@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 
 from aiohttp import web
-
 from bot import main as run_bot
 
 
@@ -21,10 +20,8 @@ async def start_web_server() -> web.AppRunner:
     app.router.add_get("/", miniapp)
     app.router.add_get("/miniapp", miniapp)
     app.router.add_get("/healthz", health)
-
     runner = web.AppRunner(app)
     await runner.setup()
-    # Render injects PORT automatically; do not hardcode a production port.
     port = int(os.environ.get("PORT", "10000"))
     site = web.TCPSite(runner, host="0.0.0.0", port=port)
     await site.start()
@@ -33,10 +30,7 @@ async def start_web_server() -> web.AppRunner:
 
 
 async def main() -> None:
-    logging.basicConfig(
-        level=os.getenv("LOG_LEVEL", "INFO"),
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-    )
+    logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"), format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     runner = await start_web_server()
     try:
         await run_bot()

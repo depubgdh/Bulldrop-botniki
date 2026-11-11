@@ -17,7 +17,7 @@ TERMS_TEXT = (
     "📜 Foydalanish shartlari\n\n"
     "Bu bot hozir sinov rejimida. Kiritilgan Telegram ID va telefon raqami "
     "botning ishlashi uchun ma’lumotlar bazasida saqlanishi mumkin.\n\n"
-    "Crash/Saper ko‘rsatmalari tasodifiy demo natijalardir; ular haqiqiy "
+    "Crash/Saper ko‘rsatmalari tasodifiy demo natijalar; ular haqiqiy "
     "o‘yin natijasini oldindan aytmaydi va yutuqni kafolatlamaydi. "
     "Hozircha pul qabul qilish, pul yechish yoki haqiqiy xarid mavjud emas."
 )

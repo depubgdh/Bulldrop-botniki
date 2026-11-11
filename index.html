@@ -7,9 +7,7 @@
   <title>BULLDROP — Mini App demo</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    :root{color-scheme:dark;--bg:#101722;--card:#1b2735;--card2:#243446;--gold:#e4b85c;--text:#f4f6fa;--muted:#a9b5c5;--line:#334256}
-    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#25354a 0,#101722 55%);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
-    .wrap{max-width:520px;margin:0 auto;padding:20px 0 32px}.brand{display:flex;align-items:center;gap:12px;margin:6px 0 20px}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#f1cf82,#9c671e);display:grid;place-items:center;color:#161616;font-size:26px;font-weight:900}.brand h1{font-size:20px;margin:0}.brand p,.muted{color:var(--muted);margin:2px 0 0;font-size:14px}.card{background:linear-gradient(145deg,#202e3e,#192432);border:1px solid var(--line);border-radius:20px;padding:18px;margin:14px 0;box-shadow:0 12px 30px #0002}.balance{font-size:30px;font-weight:750;color:var(--gold);margin:6px 0}.eyebrow{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tile,button{border:1px solid var(--line);border-radius:15px;background:var(--card2);color:var(--text);padding:15px 12px;font:inherit;text-align:left;cursor:pointer}.tile strong{display:block;font-size:16px}.tile span{display:block;color:var(--muted);font-size:13px;margin-top:4px}.notice{border-left:3px solid var(--gold);padding:10px 12px;background:#302a1d;border-radius:8px;color:#f6e8c7;font-size:13px}.section{display:none}.section.active{display:block}.back{margin-top:12px;width:100%;text-align:center}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}a{color:var(--gold)}
+    :root{color-scheme:dark;--bg:#101722;--card:#1b2735;--card2:#243446;--gold:#e4b85c;--text:#f4f6fa;--muted:#a9b5c5;--line:#334256}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#25354a 0,#101722 55%);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}.wrap{max-width:520px;margin:0 auto;padding:20px 0 32px}.brand{display:flex;align-items:center;gap:12px;margin:6px 0 20px}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#f1cf82,#9c671e);display:grid;place-items:center;color:#161616;font-size:26px;font-weight:900}.brand h1{font-size:20px;margin:0}.brand p,.muted{color:var(--muted);margin:2px 0 0;font-size:14px}.card{background:linear-gradient(145deg,#202e3e,#192432);border:1px solid var(--line);border-radius:20px;padding:18px;margin:14px 0;box-shadow:0 12px 30px #0002}.balance{font-size:30px;font-weight:750;color:var(--gold);margin:6px 0}.eyebrow{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tile,button{border:1px solid var(--line);border-radius:15px;background:var(--card2);color:var(--text);padding:15px 12px;font:inherit;text-align:left;cursor:pointer}.tile strong{display:block;font-size:16px}.tile span{display:block;color:var(--muted);font-size:13px;margin-top:4px}.notice{border-left:3px solid var(--gold);padding:10px 12px;background:#302a1d;border-radius:8px;color:#f6e8c7;font-size:13px}.section{display:none}.section.active{display:block}.back{margin-top:12px;width:100%;text-align:center}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px}a{color:var(--gold);text-decoration:none}
   </style>
 </head>
 <body>
@@ -17,27 +15,21 @@
     <header class="brand"><div class="logo">B</div><div><h1>BULLDROP</h1><p>Mini App · sinov versiyasi</p></div></header>
     <section id="home" class="section active">
       <div class="card"><div class="eyebrow">J🧧 demo balansi</div><div class="balance">0 J🧧</div><p class="muted">Bu namoyish qiymati. To‘lov va pul yechish ulanmagan.</p></div>
-      <div class="notice">Sinov rejimi: bu ilova haqiqiy pul qabul qilmaydi, yutuq va’da qilmaydi va uchinchi tomon o‘yinlari natijasini bashorat qilmaydi.</div>
+      <div class="notice">Sinov rejimi: haqiqiy pul qabul qilinmaydi, yutuq va’da qilinmaydi va uchinchi tomon o‘yinlari natijasi bashorat qilinmaydi.</div>
       <div class="grid" style="margin-top:14px">
-        <button class="tile" data-open="signals"><strong>📡 Signallar</strong><span>Hozircha demo ma’lumot</span></button>
+        <button class="tile" data-open="signals"><strong>📡 Signallar</strong><span>Demo bo‘lim</span></button>
         <button class="tile" data-open="games"><strong>🎮 O‘yinlar</strong><span>Sinov interfeysi</span></button>
         <button class="tile" data-open="account"><strong>👤 Hisobim</strong><span>Demo profil</span></button>
-        <a class="tile" href="https://t.me/x1000dollor" target="_blank" rel="noopener"><strong>💬 Support</strong><span>@x1000dollor bilan bog‘lanish</span></a>
+        <a class="tile" href="https://t.me/x1000dollor" target="_blank" rel="noopener"><strong>💬 Support</strong><span>@x1000dollor</span></a>
       </div>
     </section>
-    <section id="signals" class="section"><div class="card"><h2>📡 Signal bo‘limi</h2><p>Haqiqiy signal yoki natijani oldindan aytish funksiyasi yo‘q.</p><div class="grid"><div class="tile"><strong>Crash</strong><span>Demo mavjud emas</span></div><div class="tile"><strong>Saper</strong><span>Natijalar bashorat qilinmaydi</span></div><div class="tile"><strong>Narvon</strong><span>Ishlab chiqilmoqda</span></div><div class="tile"><strong>Minora</strong><span>Ishlab chiqilmoqda</span></div></div><button class="back" data-home>↩ Bosh sahifa</button></div></section>
-    <section id="games" class="section"><div class="card"><h2>🎮 O‘yinlar</h2><p>G‘ildirak, Upgrade, Saper va Minora modullari hozircha faol emas. Bu versiyada stavka yoki sovrinli o‘yin yo‘q.</p><button class="back" data-home>↩ Bosh sahifa</button></div></section>
-    <section id="account" class="section"><div class="card"><h2>👤 Hisobim</h2><p id="telegram-user" class="muted">Telegram profili aniqlanmadi. Ilovani Telegram ichidan oching.</p><p>Demo balans: <strong>0 J🧧</strong></p><p>To‘ldirish, transfer va pul yechish hozircha ishlamaydi.</p><button class="back" data-home>↩ Bosh sahifa</button></div></section>
-    <p class="footer">Prototip · Himoyalangan server integratsiyasi va to‘lovlar yoqilmagan.</p>
+    <section id="signals" class="section"><div class="card"><h2>📡 Signallar</h2><p>Bu prototip real o‘yinlar natijasini bashorat qilmaydi.</p><div class="grid"><div class="tile"><strong>Crash</strong><span>Faqat tasodifiy demo</span></div><div class="tile"><strong>Saper</strong><span>Bashorat mavjud emas</span></div><div class="tile"><strong>Narvon</strong><span>Ishlab chiqilmoqda</span></div><div class="tile"><strong>Minora</strong><span>Ishlab chiqilmoqda</span></div></div><button class="back" data-home>↩ Bosh sahifa</button></div></section>
+    <section id="games" class="section"><div class="card"><h2>🎮 O‘yinlar</h2><p>O‘yinlar va sovrinlar bu sinov versiyasida faol emas.</p><button class="back" data-home>↩ Bosh sahifa</button></div></section>
+    <section id="account" class="section"><div class="card"><h2>👤 Hisobim</h2><p id="telegram-user" class="muted">Telegram profili aniqlanmadi. Ilovani Telegram ichidan oching.</p><p>Demo balans: <strong>0 J🧧</strong></p><p>To‘ldirish, transfer va pul yechish mavjud emas.</p><button class="back" data-home>↩ Bosh sahifa</button></div></section>
+    <p class="footer">Prototip · To‘lovlar va pul yechish ulanmagan.</p>
   </main>
   <script>
-    (()=>{
-      const tg=window.Telegram?.WebApp;
-      if(tg){tg.ready();tg.expand();const u=tg.initDataUnsafe?.user;if(u){document.getElementById('telegram-user').textContent=`Telegram foydalanuvchisi: ${u.first_name||''}${u.username?' (@'+u.username+')':''}`;}}
-      function show(id){document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id===id));window.scrollTo({top:0,behavior:'smooth'});}
-      document.querySelectorAll('[data-open]').forEach(btn=>btn.addEventListener('click',()=>show(btn.dataset.open)));
-      document.querySelectorAll('[data-home]').forEach(btn=>btn.addEventListener('click',()=>show('home')));
-    })();
+    (()=>{const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand();const u=tg.initDataUnsafe?.user;if(u){document.getElementById('telegram-user').textContent=`Telegram foydalanuvchisi: ${u.first_name||''}${u.username?' (@'+u.username+')':''}`;}}function show(id){document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id===id));window.scrollTo({top:0,behavior:'smooth'});}document.querySelectorAll('[data-open]').forEach(btn=>btn.addEventListener('click',()=>show(btn.dataset.open)));document.querySelectorAll('[data-home]').forEach(btn=>btn.addEventListener('click',()=>show('home')));})();
   </script>
 </body>
 </html>

@@ -1,11 +1,22 @@
+import asyncio
+import random
+
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, WebAppInfo
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    Message,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    WebAppInfo,
+)
 
 import db
-from admins import is_admin
 from config import ADMIN_IDS, SUPPORT_USERNAME, TERMS_TEXT, WEBAPP_URL
 
 router = Router()
@@ -20,14 +31,15 @@ class SaperFlow(StatesGroup):
 
 
 def main_menu() -> InlineKeyboardMarkup:
-    rows = [
+    rows = []
+    if WEBAPP_URL.startswith("https://"):
+        rows.append([InlineKeyboardButton(text="🚀 Mini App ochish", web_app=WebAppInfo(url=WEBAPP_URL))])
+    rows.extend([
         [InlineKeyboardButton(text="🎁 Super Qutilar", callback_data="menu_boxes"), InlineKeyboardButton(text="📡 Bulldrop Signal", callback_data="menu_signal")],
         [InlineKeyboardButton(text="🎮 Botdagi o‘yinlar", callback_data="menu_games"), InlineKeyboardButton(text="👤 Hisobim", callback_data="menu_account")],
         [InlineKeyboardButton(text="🏆 Yutuqlarim", callback_data="menu_rewards"), InlineKeyboardButton(text="📊 Statistika", callback_data="menu_stats")],
         [InlineKeyboardButton(text="💬 Bot support", callback_data="menu_support")],
-    ]
-    if WEBAPP_URL.startswith("https://"):
-        rows.insert(0, [InlineKeyboardButton(text="🚀 Mini App ochish", web_app=WebAppInfo(url=WEBAPP_URL))])
+    ])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
@@ -36,7 +48,11 @@ def terms_keyboard() -> InlineKeyboardMarkup:
 
 
 def phone_keyboard() -> ReplyKeyboardMarkup:
-    return ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="📱 Telefon raqamni yuborish", request_contact=True)]], resize_keyboard=True, one_time_keyboard=True)
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="📱 Telefon raqamni yuborish", request_contact=True)]],
+        resize_keyboard=True,
+        one_time_keyboard=True,
+    )
 
 
 def signal_keyboard() -> InlineKeyboardMarkup:
@@ -50,26 +66,21 @@ def signal_keyboard() -> InlineKeyboardMarkup:
 
 
 def saper_keyboard(green_cells: list[int]) -> InlineKeyboardMarkup:
-    buttons = []
+    rows = []
     for row in range(5):
-        buttons.append([
+        rows.append([
             InlineKeyboardButton(
                 text="🟩" if row * 5 + col + 1 in green_cells else "☑️",
                 callback_data="saper_cell",
             )
             for col in range(5)
         ])
-    buttons.append([InlineKeyboardButton(text="↩️ Bosh menyu", callback_data="go_home")])
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
+    rows.append([InlineKeyboardButton(text="↩️ Bosh menyu", callback_data="go_home")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-async def show_main_menu(message: Message) -> None:
+async def send_home(message: Message) -> None:
     await message.answer("BULLDROP bosh menyusi:", reply_markup=main_menu())
-
-
-async def ask_phone(message: Message, state: FSMContext) -> None:
-    await state.set_state(Registration.waiting_phone)
-    await message.answer("Davom etish uchun telefon raqamingizni Telegram tugmasi orqali yuboring:", reply_markup=phone_keyboard())
 
 
 @router.message(Command("start"))
@@ -79,10 +90,11 @@ async def start(message: Message, state: FSMContext) -> None:
         await message.answer(TERMS_TEXT, reply_markup=terms_keyboard())
         return
     if not user["phone"]:
-        await ask_phone(message, state)
+        await state.set_state(Registration.waiting_phone)
+        await message.answer("Telefon raqamingizni Telegram tugmasi orqali yuboring:", reply_markup=phone_keyboard())
         return
-    await message.answer("BULLDROP bosh menyusi:", reply_markup=ReplyKeyboardRemove())
-    await show_main_menu(message)
+    await message.answer("", reply_markup=ReplyKeyboardRemove())
+    await send_home(message)
 
 
 @router.callback_query(F.data == "accept_terms")
@@ -90,42 +102,48 @@ async def accept_terms(call: CallbackQuery, state: FSMContext) -> None:
     db.save_user(call.from_user.id, call.from_user.username, accepted_terms=1)
     await call.answer("Rozilik saqlandi.")
     if call.message:
-        await ask_phone(call.message, state)
+        await state.set_state(Registration.waiting_phone)
+        await call.message.answer("Telefon raqamingizni Telegram tugmasi orqali yuboring:", reply_markup=phone_keyboard())
 
 
 @router.message(Registration.waiting_phone, F.contact)
 async def receive_phone(message: Message, state: FSMContext) -> None:
     contact = message.contact
     if message.chat.type != "private" or not contact or contact.user_id != message.from_user.id:
-        await message.answer("Iltimos, shaxsiy chatda o‘zingizning telefon raqamingizni yuboring.")
+        await message.answer("Shaxsiy chatda o‘zingizning telefon raqamingizni yuboring.")
         return
     db.save_user(message.from_user.id, message.from_user.username, phone=contact.phone_number)
     await state.clear()
     await message.answer("✅ Ro‘yxatdan o‘tdingiz!", reply_markup=ReplyKeyboardRemove())
-    await show_main_menu(message)
+    await send_home(message)
 
 
 @router.message(Registration.waiting_phone)
 async def require_contact(message: Message) -> None:
-    await message.answer("Telefon raqamni Telegram kontakt tugmasi orqali yuboring.", reply_markup=phone_keyboard())
+    await message.answer("Telefon raqamni pastdagi Telegram kontakt tugmasi orqali yuboring.", reply_markup=phone_keyboard())
 
 
 @router.callback_query(F.data == "menu_signal")
-async def open_signals_callback(call: CallbackQuery) -> None:
+async def open_signals(call: CallbackQuery) -> None:
     await call.answer()
     if call.message:
-        await call.message.edit_text("📡 Bulldrop Signal\n\nSinov rejimi: demo qiymatlar haqiqiy o‘yin natijalarini bashorat qilmaydi.", reply_markup=signal_keyboard())
+        await call.message.edit_text(
+            "📡 Bulldrop Signal\n\nSinov rejimi: demo qiymatlar haqiqiy o‘yin natijalarini bashorat qilmaydi.",
+            reply_markup=signal_keyboard(),
+        )
 
 
 @router.message(F.text == "📡 Bulldrop Signal")
-async def open_signals_message(message: Message) -> None:
-    await message.answer("📡 Bulldrop Signal\n\nSinov rejimi: demo qiymatlar haqiqiy o‘yin natijalarini bashorat qilmaydi.", reply_markup=ReplyKeyboardRemove())
-    await message.answer("Bo‘limni tanlang:", reply_markup=signal_keyboard())
+async def open_signals_legacy(message: Message) -> None:
+    await message.answer("📡 Signal demo rejimida. Haqiqiy o‘yin natijalari bashorat qilinmaydi.", reply_markup=signal_keyboard())
 
 
 @router.callback_query(F.data == "signal_crash")
 async def crash_demo(call: CallbackQuery) -> None:
-    await call.answer("Demo rejimi; natijani bashorat qilmaydi.", show_alert=True)
+    await call.answer()
+    value = random.randint(101, 420) / 100
+    if call.message:
+        await call.message.answer(f"Crash demo qiymati: {value:.2f}x\nBu tasodifiy demo; haqiqiy signal yoki bashorat emas.")
 
 
 @router.callback_query(F.data == "signal_saper")
@@ -140,15 +158,18 @@ async def saper_start(call: CallbackQuery, state: FSMContext) -> None:
 async def saper_game_id(message: Message, state: FSMContext) -> None:
     game_id = (message.text or "").strip()
     if not game_id or len(game_id) > 80:
-        await message.answer("ID noto‘g‘ri. 1–80 belgi oralig‘ida yuboring.")
+        await message.answer("ID 1–80 belgi bo‘lishi kerak. Qayta yuboring.")
         return
     await state.clear()
-    loading = await message.answer("Demo ko‘rinish tayyorlanmoqda...")
+    loading = await message.answer("⏳ Demo ko‘rinish tayyorlanmoqda...")
     await asyncio.sleep(2)
     green = sorted(random.sample(range(1, 26), 3))
     db.add_saper_result(message.from_user.id, game_id, green)
-    rows = [" ".join("🟩" if row * 5 + col + 1 in green else "☑️" for col in range(5)) for row in range(5)]
-    await loading.edit_text(f"Demo ID: {game_id}\n\n" + "\n".join(rows) + "\n\nTasodifiy demo kataklar; haqiqiy o‘yin uchun signal emas.", reply_markup=saper_keyboard(green))
+    board = [" ".join("🟩" if row * 5 + col + 1 in green else "☑️" for col in range(5)) for row in range(5)]
+    await loading.edit_text(
+        f"Demo ID: {game_id}\n\n" + "\n".join(board) + "\n\nTasodifiy kataklar; haqiqiy o‘yin uchun signal emas.",
+        reply_markup=saper_keyboard(green),
+    )
 
 
 @router.callback_query(F.data == "saper_cell")
@@ -172,68 +193,42 @@ async def go_home(call: CallbackQuery) -> None:
 async def account_callback(call: CallbackQuery) -> None:
     await call.answer()
     if call.message:
-        await send_account(call.message, call.from_user.id, call.from_user.username)
-
-
-@router.message(F.text == "👤 Hisobim")
-async def account_message(message: Message) -> None:
-    await send_account(message, message.from_user.id, message.from_user.username)
-
-
-async def send_account(message: Message, user_id: int, username: str | None) -> None:
-    user = db.get_user(user_id)
-    if not user or not user["accepted_terms"]:
-        await message.answer("Avval /start orqali ro‘yxatdan o‘ting.")
-        return
-    await message.answer(f"👤 Hisobim\nFoydalanuvchi: @{username}" if username else f"👤 Hisobim\nTelegram ID: {user_id}")
+        await call.message.answer(
+            f"👤 Hisobim\nTelegram ID: {call.from_user.id}\n"
+            "J🧧 demo balans: 0\nTo‘lov va pul yechish bu prototipda o‘chiq.",
+            reply_markup=main_menu(),
+        )
 
 
 @router.callback_query(F.data == "menu_support")
 async def support_callback(call: CallbackQuery) -> None:
     await call.answer()
     if call.message:
-        await send_support(call.message)
+        await call.message.answer(f"💬 Support: https://t.me/{SUPPORT_USERNAME}", reply_markup=main_menu())
 
 
 @router.message(Command("support"))
 @router.message(F.text == "💬 Bot support")
 async def support_message(message: Message) -> None:
-    await send_support(message)
-
-
-async def send_support(message: Message) -> None:
     await message.answer(f"💬 Support: https://t.me/{SUPPORT_USERNAME}", reply_markup=main_menu())
 
 
 @router.callback_query(F.data.in_({"menu_games", "menu_boxes", "menu_rewards", "menu_stats"}))
 async def planned_sections(call: CallbackQuery) -> None:
     await call.answer()
-    await call.message.edit_text("Bu bo‘lim hozircha sinov rejimida.", reply_markup=main_menu())
-
-
-@router.message(F.text.in_({"🎁 Super Qutilar", "🎮 Botdagi o‘yinlar", "🏆 Yutuqlarim", "📊 Statistika"}))
-async def planned_sections_message(message: Message) -> None:
-    await message.answer("Bu bo‘lim hozircha sinov rejimida.", reply_markup=main_menu())
-
-
-@router.message(Command("transactions"))
-async def transactions(message: Message) -> None:
-    rows = db.recent_transactions(message.from_user.id)
-    if not rows:
-        await message.answer("Tranzaksiyalar tarixi hozircha bo‘sh.")
-        return
-    lines = ["🧾 Oxirgi tranzaksiyalar:"]
-    for row in rows:
-        lines.append(f"{row['created_at']}: {row['kind']} · {row['amount_j']} J🧧 · {row['status']}")
-    await message.answer("\n".join(lines))
+    if call.message:
+        await call.message.edit_text("Bu bo‘lim hozircha ishlab chiqilmoqda.", reply_markup=main_menu())
 
 
 @router.message(Command("admin"))
 async def admin_command(message: Message) -> None:
-    if not is_admin(message.from_user.id):
+    if message.from_user.id not in ADMIN_IDS:
         await message.answer("Bu buyruq faqat admin uchun.")
         return
-    await message.answer("Adminning xavfsiz ko‘rish paneli. Haqiqiy balans o‘zgartirish, to‘lov yoki pul yechish yoqilmagan.")
+    await message.answer(
+        "🛠 Admin: faqat sinov rejimidagi ko‘rish.\n"
+        "Haqiqiy balans tahriri, depozit va pul yechish faollashtirilmagan."
+    )
 
 
 @router.message()
