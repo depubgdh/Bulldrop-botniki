@@ -30,16 +30,44 @@ class SaperFlow(StatesGroup):
     waiting_game_id = State()
 
 
+class AdminStates(StatesGroup):
+    waiting_case_name = State()
+    waiting_case_price = State()
+    waiting_case_desc = State()
+    waiting_case_image = State()
+
+    waiting_item_case_id = State()
+    waiting_item_name = State()
+    waiting_item_price = State()
+    waiting_item_image = State()
+    waiting_item_prob = State()
+    waiting_item_rarity = State()
+
+
+def admin_menu() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="➕ Quti yaratish", callback_data="admin_add_case")],
+        [InlineKeyboardButton(text="🎁 Sovg‘a qo‘shish", callback_data="admin_add_item")],
+        [InlineKeyboardButton(text="📦 Qutilar ro‘yxati", callback_data="admin_list_cases")],
+        [InlineKeyboardButton(text="🔙 Bosh menyu", callback_data="go_home")],
+    ])
+
+
 def main_menu() -> InlineKeyboardMarkup:
     rows = []
     if WEBAPP_URL.startswith("https://"):
         rows.append([InlineKeyboardButton(text="🚀 Mini App ochish", web_app=WebAppInfo(url=WEBAPP_URL))])
+
     rows.extend([
         [InlineKeyboardButton(text="🎁 Super Qutilar", callback_data="menu_boxes"), InlineKeyboardButton(text="📡 Bulldrop Signal", callback_data="menu_signal")],
         [InlineKeyboardButton(text="🎮 Botdagi o‘yinlar", callback_data="menu_games"), InlineKeyboardButton(text="👤 Hisobim", callback_data="menu_account")],
         [InlineKeyboardButton(text="🏆 Yutuqlarim", callback_data="menu_rewards"), InlineKeyboardButton(text="📊 Statistika", callback_data="menu_stats")],
         [InlineKeyboardButton(text="💬 Bot support", callback_data="menu_support")],
     ])
+
+    if ADMIN_IDS:
+        rows.append([InlineKeyboardButton(text="🛠 Admin panel", callback_data="menu_admin")])
+
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
@@ -74,6 +102,19 @@ def saper_keyboard(green_cells: list[int]) -> InlineKeyboardMarkup:
                 callback_data="saper_cell",
             )
             for col in range(5)
+        ])
+    rows.append([InlineKeyboardButton(text="↩️ Bosh menyu", callback_data="go_home")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def cases_keyboard() -> InlineKeyboardMarkup:
+    rows = []
+    for case in db.get_cases():
+        rows.append([
+            InlineKeyboardButton(
+                text=f"{case['name']} — {case['price']} so'm",
+                callback_data=f"case_open_{case['id']}"
+            )
         ])
     rows.append([InlineKeyboardButton(text="↩️ Bosh menyu", callback_data="go_home")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -213,7 +254,222 @@ async def support_message(message: Message) -> None:
     await message.answer(f"💬 Support: https://t.me/{SUPPORT_USERNAME}", reply_markup=main_menu())
 
 
-@router.callback_query(F.data.in_({"menu_games", "menu_boxes", "menu_rewards", "menu_stats"}))
+@router.callback_query(F.data == "menu_boxes")
+async def menu_boxes(call: CallbackQuery) -> None:
+    await call.answer()
+    if call.message:
+        await call.message.edit_text("🎁 Super Qutilar", reply_markup=cases_keyboard())
+
+
+@router.callback_query(F.data == "menu_admin")
+async def menu_admin(call: CallbackQuery) -> None:
+    if call.from_user.id not in ADMIN_IDS:
+        await call.answer("Bu bo‘lim faqat admin uchun.", show_alert=True)
+        return
+    await call.answer()
+    if call.message:
+        await call.message.edit_text("🛠 Admin panel", reply_markup=admin_menu())
+
+
+@router.callback_query(F.data == "admin_add_case")
+async def admin_add_case(call: CallbackQuery, state: FSMContext) -> None:
+    if call.from_user.id not in ADMIN_IDS:
+        await call.answer("Ruxsat yo‘q.", show_alert=True)
+        return
+    await call.answer()
+    await state.set_state(AdminStates.waiting_case_name)
+    if call.message:
+        await call.message.edit_text("Quti nomini kiriting:")
+
+
+@router.callback_query(F.data == "admin_add_item")
+async def admin_add_item(call: CallbackQuery, state: FSMContext) -> None:
+    if call.from_user.id not in ADMIN_IDS:
+        await call.answer("Ruxsat yo‘q.", show_alert=True)
+        return
+    await call.answer()
+    await state.set_state(AdminStates.waiting_item_case_id)
+    if call.message:
+        await call.message.answer("Qaysi qutiga sovg‘a qo‘shmoqchisiz? Quti ID raqamini yuboring:")
+
+
+@router.callback_query(F.data == "admin_list_cases")
+async def admin_list_cases(call: CallbackQuery) -> None:
+    if call.from_user.id not in ADMIN_IDS:
+        await call.answer("Ruxsat yo‘q.", show_alert=True)
+        return
+    await call.answer()
+    cases = db.get_cases()
+    if not cases:
+        if call.message:
+            await call.message.edit_text("Hozircha quti yo‘q.", reply_markup=admin_menu())
+        return
+
+    lines = [f"{c['id']}. {c['name']} — {c['price']} so'm" for c in cases]
+    if call.message:
+        await call.message.edit_text("\n".join(lines), reply_markup=admin_menu())
+
+
+@router.message(AdminStates.waiting_case_name)
+async def admin_case_name(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    await state.update_data(case_name=message.text)
+    await state.set_state(AdminStates.waiting_case_price)
+    await message.answer("Quti ochish narxini son bilan kiriting:")
+
+
+@router.message(AdminStates.waiting_case_price)
+async def admin_case_price(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    try:
+        price = int(message.text)
+    except ValueError:
+        await message.answer("Narx son bo‘lishi kerak. Qayta kiriting:")
+        return
+    await state.update_data(case_price=price)
+    await state.set_state(AdminStates.waiting_case_desc)
+    await message.answer("Quti haqida qisqa ma’lumot yozing:")
+
+
+@router.message(AdminStates.waiting_case_desc)
+async def admin_case_desc(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    await state.update_data(case_desc=message.text)
+    await state.set_state(AdminStates.waiting_case_image)
+    await message.answer("Quti rasmi URL yoki GIF URL yuboring. Bo‘sh qoldirish mumkin:")
+
+
+@router.message(AdminStates.waiting_case_image)
+async def admin_case_image(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    data = await state.get_data()
+
+    case_id = db.add_case(
+        name=data["case_name"],
+        price=data["case_price"],
+        description=data.get("case_desc", ""),
+        image_url=(message.text or "").strip(),
+    )
+    await state.clear()
+    await message.answer(f"✅ Quti yaratildi: {data['case_name']} (ID: {case_id})", reply_markup=admin_menu())
+
+
+@router.message(AdminStates.waiting_item_case_id)
+async def admin_item_case_id(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    try:
+        case_id = int((message.text or "").strip())
+    except ValueError:
+        await message.answer("Quti ID raqami bo‘lishi kerak. Qayta kiriting:")
+        return
+    if not db.get_case(case_id):
+        await message.answer("Bunday quti topilmadi. Qayta kiriting:")
+        return
+
+    await state.update_data(item_case_id=case_id)
+    await state.set_state(AdminStates.waiting_item_name)
+    await message.answer("Sovg‘a nomini kiriting:")
+
+
+@router.message(AdminStates.waiting_item_name)
+async def admin_item_name(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    await state.update_data(item_name=message.text)
+    await state.set_state(AdminStates.waiting_item_price)
+    await message.answer("Sovg‘a narxini son bilan kiriting:")
+
+
+@router.message(AdminStates.waiting_item_price)
+async def admin_item_price(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    try:
+        price = int(message.text)
+    except ValueError:
+        await message.answer("Narx son bo‘lishi kerak. Qayta kiriting:")
+        return
+    await state.update_data(item_price=price)
+    await state.set_state(AdminStates.waiting_item_image)
+    await message.answer("Sovg‘a rasmi URL yoki GIF URL yuboring. Bo‘sh qoldirish mumkin:")
+
+
+@router.message(AdminStates.waiting_item_image)
+async def admin_item_image(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    await state.update_data(item_image=(message.text or "").strip())
+    await state.set_state(AdminStates.waiting_item_prob)
+    await message.answer("Foiz qiymatini kiriting (masalan: 10.5):")
+
+
+@router.message(AdminStates.waiting_item_prob)
+async def admin_item_prob(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    try:
+        probability = float(message.text)
+    except ValueError:
+        await message.answer("Foiz son bo‘lishi kerak. Qayta kiriting:")
+        return
+    await state.update_data(item_prob=probability)
+    await state.set_state(AdminStates.waiting_item_rarity)
+    await message.answer("Rarity kiriting: common / rare / epic / legendary / mythic")
+
+
+@router.message(AdminStates.waiting_item_rarity)
+async def admin_item_rarity(message: Message, state: FSMContext) -> None:
+    if message.from_user.id not in ADMIN_IDS:
+        return
+    rarity = (message.text or "common").strip().lower()
+    if rarity not in {"common", "rare", "epic", "legendary", "mythic"}:
+        await message.answer("Noto‘g‘ri rarity. common / rare / epic / legendary / mythic dan birini kiriting:")
+        return
+
+    data = await state.get_data()
+    db.add_case_item(
+        case_id=data["item_case_id"],
+        name=data["item_name"],
+        price=data["item_price"],
+        image_url=data.get("item_image", ""),
+        probability=data["item_prob"],
+        rarity=rarity,
+    )
+    await state.clear()
+    await message.answer("✅ Sovg‘a qo‘shildi!", reply_markup=admin_menu())
+
+
+@router.callback_query(F.data.startswith("case_open_"))
+async def open_case(call: CallbackQuery) -> None:
+    case_id = int(call.data.replace("case_open_", ""))
+    case = db.get_case(case_id)
+    if not case:
+        await call.answer("Quti topilmadi.", show_alert=True)
+        return
+
+    items = db.get_case_items(case_id)
+    if not items:
+        await call.answer("Bu qutida sovg‘a yo‘q.", show_alert=True)
+        return
+
+    winner = db.pick_case_item(case_id)
+    await call.answer(f"{case['name']} ochilmoqda...")
+
+    if call.message:
+        await call.message.answer(
+            f"🎁 {case['name']} ochildi\n\n"
+            f"Yutgan sovg‘a: {winner['name']}\n"
+            f"Narx: {winner['price']} so'm\n"
+            f"Rarity: {winner['rarity']}"
+        )
+
+
+@router.callback_query(F.data.in_({"menu_games", "menu_rewards", "menu_stats"}))
 async def planned_sections(call: CallbackQuery) -> None:
     await call.answer()
     if call.message:
@@ -225,10 +481,7 @@ async def admin_command(message: Message) -> None:
     if message.from_user.id not in ADMIN_IDS:
         await message.answer("Bu buyruq faqat admin uchun.")
         return
-    await message.answer(
-        "🛠 Admin: faqat sinov rejimidagi ko‘rish.\n"
-        "Haqiqiy balans tahriri, depozit va pul yechish faollashtirilmagan."
-    )
+    await message.answer("🛠 Admin panel", reply_markup=admin_menu())
 
 
 @router.message()
