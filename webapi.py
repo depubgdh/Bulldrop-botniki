@@ -1,5 +1,6 @@
 import functools
 import hashlib
+import logging
 import hmac
 import json
 import re
@@ -37,6 +38,14 @@ def api(handler):
             return await handler(request)
         except ApiError as exc:
             return web.json_response({"error": exc.code, "message": exc.message}, status=exc.status, headers=NO_STORE)
+        except web.HTTPException:
+            raise
+        except Exception as exc:  # kutilmagan xato: logga yoziladi, Mini App'da aniq sabab ko'rinadi
+            logging.exception("API xatosi: %s", request.path)
+            return web.json_response(
+                {"error": "server", "message": f"Server xatosi: {type(exc).__name__}: {exc}"},
+                status=500, headers=NO_STORE,
+            )
     return wrapper
 
 
