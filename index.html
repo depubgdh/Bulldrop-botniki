@@ -76,6 +76,16 @@
     .hero-bg img, .hero-bg video { width: 100%; height: 100%; object-fit: cover; }
     .hero-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 14, 22, .10), rgba(10, 14, 22, .78)); }
     .hero-content { position: relative; }
+    .wheelcard { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px 16px; margin-top: 12px; }
+    .wic { font-size: 30px; }
+    .wheel-wrap { position: relative; width: 300px; max-width: 86vw; margin: 8px auto 6px; }
+    .wheel-wrap svg { width: 100%; height: auto; display: block; }
+    .wheel-pointer { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 22px solid #fff; z-index: 2; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)); }
+    .bets { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 10px 0; }
+    .chipbtn { padding: 9px 14px; border-radius: 12px; background: var(--card2); border: 1px solid var(--line); font-weight: 700; font-size: 13px; }
+    .chipbtn.on { background: linear-gradient(135deg, var(--pink), var(--purple)); border: 0; color: #fff; }
+    .betinput { width: 100%; padding: 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); color: var(--text); font-size: 16px; text-align: center; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
     .kv { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
     .kv:last-child { border-bottom: 0; }
     .kv span { color: var(--muted); }
@@ -257,6 +267,7 @@
 
     var state = {
       tab: "home", cases: [], banner: null, hero: null, freeLimit: 10, adminData: null,
+      wheel: { data: null, bet: 10, count: 1, rot: 0, busy: false, pending: null, result: null },
       loaded: false, error: "", me: null,
       inv: [], invLoaded: false
     };
@@ -525,6 +536,11 @@
         stat(state.me && state.me.referrals !== undefined ? state.me.referrals : "—", "Do‘stlar")
       ));
 
+      page.appendChild(h("button", { class: "card wheelcard", onclick: function () { go("wheel"); } },
+        h("span", { class: "wic" }, "🎡"),
+        h("div", null, h("b", null, "G‘ildirak"), h("div", { class: "muted" }, "Coin tikib, g‘ildirakni aylantiring"))
+      ));
+
       if (top.length) {
         page.appendChild(h("h3", { class: "sec" }, "🔥 Top sovg‘alar"));
         page.appendChild(h("div", { class: "hscroll" },
@@ -600,6 +616,177 @@
         h("div", { class: "kv" }, h("span", null, "Jami coin balanslari"), h("b", null, coin(s.coins || 0)))
       ));
       page.appendChild(h("p", { class: "note" }, "Sozlamalarni o‘zgartirish: botda /admin → 📱 Mini App bosh sahifasi."));
+      return page;
+    }
+
+    /* ---------- G‘ildirak ---------- */
+    var WHEEL_COLORS = { lose: "#3a4658", x0: "#4da3ff", x2: "#9b68ff", x5: "#e4b85c", x10: "#ff4d9e" };
+
+    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+    function randomId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+
+    function wheelSvg(sectors, rot) {
+      var N = sectors.length, R = 140, C = 150, step = 360 / N;
+      var pt = function (deg, r) { var a = (deg - 90) * Math.PI / 180; return [C + r * Math.cos(a), C + r * Math.sin(a)]; };
+      var parts = [];
+      sectors.forEach(function (s, i) {
+        var a0 = i * step, a1 = (i + 1) * step;
+        var p0 = pt(a0, R), p1 = pt(a1, R);
+        var fill = s.locked ? "#222b38" : WHEEL_COLORS[s.type];
+        parts.push('<path d="M' + C + ',' + C + ' L' + p0[0] + ',' + p0[1] + ' A' + R + ',' + R + ' 0 0 1 ' + p1[0] + ',' + p1[1] + ' Z" fill="' + fill + '" stroke="#101722" stroke-width="1"/>');
+        if (!s.locked && s.type !== "lose") {
+          var mid = (a0 + a1) / 2, t = pt(mid, R * 0.72);
+          parts.push('<text x="' + t[0] + '" y="' + t[1] + '" fill="#fff" font-size="9" font-weight="800" text-anchor="middle" dominant-baseline="middle" transform="rotate(' + mid + ' ' + t[0] + ' ' + t[1] + ')">' + s.label + '</text>');
+        }
+      });
+      return '<svg viewBox="0 0 300 300"><g id="wheelg" style="transform-origin:150px 150px;transform:rotate(' + rot + 'deg)">' +
+        parts.join("") + '</g><circle cx="150" cy="150" r="10" fill="#101722" stroke="#fff" stroke-width="2"/></svg>';
+    }
+
+    /* Natija sektorini tepadagi ko‘rsatkichga olib keladigan burilish (kamida 3 marta aylanib). */
+    function landRot(cur, idx, N) {
+      var step = 360 / N;
+      var target = (360 - (idx * step + step / 2)) % 360;
+      var base = cur - (((cur % 360) + 360) % 360);
+      var rot = base + target;
+      while (rot <= cur + 1080) rot += 360;
+      return rot;
+    }
+
+    function applyBalance(b) {
+      if (!state.me) state.me = {};
+      state.me.coins = b;
+      renderTop();
+    }
+
+    function loadWheel() {
+      if (!inTG) { render(); return; }
+      request("/api/wheel/state", {}).then(function (d) {
+        state.wheel.data = d;
+        applyBalance(d.balance);
+        render();
+      }).catch(function (e) { toast(e.message); });
+    }
+
+    function claimDaily() {
+      request("/api/wheel/daily", {}).then(function (res) {
+        applyBalance(res.balance);
+        if (state.wheel.data) state.wheel.data.daily.available = false;
+        toast("+" + coin(res.amount) + " kunlik ✅");
+        render();
+      }).catch(function (e) { toast(e.message); });
+    }
+
+    function spinWheel() {
+      var w = state.wheel;
+      if (w.busy || !w.data) return;
+      if (!inTG) { toast("Telegram ichida oching"); return; }
+      /* Bir xil request_id: internet uzilsa, qayta bosganda natija ikki marta hisoblanmaydi */
+      var p = w.pending || { request_id: randomId(), bet: w.bet, count: w.count };
+      w.pending = p;
+      w.busy = true;
+      w.result = null;
+      render();
+      request("/api/wheel/spin", { bet: p.bet, count: p.count, request_id: p.request_id }).then(function (res) {
+        w.pending = null;
+        applyBalance(res.balance);
+        var N = w.data.sectors.length;
+        var last = res.results[res.results.length - 1];
+        w.rot = landRot(w.rot, last, N);
+        var g = document.getElementById("wheelg");
+        if (g) {
+          g.style.transition = "transform 4.2s cubic-bezier(.12,.7,.08,1)";
+          g.style.transform = "rotate(" + w.rot + "deg)";
+        }
+        return sleep(4300).then(function () {
+          w.busy = false;
+          w.result = res;
+          w.data.last = res;
+          haptic("success");
+          render();
+        });
+      }).catch(function (e) {
+        w.busy = false;
+        if (e.code) w.pending = null; /* server rad etdi: qayta urinishda yangi so‘rov */
+        toast(e.message || "Ulanish yo‘q. Qayta bosing, natija saqlanadi.");
+        render();
+      });
+    }
+
+    function viewWheel() {
+      var w = state.wheel;
+      var page = h("div", null, h("h1", { class: "page-title" }, "🎡 G‘ildirak"));
+      if (!inTG) {
+        page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "G‘ildirakni ochish uchun Telegram ichida oching.")));
+        return page;
+      }
+      if (!w.data) {
+        page.appendChild(h("div", { class: "skeleton" }));
+        return page;
+      }
+      var d = w.data;
+      page.appendChild(h("p", { class: "muted", style: "margin:0 2px 10px" },
+        "Faqat virtual coin: pul yechib bo‘lmaydi. Natija serverda belgilanadi va saqlanadi."));
+
+      if (d.daily.available) {
+        page.appendChild(h("button", { class: "btn primary big", style: "margin-bottom:12px", onclick: claimDaily },
+          "🎁 Kunlik coin: +" + coin(d.daily.amount)));
+      }
+
+      var box = h("div", { class: "wheel-box" });
+      box.innerHTML = wheelSvg(d.sectors, w.rot);
+      page.appendChild(h("div", { class: "wheel-wrap" }, h("div", { class: "wheel-pointer" }), box));
+
+      if (w.result) {
+        var r = w.result;
+        page.appendChild(h("div", { class: "result show", style: "--c:" + (r.net >= 0 ? "var(--gold)" : "var(--r-common)") },
+          h("div", { class: "rar" }, r.count + " ta o‘yin"),
+          h("div", { class: "rname" }, (r.net >= 0 ? "+" : "−") + coin(Math.abs(r.net))),
+          h("p", { class: "muted" }, "Tikish: " + coin(r.total_bet) + " · Qaytim: " + coin(r.total_payout))
+        ));
+      } else if (d.last) {
+        page.appendChild(h("p", { class: "note" },
+          "Oxirgi o‘yin: " + (d.last.net >= 0 ? "+" : "−") + coin(Math.abs(d.last.net))));
+      }
+
+      page.appendChild(h("h3", { class: "sec" }, "Tikish miqdori"));
+      page.appendChild(h("div", { class: "bets" }, d.bet_presets.map(function (v) {
+        return h("button", { class: "chipbtn" + (w.bet === v ? " on" : ""), onclick: function () { w.bet = v; render(); } }, String(v));
+      })));
+      var input = h("input", { class: "betinput", type: "number", min: String(d.min_bet), max: String(d.max_bet), value: String(w.bet) });
+      input.addEventListener("change", function () {
+        var v = parseInt(input.value, 10);
+        if (isNaN(v) || v < d.min_bet || v > d.max_bet) { toast("Tikish " + d.min_bet + " dan " + d.max_bet + " gacha bo‘lishi kerak."); }
+        else { w.bet = v; }
+        render();
+      });
+      page.appendChild(input);
+
+      page.appendChild(h("h3", { class: "sec" }, "Avtomatik o‘yinlar soni"));
+      page.appendChild(h("div", { class: "bets" }, d.auto_options.map(function (v) {
+        return h("button", { class: "chipbtn" + (w.count === v ? " on" : ""), onclick: function () { w.count = v; render(); } }, v + " ta");
+      })));
+
+      page.appendChild(h("button", { class: "btn primary big", style: "margin-top:8px", disabled: w.busy ? "" : null, onclick: spinWheel },
+        w.busy ? "Aylanmoqda..." : "🎡 O‘ynash — " + fmtNum(w.bet * w.count) + " coin"));
+
+      /* Sektorlar ro‘yxati */
+      var kinds = {};
+      d.sectors.forEach(function (s) {
+        if (!kinds[s.type]) kinds[s.type] = { label: s.label, coef: s.coef, count: 0, locked: false };
+        kinds[s.type].count += 1;
+        if (s.locked) kinds[s.type].locked = true;
+      });
+      var rows = Object.keys(kinds).map(function (k) {
+        var x = kinds[k];
+        var rowText = x.coef < 0 ? "Tikish yo‘qoladi" : (x.coef === 0 ? "Tikish qaytadi" : "Qaytim: tikish × " + (1 + x.coef));
+        return h("div", { class: "kv" },
+          h("span", null, h("i", { class: "dot", style: "background:" + WHEEL_COLORS[k] }), x.label + " (" + x.count + " ta)"),
+          h("b", null, x.locked ? "🔒 " + rowText : rowText));
+      });
+      page.appendChild(h("h3", { class: "sec" }, "Sektorlar"));
+      page.appendChild(h("div", { class: "card" }, rows));
+      page.appendChild(h("p", { class: "note" }, "Qaytim = tikish + tikish × koeffitsiyent. Natijalar tasodifiy."));
       return page;
     }
 
@@ -898,6 +1085,7 @@
       closeSheet();
       if (tab === "inv" && inTG && !state.invLoaded) loadInv();
       if (tab === "admin") loadAdmin();
+      if (tab === "wheel") loadWheel();
       render();
       window.scrollTo(0, 0);
     }
@@ -915,6 +1103,7 @@
         else if (state.tab === "inv") view.appendChild(viewInv());
         else if (state.tab === "friends") view.appendChild(viewFriends());
         else if (state.tab === "admin") view.appendChild(viewAdmin());
+        else if (state.tab === "wheel") view.appendChild(viewWheel());
         else view.appendChild(viewHome());
       } catch (e) {
         view.appendChild(h("div", { class: "card empty" }, h("p", null, "Xatolik: " + e.message)));

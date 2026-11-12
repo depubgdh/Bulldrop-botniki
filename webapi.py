@@ -10,6 +10,7 @@ from aiohttp import web
 
 import db
 import tg_http
+import wheel
 from config import ADMIN_IDS, BOT_TOKEN, BOT_USERNAME
 
 INIT_DATA_MAX_AGE = 24 * 60 * 60  # 24 soat
@@ -328,10 +329,58 @@ async def api_admin_overview(request):
         "free_limit": free_limit,
         "stats": db.stats(),
         "cases": len(db.get_cases()),
+        "wheel": {"daily": wheel.daily_amount(), "locked": sorted(wheel.locked_types())},
     }, headers=NO_STORE)
 
 
+WHEEL_ERRORS = {
+    "bad_request": (400, "Noto‘g‘ri so‘rov."),
+    "bad_bet": (400, "Tikish 1 dan 1000 gacha bo‘lishi kerak."),
+    "bad_count": (400, "Avtomatik o‘yin soni noto‘g‘ri."),
+    "no_funds": (402, "Coin yetarli emas."),
+    "no_sectors": (409, "Hozircha barcha sektorlar qulflangan."),
+    "no_daily": (404, "Kunlik coin yo‘q."),
+    "claimed": (409, "Bugungi kunlik coin allaqachon olingan."),
+}
+
+
+def _wheel_error(exc: "wheel.WheelError") -> ApiError:
+    status, message = WHEEL_ERRORS.get(exc.code, (400, "Xatolik"))
+    return ApiError(status, exc.code, message)
+
+
+@api
+async def api_wheel_state(request):
+    user_id, _, _, _ = await _auth(request)
+    return web.json_response(wheel.state_for(user_id), headers=NO_STORE)
+
+
+@api
+async def api_wheel_spin(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        res = wheel.play(user_id, body.get("bet"), body.get("count"), body.get("request_id"))
+    except wheel.WheelError as exc:
+        raise _wheel_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_wheel_daily(request):
+    user_id, _, _, _ = await _auth(request)
+    try:
+        res = wheel.claim_daily(user_id)
+    except wheel.WheelError as exc:
+        raise _wheel_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
 def setup_routes(app: web.Application) -> None:
+    app.router.add_post("/api/wheel/state", api_wheel_state)
+    app.router.add_post("/api/wheel/spin", api_wheel_spin)
+    app.router.add_post("/api/wheel/daily", api_wheel_daily)
+
+
     app.router.add_post("/api/admin/overview", api_admin_overview)
     app.router.add_get("/api/cases", api_cases)
     app.router.add_post("/api/me", api_me)

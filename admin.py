@@ -69,6 +69,8 @@ class AdminStates(StatesGroup):
     waiting_hero_image = State()
     waiting_hero_btn = State()
     waiting_hero_url = State()
+    # G'ildirak o'yini
+    waiting_wheel_daily = State()
 
 
 # ------------------------------------------------------------------ yordamchilar
@@ -109,6 +111,7 @@ def admin_menu() -> InlineKeyboardMarkup:
         [b("🖼 Mini App reklamasi", "admin_banner"), b("🎟 Tekin ochishlar", "admin_free")],
         [b("🏠 Bosh menyu matni va rasmi", "admin_home")],
         [b("📱 Mini App bosh sahifasi", "admin_hero")],
+        [b("🎡 G‘ildirak", "admin_wheel")],
         [b("🧩 Menyu tugmalari (rang/joy)", "admin_mbtn")],
         [b("⬅️ Asosiy menyu", "go_home")],
     )
@@ -1229,3 +1232,88 @@ async def admin_hero_reset(call: CallbackQuery, state: FSMContext) -> None:
     await call.answer("Asl holatga qaytarildi.")
     if call.message:
         await edit_or_send(call.message, hero_view(), hero_keyboard())
+
+
+# ------------------------------------------------------------------ 🎡 G‘ildirak
+
+def wheel_view() -> str:
+    import wheel  # lazy: admin.py ni yengil saqlash uchun
+    locked = wheel.locked_types()
+    counts = {kind: wheel.SECTORS.count(kind) for kind in wheel.SECTOR_TYPES}
+    amount = wheel.daily_amount()
+    lines = [
+        "🎡 G‘ildirak\n",
+        "Faqat virtual coin. Pul yechib bo‘lmaydi.\n",
+        f"🪙 Kunlik coin: {amount if amount > 0 else 'o‘chiq (0)'} — har kuni har bir foydalanuvchiga beriladi.",
+        "",
+        "Sektor turlari (bosib qulflang yoki oching):",
+    ]
+    for kind, (label, coef) in wheel.SECTOR_TYPES.items():
+        state_text = "🔒 qulflangan" if kind in locked else "🔓 ochiq"
+        lines.append(f"• {label} ({counts[kind]} ta) — {state_text}")
+    return "\n".join(lines)
+
+
+def wheel_keyboard() -> InlineKeyboardMarkup:
+    import wheel
+    locked = wheel.locked_types()
+    rows = []
+    for kind, (label, _) in wheel.SECTOR_TYPES.items():
+        mark = "🔒" if kind in locked else "🔓"
+        rows.append([b(f"{mark} {label}", f"admin_wl_{kind}")])
+    rows.append([b("🪙 Kunlik coin miqdori", "admin_wheel_daily")])
+    rows.append([b("🔙 Admin panel", "menu_admin")])
+    return kb(*rows)
+
+
+@router.callback_query(F.data == "admin_wheel")
+async def admin_wheel(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        await call.answer("Ruxsat yo‘q.", show_alert=True)
+        return
+    await call.answer()
+    await state.clear()
+    if call.message:
+        await edit_or_send(call.message, wheel_view(), wheel_keyboard())
+
+
+@router.callback_query(F.data.startswith("admin_wl_"))
+async def admin_wheel_lock(call: CallbackQuery) -> None:
+    if not _is_admin(call):
+        return
+    import wheel
+    kind = call.data.replace("admin_wl_", "")
+    if kind not in wheel.SECTOR_TYPES:
+        await call.answer("Noto‘g‘ri sektor.", show_alert=True)
+        return
+    locked = wheel.locked_types()
+    if kind in locked:
+        locked.discard(kind)
+    else:
+        locked.add(kind)
+    wheel.set_locked_types(locked)
+    await call.answer("Saqlandi.")
+    if call.message:
+        await edit_or_send(call.message, wheel_view(), wheel_keyboard())
+
+
+@router.callback_query(F.data == "admin_wheel_daily")
+async def admin_wheel_daily(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        return
+    await call.answer()
+    await state.set_state(AdminStates.waiting_wheel_daily)
+    if call.message:
+        await call.message.answer("Har kuni beriladigan coin miqdorini yozing (0 — o‘chirish):")
+
+
+@router.message(AdminStates.waiting_wheel_daily, not_command)
+async def admin_wheel_daily_value(message: Message, state: FSMContext) -> None:
+    import wheel
+    number = parse_int(message.text, minimum=0)
+    if number is None or number > 1_000_000:
+        await message.answer("0 dan 1 000 000 gacha son yozing:")
+        return
+    wheel.set_daily_amount(number)
+    await state.clear()
+    await message.answer("✅ Saqlandi.\n\n" + wheel_view(), reply_markup=wheel_keyboard())
