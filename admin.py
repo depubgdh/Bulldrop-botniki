@@ -63,6 +63,12 @@ class AdminStates(StatesGroup):
     waiting_free_opens = State()
     # mavjud quti/sovg'aga rasm o'rnatish
     waiting_set_image = State()
+    # Mini App bosh sahifasi
+    waiting_hero_title = State()
+    waiting_hero_text = State()
+    waiting_hero_image = State()
+    waiting_hero_btn = State()
+    waiting_hero_url = State()
 
 
 # ------------------------------------------------------------------ yordamchilar
@@ -102,6 +108,7 @@ def admin_menu() -> InlineKeyboardMarkup:
         [b("📢 Majburiy kanal", "admin_channel"), b("📈 Statistika", "admin_stats")],
         [b("🖼 Mini App reklamasi", "admin_banner"), b("🎟 Tekin ochishlar", "admin_free")],
         [b("🏠 Bosh menyu matni va rasmi", "admin_home")],
+        [b("📱 Mini App bosh sahifasi", "admin_hero")],
         [b("🧩 Menyu tugmalari (rang/joy)", "admin_mbtn")],
         [b("⬅️ Asosiy menyu", "go_home")],
     )
@@ -978,3 +985,247 @@ async def admin_mbtn_reset(call: CallbackQuery) -> None:
     await call.answer("Asl holatga qaytarildi.")
     if call.message:
         await edit_or_send(call.message, mbtn_text(), mbtn_keyboard())
+
+
+# ------------------------------------------------------------------ 📱 Mini App bosh sahifasi
+
+HERO_DEFAULT_TITLE = "BULLDROP"
+HERO_DEFAULT_TEXT = "Har kim {free} ta bepul ochadi. Keyin tushgan sovg‘ani sotib, coin bilan yana oching."
+HERO_DEFAULT_BTN = "🎁 Qutilarga o‘tish"
+HERO_DEFAULT_TARGET = "tab:case"
+TARGET_TABS = {
+    "case": "🎁 Qutilar bo‘limi",
+    "inv": "🎒 Buyumlar",
+    "friends": "👥 Do‘stlar",
+    "home": "🏠 Bosh sahifa",
+}
+
+
+def _is_admin(call) -> bool:
+    return call.from_user.id in ADMIN_IDS
+
+
+def target_label(target: str) -> str:
+    if target.startswith("tab:") and target[4:] in TARGET_TABS:
+        return TARGET_TABS[target[4:]]
+    if target.startswith("case:"):
+        case = db.get_case(int(target[5:])) if target[5:].isdigit() else None
+        return f"📦 Quti: {case['name']}" if case else "📦 Quti (topilmadi)"
+    if target.startswith("url:"):
+        return f"🔗 Havola: {target[4:]}"
+    return TARGET_TABS["case"]
+
+
+def hero_view() -> str:
+    text = db.get_setting("app_hero_text") or HERO_DEFAULT_TEXT
+    return (
+        "📱 Mini App bosh sahifasi\n\n"
+        f"Sarlavha: {db.get_setting('app_hero_title') or HERO_DEFAULT_TITLE}\n"
+        f"Matn: {text}\n"
+        f"Rasm/fon: {'o‘rnatilgan' if db.get_setting('app_hero_image') else 'yo‘q (pushti fon)'}\n"
+        f"Tugma matni: {db.get_setting('app_hero_btn_text') or HERO_DEFAULT_BTN}\n"
+        f"Tugma bosilganda: {target_label(db.get_setting('app_hero_btn_target') or HERO_DEFAULT_TARGET)}\n\n"
+        "Matnda {free} yozsangiz, bepul ochishlar soni avtomatik qo‘yiladi."
+    )
+
+
+def hero_keyboard() -> InlineKeyboardMarkup:
+    return kb(
+        [b("✏️ Sarlavha", "admin_hero_title"), b("✏️ Matn", "admin_hero_text")],
+        [b("🖼 Rasm / fon", "admin_hero_img"), b("🔤 Tugma matni", "admin_hero_btn")],
+        [b("🎯 Tugma yo‘nalishi", "admin_hero_target")],
+        [b("♻️ Asl holatga qaytarish", "admin_hero_reset")],
+        [b("🔙 Admin panel", "menu_admin")],
+    )
+
+
+def hero_target_keyboard() -> InlineKeyboardMarkup:
+    rows = [[b(label, f"admin_hero_tt_{key}")] for key, label in TARGET_TABS.items()]
+    rows.append([b("📦 Bitta quti", "admin_hero_tcase"), b("🔗 Havola", "admin_hero_turl")])
+    rows.append([b("🔙 Orqaga", "admin_hero")])
+    return kb(*rows)
+
+
+@router.callback_query(F.data == "admin_hero")
+async def admin_hero(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        await call.answer("Ruxsat yo‘q.", show_alert=True)
+        return
+    await call.answer()
+    await state.clear()
+    if call.message:
+        await edit_or_send(call.message, hero_view(), hero_keyboard())
+
+
+@router.callback_query(F.data == "admin_hero_title")
+async def admin_hero_title(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        return
+    await call.answer()
+    await state.set_state(AdminStates.waiting_hero_title)
+    if call.message:
+        await call.message.answer("Yangi sarlavhani yuboring (60 belgigacha):")
+
+
+@router.message(AdminStates.waiting_hero_title, not_command)
+async def admin_hero_title_value(message: Message, state: FSMContext) -> None:
+    text = (message.text or "").strip()
+    if not text or len(text) > 60:
+        await message.answer("Sarlavha 1 dan 60 belgigacha bo‘lishi kerak. Qayta yuboring:")
+        return
+    db.set_setting("app_hero_title", text)
+    await state.clear()
+    await message.answer("✅ Saqlandi.\n\n" + hero_view(), reply_markup=hero_keyboard())
+
+
+@router.callback_query(F.data == "admin_hero_text")
+async def admin_hero_text(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        return
+    await call.answer()
+    await state.set_state(AdminStates.waiting_hero_text)
+    if call.message:
+        await call.message.answer("Yangi matnni yuboring (300 belgigacha). Bepul ochishlar sonini {free} deb yozing:")
+
+
+@router.message(AdminStates.waiting_hero_text, not_command)
+async def admin_hero_text_value(message: Message, state: FSMContext) -> None:
+    text = (message.text or "").strip()
+    if not text or len(text) > 300:
+        await message.answer("Matn 1 dan 300 belgigacha bo‘lishi kerak. Qayta yuboring:")
+        return
+    db.set_setting("app_hero_text", text)
+    await state.clear()
+    await message.answer("✅ Saqlandi.\n\n" + hero_view(), reply_markup=hero_keyboard())
+
+
+@router.callback_query(F.data == "admin_hero_img")
+async def admin_hero_img(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        return
+    await call.answer()
+    await state.set_state(AdminStates.waiting_hero_image)
+    if call.message:
+        await call.message.answer(
+            "Fon uchun rasm, GIF yoki stiker yuboring (yoki https:// havola).\n"
+            "Olib tashlash uchun «-» yozing."
+        )
+
+
+@router.message(AdminStates.waiting_hero_image, not_command)
+async def admin_hero_image_value(message: Message, state: FSMContext) -> None:
+    image = extract_media(message)
+    if image is None:
+        await message.answer("Tushunmadim. Rasm, GIF yoki stiker yuboring, yoki https:// havola yozing («-» — olib tashlash):")
+        return
+    db.set_setting("app_hero_image", image or None)
+    await state.clear()
+    await message.answer("✅ Saqlandi.\n\n" + hero_view(), reply_markup=hero_keyboard())
+
+
+@router.callback_query(F.data == "admin_hero_btn")
+async def admin_hero_btn(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        return
+    await call.answer()
+    await state.set_state(AdminStates.waiting_hero_btn)
+    if call.message:
+        await call.message.answer("Tugma matnini yuboring (40 belgigacha, emoji ham bo‘lishi mumkin):")
+
+
+@router.message(AdminStates.waiting_hero_btn, not_command)
+async def admin_hero_btn_value(message: Message, state: FSMContext) -> None:
+    text = (message.text or "").strip()
+    if not text or len(text) > 40:
+        await message.answer("Tugma matni 1 dan 40 belgigacha bo‘lishi kerak. Qayta yuboring:")
+        return
+    db.set_setting("app_hero_btn_text", text)
+    await state.clear()
+    await message.answer("✅ Saqlandi.\n\n" + hero_view(), reply_markup=hero_keyboard())
+
+
+@router.callback_query(F.data == "admin_hero_target")
+async def admin_hero_target(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        return
+    await call.answer()
+    await state.clear()
+    if call.message:
+        await edit_or_send(call.message, "Tugma bosilganda qayerga o‘tsin?", hero_target_keyboard())
+
+
+@router.callback_query(F.data.startswith("admin_hero_tt_"))
+async def admin_hero_tab_target(call: CallbackQuery) -> None:
+    if not _is_admin(call):
+        return
+    key = call.data.replace("admin_hero_tt_", "")
+    if key not in TARGET_TABS:
+        await call.answer("Noto‘g‘ri bo‘lim.", show_alert=True)
+        return
+    db.set_setting("app_hero_btn_target", f"tab:{key}")
+    await call.answer("Saqlandi.")
+    if call.message:
+        await edit_or_send(call.message, hero_view(), hero_keyboard())
+
+
+@router.callback_query(F.data == "admin_hero_tcase")
+async def admin_hero_case_list(call: CallbackQuery) -> None:
+    if not _is_admin(call):
+        return
+    await call.answer()
+    cases = db.get_cases()
+    if not cases:
+        if call.message:
+            await edit_or_send(call.message, "Hozircha quti yo‘q. Avval quti yarating.", kb([b("🔙 Orqaga", "admin_hero_target")]))
+        return
+    rows = [[b(f"📦 {c['name']}", f"admin_hero_tc_{c['id']}")] for c in cases]
+    rows.append([b("🔙 Orqaga", "admin_hero_target")])
+    if call.message:
+        await edit_or_send(call.message, "Qaysi quti ochilsin?", kb(*rows))
+
+
+@router.callback_query(F.data.startswith("admin_hero_tc_"))
+async def admin_hero_case_target(call: CallbackQuery) -> None:
+    if not _is_admin(call):
+        return
+    case_id = call.data.replace("admin_hero_tc_", "")
+    if not case_id.isdigit() or not db.get_case(int(case_id)):
+        await call.answer("Quti topilmadi.", show_alert=True)
+        return
+    db.set_setting("app_hero_btn_target", f"case:{int(case_id)}")
+    await call.answer("Saqlandi.")
+    if call.message:
+        await edit_or_send(call.message, hero_view(), hero_keyboard())
+
+
+@router.callback_query(F.data == "admin_hero_turl")
+async def admin_hero_url(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        return
+    await call.answer()
+    await state.set_state(AdminStates.waiting_hero_url)
+    if call.message:
+        await call.message.answer("Havolani yuboring (https:// bilan boshlansin):")
+
+
+@router.message(AdminStates.waiting_hero_url, not_command)
+async def admin_hero_url_value(message: Message, state: FSMContext) -> None:
+    url = (message.text or "").strip()
+    if not url.startswith("https://") or len(url) > 300:
+        await message.answer("Havola https:// bilan boshlanishi kerak. Qayta yuboring:")
+        return
+    db.set_setting("app_hero_btn_target", f"url:{url}")
+    await state.clear()
+    await message.answer("✅ Saqlandi.\n\n" + hero_view(), reply_markup=hero_keyboard())
+
+
+@router.callback_query(F.data == "admin_hero_reset")
+async def admin_hero_reset(call: CallbackQuery, state: FSMContext) -> None:
+    if not _is_admin(call):
+        return
+    for key in ("app_hero_title", "app_hero_text", "app_hero_image", "app_hero_btn_text", "app_hero_btn_target"):
+        db.set_setting(key, None)
+    await state.clear()
+    await call.answer("Asl holatga qaytarildi.")
+    if call.message:
+        await edit_or_send(call.message, hero_view(), hero_keyboard())

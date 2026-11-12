@@ -129,7 +129,35 @@ def cases_payload() -> dict:
                 for i in items
             ],
         })
-    return {"cases": cases, "banner": banner_payload(), "free_limit": db.free_limit()}
+    free_limit = db.free_limit()
+    return {"cases": cases, "banner": banner_payload(), "free_limit": free_limit, "hero": hero_payload(free_limit)}
+
+
+HERO_DEFAULTS = {
+    "title": "BULLDROP",
+    "text": "Har kim {free} ta bepul ochadi. Keyin tushgan sovg‘ani sotib, coin bilan yana oching.",
+    "btn_text": "🎁 Qutilarga o‘tish",
+    "btn_target": "tab:case",
+}
+HERO_KEYS = {
+    "title": "app_hero_title",
+    "text": "app_hero_text",
+    "image": "app_hero_image",
+    "btn_text": "app_hero_btn_text",
+    "btn_target": "app_hero_btn_target",
+}
+
+
+def hero_payload(free_limit: int) -> dict:
+    """Mini App bosh sahifasi (pushti blok): admin panelda o'zgartiriladi."""
+    text = db.get_setting(HERO_KEYS["text"]) or HERO_DEFAULTS["text"]
+    return {
+        "title": db.get_setting(HERO_KEYS["title"]) or HERO_DEFAULTS["title"],
+        "text": text.replace("{free}", str(free_limit)),
+        "image": media_url(db.get_setting(HERO_KEYS["image"])),
+        "btn_text": db.get_setting(HERO_KEYS["btn_text"]) or HERO_DEFAULTS["btn_text"],
+        "btn_target": db.get_setting(HERO_KEYS["btn_target"]) or HERO_DEFAULTS["btn_target"],
+    }
 
 
 def channel_link(channel) -> str:
@@ -210,6 +238,7 @@ async def api_me(request):
         "gate": gate,
         "channel_url": channel_link(channel) if gate == "subscribe" else "",
         "referrals": db.count_referrals(user_id),
+        "is_admin": user_id in ADMIN_IDS,
         **wallet_json(wallet),
     }, headers=NO_STORE)
 
@@ -287,7 +316,23 @@ async def media(request):
     return web.Response(body=body, content_type=ctype, headers=headers)
 
 
+@api
+async def api_admin_overview(request):
+    """Faqat adminlar uchun: bosh sahifa sozlamalari va statistika (Mini App admin menyusi)."""
+    user_id, _, _, _ = await _auth(request)
+    if user_id not in ADMIN_IDS:
+        raise ApiError(403, "forbidden", "Bu bo‘lim faqat admin uchun.")
+    free_limit = db.free_limit()
+    return web.json_response({
+        "hero": hero_payload(free_limit),
+        "free_limit": free_limit,
+        "stats": db.stats(),
+        "cases": len(db.get_cases()),
+    }, headers=NO_STORE)
+
+
 def setup_routes(app: web.Application) -> None:
+    app.router.add_post("/api/admin/overview", api_admin_overview)
     app.router.add_get("/api/cases", api_cases)
     app.router.add_post("/api/me", api_me)
     app.router.add_post("/api/open", api_open)
