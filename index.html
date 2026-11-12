@@ -27,28 +27,34 @@
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
     html, body { margin: 0; background: var(--bg); color: var(--text); }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 14px 14px calc(92px + env(safe-area-inset-bottom));
+      padding: 14px 14px calc(110px + env(safe-area-inset-bottom));
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
     }
-
     h1, h2, h3, p { margin: 0; }
     button { font: inherit; color: inherit; border: 0; cursor: pointer; }
     button:disabled { opacity: .55; cursor: default; }
 
     .muted { color: var(--muted); font-size: 13px; line-height: 1.4; }
-    .note { color: var(--muted); font-size: 12px; text-align: center; margin: 10px 0 4px; }
+    .note { color: var(--muted); font-size: 12px; text-align: center; margin: 12px 0 4px; line-height: 1.4; }
     .row { display: flex; align-items: center; gap: 10px; }
     .between { justify-content: space-between; }
     .page-title { font-size: 22px; font-weight: 800; margin: 4px 2px 14px; }
     .sec { font-size: 16px; font-weight: 700; margin: 20px 2px 10px; }
-
     .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; }
+
+    /* ---------- ust qism: balans chiplari ---------- */
+    .chips { display: flex; gap: 8px; justify-content: flex-end; margin: 0 2px 12px; flex-wrap: wrap; }
+    .chip {
+      display: flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 999px;
+      background: rgba(255, 255, 255, .06); border: 1px solid var(--line); font-size: 13px; color: var(--muted);
+    }
+    .chip b { color: var(--text); }
+    .chip.gold { border-color: rgba(228, 184, 92, .4); color: var(--gold); }
+    .chip.gold b { color: var(--gold); }
 
     /* ---------- Home ---------- */
     .profile { display: flex; align-items: center; gap: 12px; margin: 2px 2px 14px; }
@@ -56,7 +62,6 @@
     .avatar .emoji { font-size: 20px; font-weight: 700; }
     .hello { font-size: 13px; color: var(--muted); }
     .uname { font-size: 18px; font-weight: 800; }
-
     .hero {
       border-radius: 22px; padding: 20px 18px;
       background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
@@ -64,33 +69,37 @@
     }
     .hero h2 { font-size: 24px; font-weight: 900; letter-spacing: .5px; }
     .hero p { margin: 6px 0 16px; font-size: 14px; line-height: 1.4; opacity: .95; }
-
+    .banner { display: block; width: 100%; padding: 0; overflow: hidden; border-radius: 18px; margin-bottom: 12px; }
+    .banner .media { aspect-ratio: 16 / 7; border-radius: 18px; }
     .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
     .stat { padding: 12px 8px; text-align: center; }
     .stat b { display: block; font-size: 20px; }
     .stat span { font-size: 12px; color: var(--muted); }
-
     .hscroll { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; }
     .hscroll::-webkit-scrollbar { display: none; }
 
-    /* ---------- Buttons ---------- */
+    /* ---------- tugmalar ---------- */
     .btn { border-radius: 14px; padding: 12px 16px; font-weight: 700; background: var(--card2); border: 1px solid var(--line); }
     .btn.primary { background: linear-gradient(135deg, var(--pink), var(--purple)); border: 0; color: #fff; }
     .btn.white { background: #fff; color: #1b1030; border: 0; }
     .btn.big { width: 100%; padding: 15px; font-size: 16px; }
+    .btn.small { padding: 9px 10px; font-size: 13px; border-radius: 11px; width: 100%; margin-top: 8px; }
     .btn:active:not(:disabled) { transform: scale(.98); }
+    .btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 
-    /* ---------- Media ---------- */
+    /* ---------- media ---------- */
     .media { display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
     .media img, .media video { width: 100%; height: 100%; object-fit: contain; display: block; }
     .media .emoji { font-size: 36px; line-height: 1; }
+    .lottie { width: 100%; height: 100%; }
+    .lottie svg { width: 100% !important; height: 100% !important; }
 
-    /* ---------- Cases grid (NFT sovg‘alar ko‘rinishi) ---------- */
+    /* ---------- kartalar ---------- */
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .case {
       padding: 10px; text-align: left; width: 100%;
-      background: var(--card); border: 1px solid var(--line); border-radius: 18px;
-      transition: transform .12s ease;
+      background: var(--card); border: 1px solid var(--line); border-radius: 18px; transition: transform .12s ease;
     }
     .case:active { transform: scale(.97); }
     .case .media {
@@ -104,27 +113,22 @@
       display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 800;
       background: rgba(228, 184, 92, .14); color: var(--gold); border: 1px solid rgba(228, 184, 92, .35);
     }
-
-    .skeleton { height: 200px; border-radius: 18px; background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%); background-size: 200% 100%; animation: shine 1.2s infinite linear; }
-    @keyframes shine { to { background-position: -200% 0; } }
-
-    .empty { padding: 28px 18px; text-align: center; }
-    .empty .big { font-size: 44px; margin-bottom: 8px; }
-
-    /* ---------- Gift cards ---------- */
     .gift {
       --c: var(--r-common);
-      background: var(--card);
       background: linear-gradient(180deg, color-mix(in srgb, var(--c) 20%, var(--card)), var(--card));
       border: 1px solid var(--line); border-bottom: 3px solid var(--c);
       border-radius: 14px; padding: 8px; text-align: center; min-width: 0;
     }
+    .gift.small { width: 112px; flex: none; }
     .gift .media { aspect-ratio: 1 / 1; }
     .gift .gname { font-size: 12px; font-weight: 700; margin-top: 6px; line-height: 1.25; max-height: 30px; overflow: hidden; }
     .gift .gprice { font-size: 11px; color: var(--muted); margin-top: 3px; }
     .gift .gpct { font-size: 11px; font-weight: 800; color: var(--c); margin-top: 2px; }
-    .gift.small { width: 112px; flex: none; }
-    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+    .skeleton { height: 200px; border-radius: 18px; background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%); background-size: 200% 100%; animation: shine 1.2s infinite linear; }
+    @keyframes shine { to { background-position: -200% 0; } }
+    .empty { padding: 28px 18px; text-align: center; }
+    .empty .big { font-size: 44px; margin-bottom: 8px; }
 
     /* ---------- Friends ---------- */
     .friends-hero { padding: 20px 18px; text-align: center; }
@@ -132,22 +136,25 @@
     .friends-hero h2 { font-size: 20px; margin: 8px 0 6px; }
     .count { font-size: 38px; font-weight: 900; margin: 14px 0 2px; background: linear-gradient(135deg, var(--pink), var(--purple)); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .linkbox { margin-top: 14px; padding: 12px; font-size: 13px; word-break: break-all; text-align: left; background: var(--bg); border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); }
-    .btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 
-    /* ---------- Bottom tabs ---------- */
+    /* ---------- shaffof pastki menyu (NFT bot uslubi) ---------- */
     .tabbar {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-      background: rgba(16, 23, 34, .94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-top: 1px solid var(--line);
+      position: fixed; left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 20;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px; border-radius: 26px;
+      background: rgba(40, 52, 70, .38);
+      backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, .14);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .14);
     }
-    .tab { background: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; font-size: 12px; font-weight: 700; color: var(--muted); transition: color .15s; }
-    .tab svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .tab.active { color: var(--pink); }
-    .tab.active svg { filter: drop-shadow(0 0 8px rgba(255, 77, 158, .55)); }
+    .tab {
+      background: none; border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 8px 0 7px; font-size: 11px; font-weight: 700; color: #c9d3e0; transition: background .2s, color .2s;
+    }
+    .tab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .tab.active { background: rgba(255, 255, 255, .16); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2); }
+    .tab.active svg { filter: drop-shadow(0 0 6px rgba(255, 255, 255, .4)); }
 
-    /* ---------- Bottom sheet ---------- */
+    /* ---------- bottom sheet ---------- */
     .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, .62); display: flex; align-items: flex-end; animation: fade .2s ease; }
     .sheet {
       position: relative; width: 100%; max-height: 92vh; overflow-y: auto;
@@ -160,7 +167,6 @@
     .hero-media .emoji { font-size: 76px; }
     .sheet-title { font-size: 22px; font-weight: 900; margin: 14px 2px 4px; }
     .sheet .row { margin: 10px 2px 12px; }
-
     .roulette { display: none; position: relative; overflow: hidden; height: 128px; margin: 4px 0 12px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
     .roulette.show { display: block; }
     .track { display: flex; gap: 8px; padding: 10px 0; will-change: transform; }
@@ -169,15 +175,17 @@
     .mini .media .emoji { font-size: 30px; }
     .mini .gname { font-size: 11px; font-weight: 700; margin-top: 4px; line-height: 1.2; max-height: 26px; overflow: hidden; }
     .marker { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px; background: var(--pink); box-shadow: 0 0 14px var(--pink); pointer-events: none; }
-
     .result { display: none; margin-bottom: 12px; padding: 18px; text-align: center; border-radius: 18px; background: var(--card); border: 1px solid var(--c, var(--line)); animation: pop .35s ease; }
     .result.show { display: block; }
     .result .media { width: 120px; height: 120px; margin: 0 auto; }
     .result .media .emoji { font-size: 64px; }
     .result .rar { margin-top: 10px; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--c); }
     .result .rname { font-size: 20px; font-weight: 900; margin: 4px 0; }
+    .gatebox { text-align: center; padding: 26px 18px; }
+    .gatebox .big { font-size: 46px; }
+    .gatebox h2 { font-size: 18px; margin: 10px 0 6px; }
 
-    #toast { position: fixed; left: 50%; bottom: calc(100px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); z-index: 80; max-width: 86%; padding: 11px 16px; border-radius: 12px; background: #000c; border: 1px solid var(--line); font-size: 14px; text-align: center; opacity: 0; pointer-events: none; transition: .25s; }
+    #toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); z-index: 80; max-width: 86%; padding: 11px 16px; border-radius: 12px; background: #000c; border: 1px solid var(--line); font-size: 14px; text-align: center; opacity: 0; pointer-events: none; transition: .25s; }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     @keyframes up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -186,6 +194,7 @@
   </style>
 </head>
 <body>
+  <header id="top"></header>
   <main id="view"></main>
   <nav class="tabbar" id="tabbar"></nav>
   <div id="sheet-root"></div>
@@ -197,15 +206,16 @@
     "use strict";
 
     var tg = window.Telegram && window.Telegram.WebApp;
-    if (tg) {
-      try {
+    var inTG = !!(tg && tg.initData);
+    try {
+      if (tg) {
         tg.ready();
         tg.expand();
         if (tg.setHeaderColor) tg.setHeaderColor("#101722");
         if (tg.setBackgroundColor) tg.setBackgroundColor("#101722");
         if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
-      } catch (e) { /* eski versiyalar */ }
-    }
+      }
+    } catch (e) { /* eski Telegram versiyalari */ }
 
     var RARITY = {
       common:    { label: "Oddiy",     color: "var(--r-common)" },
@@ -218,18 +228,29 @@
 
     var ICONS = {
       home:    '<svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>',
-      case:    '<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M3 12h18"/><path d="M12 8v12"/><path d="M12 8c-2.5 0-4-1-4-2.5S9.5 3 12 8c2.5-5 4-3.5 4-2.5S14.5 8 12 8z"/></svg>',
+      gift:    '<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M3 12h18"/><path d="M12 8v12"/><path d="M12 8c-2.5 0-4-1-4-2.5S9.5 3 12 8c2.5-5 4-3.5 4-2.5S14.5 8 12 8z"/></svg>',
+      bag:     '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
       friends: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.5 0 4 2 4 5"/></svg>'
     };
     var TABS = [
-      { id: "home", label: "Home" },
-      { id: "case", label: "Case" },
-      { id: "friends", label: "Friends" }
+      { id: "home", label: "Bosh", icon: "home" },
+      { id: "case", label: "Qutilar", icon: "gift" },
+      { id: "inv", label: "Buyumlar", icon: "bag" },
+      { id: "friends", label: "Do‘stlar", icon: "friends" }
     ];
+    var GATE_TEXT = {
+      register: "Avval botda /start bosib ro‘yxatdan o‘ting.",
+      subscribe: "Davom etish uchun kanalga a‘zo bo‘ling."
+    };
 
-    var state = { tab: "home", cases: [], loaded: false, error: "", me: null };
+    var state = {
+      tab: "home", cases: [], banner: null, freeLimit: 10,
+      loaded: false, error: "", me: null,
+      inv: [], invLoaded: false
+    };
 
     var view = document.getElementById("view");
+    var topEl = document.getElementById("top");
     var tabbar = document.getElementById("tabbar");
     var sheetRoot = document.getElementById("sheet-root");
     var toastEl = document.getElementById("toast");
@@ -256,13 +277,11 @@
       else parent.appendChild(kid);
     }
 
-    function fmt(n) {
-      return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " so‘m";
+    function fmtNum(n) {
+      return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     }
-    function pct(n) {
-      var v = Math.round((Number(n) || 0) * 100) / 100;
-      return v + "%";
-    }
+    function coin(n) { return fmtNum(n) + " coin"; }
+
     function safeUrl(u) {
       if (!u) return "";
       try {
@@ -270,23 +289,67 @@
         return (x.protocol === "https:" || x.protocol === "http:") ? x.href : "";
       } catch (e) { return ""; }
     }
+    function mediaKind(url) {
+      if (/\/media\/tgs\//.test(url)) return "lottie";
+      if (/\/media\/vid\//.test(url) || /\.(mp4|webm)(\?|#|$)/i.test(url)) return "video";
+      return "image";
+    }
 
+    function ensureLottie() {
+      if (window.lottie) return Promise.resolve();
+      if (!window.__lottiePromise) {
+        window.__lottiePromise = new Promise(function (resolve, reject) {
+          var s = document.createElement("script");
+          s.src = "https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js";
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      return window.__lottiePromise;
+    }
+
+    /* Rasm / video / animatsion stiker. Xato bo'lsa emoji ko'rsatiladi. */
     function media(url, emoji, cls) {
       var box = h("div", { class: "media " + (cls || "") });
-      var src = safeUrl(url);
-      function fallback() { box.textContent = ""; box.appendChild(h("span", { class: "emoji" }, emoji)); }
-      if (!src) { fallback(); return box; }
-      if (/\.(mp4|webm)(\?|#|$)/i.test(src)) {
-        var v = h("video", { src: src, autoplay: "", loop: "", playsinline: "", preload: "metadata" });
-        v.muted = true;
-        v.addEventListener("error", fallback);
-        box.appendChild(v);
-      } else {
-        var img = h("img", { src: src, alt: "", loading: "lazy" });
-        img.addEventListener("error", fallback);
-        box.appendChild(img);
+      function fallback() {
+        box.textContent = "";
+        box.appendChild(h("span", { class: "emoji" }, emoji || "🎁"));
       }
+      var src = safeUrl(url);
+      if (!src) { fallback(); return box; }
+
+      var kind = mediaKind(src);
+      if (kind === "lottie") {
+        var holder = h("div", { class: "lottie" });
+        box.appendChild(holder);
+        loadLottie(src, holder).catch(fallback);
+        return box;
+      }
+      var el;
+      if (kind === "video") {
+        el = h("video", { src: src, autoplay: "", loop: "", playsinline: "", preload: "auto" });
+        el.muted = true;
+        el.setAttribute("muted", "");
+      } else {
+        el = h("img", { src: src, alt: "", loading: "lazy" });
+      }
+      el.addEventListener("error", fallback);
+      box.appendChild(el);
       return box;
+    }
+
+    function loadLottie(src, holder) {
+      return ensureLottie()
+        .then(function () {
+          return fetch(src).then(function (r) {
+            if (!r.ok) throw new Error("media");
+            return r.json();
+          });
+        })
+        .then(function (data) {
+          window.lottie.loadAnimation({ container: holder, renderer: "svg", loop: true, autoplay: true, animationData: data });
+        });
     }
 
     function haptic(kind) {
@@ -302,23 +365,60 @@
       toastEl.textContent = msg;
       toastEl.classList.add("show");
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2600);
+      toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2800);
     }
 
-    function api(path, body) {
+    function openLink(url) {
+      if (!url) return;
+      if (tg && tg.openTelegramLink && url.indexOf("https://t.me/") === 0) tg.openTelegramLink(url);
+      else if (tg && tg.openLink) tg.openLink(url);
+      else window.open(url, "_blank");
+    }
+
+    /* Server: {"error": kod, "message": matn}. GET so'rovda payload yo'q. */
+    function request(path, payload) {
       var opt = {};
-      if (body) {
-        var payload = {};
-        Object.keys(body).forEach(function (k) { payload[k] = body[k]; });
-        payload.init_data = tg ? tg.initData : "";
-        opt = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) };
+      if (payload) {
+        var body = {};
+        Object.keys(payload).forEach(function (k) { body[k] = payload[k]; });
+        body.init_data = tg ? tg.initData : "";
+        opt = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
       }
       return fetch(path, opt).then(function (r) {
-        if (!r.ok) {
-          return r.text().then(function (t) { throw new Error(t || ("Xatolik " + r.status)); });
-        }
-        return r.json();
+        return r.text().then(function (text) {
+          var data = null;
+          try { data = JSON.parse(text); } catch (e) {}
+          if (!r.ok) {
+            var err = new Error((data && data.message) || text || ("Xatolik " + r.status));
+            err.code = data && data.error;
+            throw err;
+          }
+          return data;
+        });
       });
+    }
+
+    function applyWallet(w) {
+      if (!w) return;
+      if (!state.me) state.me = {};
+      state.me.coins = w.coins;
+      state.me.free_left = w.free_left;
+      state.me.opens = w.opens;
+    }
+
+    function confirmThen(msg, fn) {
+      if (tg && tg.showConfirm) tg.showConfirm(msg, function (ok) { if (ok) fn(); });
+      else if (window.confirm(msg)) fn();
+    }
+
+    /* ---------- ust chiplar ---------- */
+    function renderTop() {
+      topEl.textContent = "";
+      var me = state.me;
+      topEl.appendChild(h("div", { class: "chips" },
+        h("div", { class: "chip" }, "🎟 ", h("b", null, me && me.free_left !== undefined ? String(me.free_left) : "—"), " bepul"),
+        h("div", { class: "chip gold" }, "🪙 ", h("b", null, me && me.coins !== undefined ? fmtNum(me.coins) : "—"))
+      ));
     }
 
     /* ---------- kartalar ---------- */
@@ -328,8 +428,8 @@
       var card = h("div", { class: "gift" + (opts.small ? " small" : ""), style: "--c:" + r.color },
         media(item.image_url, "🎁"),
         h("div", { class: "gname" }, item.name),
-        h("div", { class: "gprice" }, fmt(item.price)),
-        opts.percent ? h("div", { class: "gpct" }, pct(item.percent)) : h("div", { class: "gpct" }, r.label)
+        h("div", { class: "gprice" }, coin(item.price)),
+        opts.percent ? h("div", { class: "gpct" }, item.percent + "%") : h("div", { class: "gpct" }, r.label)
       );
       if (opts.onclick) { card.style.cursor = "pointer"; card.addEventListener("click", opts.onclick); }
       return card;
@@ -340,16 +440,49 @@
         media(c.image_url, "🎁"),
         h("div", { class: "name" }, c.name),
         h("div", { class: "sub" }, c.items.length + " ta sovg‘a"),
-        h("span", { class: "pill" }, fmt(c.price))
+        h("span", { class: "pill" }, coin(c.price))
+      );
+    }
+
+    function invCard(it) {
+      var r = rar(it.rarity);
+      return h("div", { class: "gift", style: "--c:" + r.color },
+        media(it.image_url, "🎁"),
+        h("div", { class: "gname" }, it.name),
+        h("div", { class: "gprice" }, coin(it.price)),
+        h("div", { class: "gpct" }, r.label),
+        h("button", { class: "btn primary small", onclick: function () { sellOne(it); } }, "💰 Sotish")
+      );
+    }
+
+    /* ---------- gate (ro'yxat / kanal) ---------- */
+    function gateCard(me) {
+      var isReg = me.gate === "register";
+      var actions = isReg
+        ? [h("button", { class: "btn primary big", onclick: function () {
+            openLink(me.bot_username ? "https://t.me/" + me.bot_username + "?start=gate" : "");
+          } }, "🤖 Botga o‘tish")]
+        : [
+            h("button", { class: "btn primary big", onclick: function () { openLink(me.channel_url); } }, "📢 Kanalga o‘tish"),
+            h("button", { class: "btn big", style: "margin-top:10px", onclick: refreshMe }, "✅ Tekshirish")
+          ];
+      return h("div", { class: "card gatebox" },
+        h("div", { class: "big" }, isReg ? "📝" : "📢"),
+        h("h2", null, isReg ? "Ro‘yxatdan o‘ting" : "Kanalga a‘zo bo‘ling"),
+        h("p", { class: "muted" }, GATE_TEXT[me.gate] || ""),
+        actions
       );
     }
 
     /* ---------- sahifalar ---------- */
+    function stat(value, label) {
+      return h("div", { class: "card stat" }, h("b", null, String(value)), h("span", null, label));
+    }
+
     function viewHome() {
       var u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
       var name = u ? (u.first_name || u.username || "Do‘st") : "Mehmon";
-      var initial = (name || "?").charAt(0).toUpperCase();
-      var itemsTotal = state.cases.reduce(function (s, c) { return s + c.items.length; }, 0);
+      var initial = name.charAt(0).toUpperCase();
 
       var top = [];
       state.cases.forEach(function (c) {
@@ -361,22 +494,28 @@
       var page = h("div", null,
         h("div", { class: "profile" },
           media(u && u.photo_url, initial, "avatar"),
-          h("div", null,
-            h("div", { class: "hello" }, "Xush kelibsiz,"),
-            h("div", { class: "uname" }, name)
-          )
-        ),
-        h("div", { class: "hero" },
-          h("h2", null, "BULLDROP"),
-          h("p", null, "Qutilarni oching va noyob sovg‘alarni qo‘lga kiriting."),
-          h("button", { class: "btn white", onclick: function () { go("case"); } }, "🎁 Qutilarga o‘tish")
-        ),
-        h("div", { class: "stats" },
-          h("div", { class: "card stat" }, h("b", null, state.cases.length), h("span", null, "Qutilar")),
-          h("div", { class: "card stat" }, h("b", null, itemsTotal), h("span", null, "Sovg‘alar")),
-          h("div", { class: "card stat" }, h("b", null, state.me ? state.me.referrals : "—"), h("span", null, "Do‘stlar"))
+          h("div", null, h("div", { class: "hello" }, "Xush kelibsiz,"), h("div", { class: "uname" }, name))
         )
       );
+
+      if (state.banner && safeUrl(state.banner.image)) {
+        var banner = h("button", { class: "card banner", onclick: function () {
+          if (state.banner.link) openLink(state.banner.link);
+        } }, media(state.banner.image, "🖼", ""));
+        page.appendChild(banner);
+      }
+
+      page.appendChild(h("div", { class: "hero" },
+        h("h2", null, "BULLDROP"),
+        h("p", null, "Har kim " + state.freeLimit + " ta bepul ochadi. Keyin tushgan sovg‘ani sotib, coin bilan yana oching."),
+        h("button", { class: "btn white", onclick: function () { go("case"); } }, "🎁 Qutilarga o‘tish")
+      ));
+
+      page.appendChild(h("div", { class: "stats" },
+        stat(state.cases.length, "Qutilar"),
+        stat(state.inv.length, "Buyumlar"),
+        stat(state.me && state.me.referrals !== undefined ? state.me.referrals : "—", "Do‘stlar")
+      ));
 
       if (top.length) {
         page.appendChild(h("h3", { class: "sec" }, "🔥 Top sovg‘alar"));
@@ -386,15 +525,13 @@
           })
         ));
       }
-      page.appendChild(h("p", { class: "note" }, "Demo rejim: haqiqiy pul qabul qilinmaydi va yechilmaydi."));
       return page;
     }
 
     function viewCases() {
       var page = h("div", null, h("h1", { class: "page-title" }, "🎁 Qutilar"));
       if (!state.loaded) {
-        page.appendChild(h("div", { class: "grid2" },
-          [1, 2, 3, 4].map(function () { return h("div", { class: "skeleton" }); })));
+        page.appendChild(h("div", { class: "grid2" }, [1, 2, 3, 4].map(function () { return h("div", { class: "skeleton" }); })));
         return page;
       }
       if (state.error) {
@@ -417,15 +554,44 @@
       return page;
     }
 
+    function viewInv() {
+      var page = h("div", null, h("h1", { class: "page-title" }, "🎒 Buyumlar"));
+      if (!inTG) {
+        page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Buyumlarni ko‘rish uchun Telegram ichida oching.")));
+        return page;
+      }
+      if (!state.invLoaded) {
+        page.appendChild(h("div", { class: "grid2" }, [1, 2].map(function () { return h("div", { class: "skeleton" }); })));
+        return page;
+      }
+      if (!state.inv.length) {
+        page.appendChild(h("div", { class: "card empty" },
+          h("div", { class: "big" }, "🎒"),
+          h("p", null, "Hozircha buyumlaringiz yo‘q."),
+          h("button", { class: "btn primary", style: "margin-top:14px", onclick: function () { go("case"); } }, "🎁 Quti ochish")
+        ));
+        return page;
+      }
+      var total = state.inv.reduce(function (s, i) { return s + Number(i.price || 0); }, 0);
+      page.appendChild(h("div", { class: "card", style: "padding:14px 16px;margin-bottom:12px" },
+        h("div", { class: "row between" },
+          h("div", null, h("div", { class: "muted" }, "Sotish mumkin bo‘lgan qiymat"), h("b", { style: "font-size:18px" }, coin(total))),
+          h("span", { class: "pill" }, state.inv.length + " ta")
+        ),
+        h("button", { class: "btn small", style: "margin-top:12px", onclick: sellAll }, "💰 Hammasini sotish")
+      ));
+      page.appendChild(h("p", { class: "muted", style: "margin:0 2px 12px" }, "Sotsangiz coin olasiz — bu coin bilan yana quti ochasiz."));
+      page.appendChild(h("div", { class: "grid2" }, state.inv.map(invCard)));
+      return page;
+    }
+
     function referralLink() {
       if (!state.me || !state.me.bot_username) return "";
       return "https://t.me/" + state.me.bot_username + "?start=ref_" + state.me.id;
     }
 
     function copyText(text) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        return navigator.clipboard.writeText(text);
-      }
+      if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
       return new Promise(function (resolve, reject) {
         try {
           var ta = h("textarea", { style: "position:fixed;opacity:0" });
@@ -444,10 +610,10 @@
       var box = h("div", { class: "card friends-hero" },
         h("div", { class: "big" }, "👥"),
         h("h2", null, "Do‘stlarni taklif qiling"),
-        h("p", { class: "muted" }, "Havolangiz orqali botga qo‘shilgan va ro‘yxatdan o‘tgan do‘stlar shu yerda hisoblanadi.")
+        h("p", { class: "muted" }, "Havolangiz orqali botga qo‘shilib, ro‘yxatdan o‘tgan do‘stlar shu yerda hisoblanadi.")
       );
-      if (state.me) {
-        box.appendChild(h("div", { class: "count" }, state.me.referrals));
+      if (state.me && state.me.referrals !== undefined) {
+        box.appendChild(h("div", { class: "count" }, String(state.me.referrals)));
         box.appendChild(h("div", { class: "muted" }, "Taklif qilingan do‘stlar"));
       }
       if (link) {
@@ -458,15 +624,43 @@
                                 function () { toast("Nusxalab bo‘lmadi"); });
           } }, "📋 Nusxalash"),
           h("button", { class: "btn primary", onclick: function () {
-            var url = "https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent("BULLDROP — qutilarni oching 🎁");
-            if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
+            openLink("https://t.me/share/url?url=" + encodeURIComponent(link) + "&text=" + encodeURIComponent("BULLDROP — qutilarni oching 🎁"));
           } }, "📤 Ulashish")
         ));
       } else {
         box.appendChild(h("p", { class: "note" },
           state.me ? "Bot username sozlanmagan (BOT_USERNAME)." : "Havolani olish uchun Mini App’ni Telegram ichida oching."));
       }
-      return h("div", null, h("h1", { class: "page-title" }, "👥 Friends"), box);
+      return h("div", null, h("h1", { class: "page-title" }, "👥 Do‘stlar"), box);
+    }
+
+    /* ---------- sotish ---------- */
+    function sellOne(it, after) {
+      confirmThen("«" + it.name + "» " + coin(it.price) + " ga sotilsinmi?", function () {
+        request("/api/sell", { id: it.id }).then(function (res) {
+          haptic("success");
+          applyWallet(res.wallet);
+          state.inv = state.inv.filter(function (x) { return x.id !== it.id; });
+          toast("+" + coin(res.gained) + " ✅");
+          renderTop();
+          if (after) after();
+          render();
+        }).catch(function (e) { toast(e.message); });
+      });
+    }
+
+    function sellAll() {
+      if (!state.inv.length) return;
+      confirmThen("Barcha buyumlar (" + state.inv.length + " ta) sotilsinmi?", function () {
+        request("/api/sell", { all: true }).then(function (res) {
+          haptic("success");
+          applyWallet(res.wallet);
+          state.inv = [];
+          toast("+" + coin(res.gained) + " ✅");
+          renderTop();
+          render();
+        }).catch(function (e) { toast(e.message); });
+      });
     }
 
     /* ---------- quti sheet ---------- */
@@ -492,7 +686,7 @@
         host.appendChild(h("div", { class: "marker" }));
         var offset = W * STEP + CARD / 2 - host.clientWidth / 2 + (Math.random() * 30 - 15);
         var finished = false;
-        function finish() { if (finished) return; finished = true; resolve(); }
+        function finish() { if (!finished) { finished = true; resolve(); } }
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             track.style.transition = "transform 4.6s cubic-bezier(.12,.7,.08,1)";
@@ -507,42 +701,73 @@
     function openSheet(c) {
       closeSheet();
       var busy = false;
-      var btn = h("button", { class: "btn primary big" }, "🎁 Ochish (demo)");
+      var btn = h("button", { class: "btn primary big" });
+      var hint = h("p", { class: "note", style: "display:none" });
       var roulette = h("div", { class: "roulette" });
       var result = h("div", { class: "result" });
 
-      if (!c.items.length) { btn.disabled = true; btn.textContent = "Sovg‘a qo‘shilmagan"; }
+      function paintBtn() {
+        var me = state.me;
+        var label, disabled = false, hintText = "";
+        if (!inTG) { label = "Telegram ichida oching"; disabled = true; }
+        else if (!me || me.gate !== "ok") { label = "Avval ro‘yxatdan o‘ting"; disabled = true; }
+        else if (!c.items.length) { label = "Sovg‘a qo‘shilmagan"; disabled = true; }
+        else if (c.price > 0 && me.free_left <= 0 && me.coins < c.price) {
+          label = "🪙 " + coin(c.price) + " bilan ochish";
+          disabled = true;
+          hintText = "Coin yetarli emas. «Buyumlar» bo‘limida sovg‘alarni soting.";
+        }
+        else if (me.free_left > 0) label = "🎟 Bepul ochish (qoldi: " + me.free_left + ")";
+        else label = c.price > 0 ? "🪙 " + coin(c.price) + " bilan ochish" : "🎁 Ochish";
+        btn.textContent = busy ? "Ochilmoqda..." : label;
+        btn.disabled = disabled || busy;
+        hint.textContent = hintText;
+        hint.style.display = hintText ? "" : "none";
+      }
 
-      function showResult(item) {
-        var r = rar(item.rarity);
+      function showResult(res) {
+        var r = rar(res.item.rarity);
         roulette.classList.remove("show");
         result.textContent = "";
         result.style.setProperty("--c", r.color);
-        result.appendChild(media(item.image_url, "🎁"));
+        result.appendChild(media(res.item.image_url, "🎁"));
         result.appendChild(h("div", { class: "rar" }, r.label));
-        result.appendChild(h("div", { class: "rname" }, item.name));
-        result.appendChild(h("div", { class: "pill" }, fmt(item.price)));
-        result.appendChild(h("p", { class: "note" }, "Demo: sovg‘a hisobingizga qo‘shilmaydi."));
+        result.appendChild(h("div", { class: "rname" }, res.item.name));
+        result.appendChild(h("div", { class: "pill" }, coin(res.item.price)));
+        result.appendChild(h("div", { class: "btnrow" },
+          h("button", { class: "btn", onclick: function () { result.classList.remove("show"); } }, "🎒 Qolsin"),
+          h("button", { class: "btn primary", onclick: function () {
+            sellOne(res.item, function () { result.classList.remove("show"); paintBtn(); });
+          } }, "💰 Sotish")
+        ));
         result.classList.add("show");
       }
 
       btn.addEventListener("click", function () {
         if (busy) return;
         busy = true;
-        btn.disabled = true;
+        paintBtn();
         result.classList.remove("show");
         haptic();
-        api("/api/open", { case_id: c.id })
-          .then(function (res) { return spin(c, res.item, roulette).then(function () { return res; }); })
-          .then(function (res) { haptic("success"); showResult(res.item); })
-          .catch(function (e) { roulette.classList.remove("show"); toast(e.message || "Xatolik"); })
-          .then(function () {
-            busy = false;
-            btn.disabled = false;
-            btn.textContent = "🎁 Yana ochish (demo)";
-          });
+        request("/api/open", { case_id: c.id }).then(function (res) {
+          applyWallet(res.wallet);
+          state.inv.unshift(res.item);
+          state.invLoaded = true;
+          renderTop();
+          return spin(c, res.item, roulette).then(function () { return res; });
+        }).then(function (res) {
+          haptic("success");
+          showResult(res);
+        }).catch(function (e) {
+          roulette.classList.remove("show");
+          toast(e.message || "Xatolik");
+        }).then(function () {
+          busy = false;
+          paintBtn();
+        });
       });
 
+      paintBtn();
       var sheet = h("div", { class: "sheet", onclick: function (e) { e.stopPropagation(); } },
         h("div", { class: "grab" }),
         h("button", { class: "x", "aria-label": "Yopish", onclick: closeSheet }, "✕"),
@@ -550,12 +775,12 @@
         h("h2", { class: "sheet-title" }, c.name),
         c.description ? h("p", { class: "muted" }, c.description) : null,
         h("div", { class: "row between" },
-          h("span", { class: "pill" }, "Narxi: " + fmt(c.price)),
+          h("span", { class: "pill" }, "Narxi: " + coin(c.price)),
           h("span", { class: "muted" }, c.items.length + " ta sovg‘a")),
         roulette,
         result,
         btn,
-        h("p", { class: "note" }, "Demo rejim: pul yechilmaydi."),
+        hint,
         h("h3", { class: "sec" }, "Qutidagi sovg‘alar"),
         c.items.length
           ? h("div", { class: "grid3" }, c.items.map(function (i) { return giftCard(i, { percent: true }); }))
@@ -565,12 +790,12 @@
       document.body.style.overflow = "hidden";
     }
 
-    /* ---------- navigatsiya ---------- */
+    /* ---------- navigatsiya va yuklash ---------- */
     function buildTabs() {
       tabbar.textContent = "";
       TABS.forEach(function (t) {
         var b = h("button", { class: "tab", "data-tab": t.id, onclick: function () { go(t.id); } });
-        b.innerHTML = ICONS[t.id === "case" ? "case" : t.id];
+        b.innerHTML = ICONS[t.icon];
         b.appendChild(h("span", null, t.label));
         tabbar.appendChild(b);
       });
@@ -580,6 +805,7 @@
       if (tab !== state.tab) haptic();
       state.tab = tab;
       closeSheet();
+      if (tab === "inv" && inTG && !state.invLoaded) loadInv();
       render();
       window.scrollTo(0, 0);
     }
@@ -588,9 +814,13 @@
       Array.prototype.forEach.call(tabbar.children, function (b) {
         b.classList.toggle("active", b.getAttribute("data-tab") === state.tab);
       });
+      renderTop();
       view.textContent = "";
       try {
-        if (state.tab === "case") view.appendChild(viewCases());
+        if (inTG && state.me && state.me.gate && state.me.gate !== "ok") {
+          view.appendChild(gateCard(state.me));
+        } else if (state.tab === "case") view.appendChild(viewCases());
+        else if (state.tab === "inv") view.appendChild(viewInv());
         else if (state.tab === "friends") view.appendChild(viewFriends());
         else view.appendChild(viewHome());
       } catch (e) {
@@ -598,17 +828,42 @@
       }
     }
 
+    function refreshMe() {
+      if (!inTG) return;
+      request("/api/me", {}).then(function (me) {
+        state.me = me;
+        if (me.gate === "ok" && !state.invLoaded) loadInv();
+        render();
+      }).catch(function (e) { toast(e.message); });
+    }
+
+    function loadInv() {
+      if (!inTG) return;
+      request("/api/inventory", {}).then(function (d) {
+        state.inv = d.items || [];
+        applyWallet(d.wallet);
+        state.invLoaded = true;
+        render();
+      }).catch(function (e) {
+        state.invLoaded = true;
+        toast(e.message);
+        render();
+      });
+    }
+
     function load() {
       state.loaded = false;
       state.error = "";
       render();
-      api("/api/cases")
-        .then(function (d) { state.cases = d.cases || []; })
+      request("/api/cases")
+        .then(function (d) {
+          state.cases = d.cases || [];
+          state.banner = d.banner || null;
+          state.freeLimit = d.free_limit || state.freeLimit;
+        })
         .catch(function () { state.error = "Qutilarni yuklab bo‘lmadi. Internetni tekshiring."; })
         .then(function () { state.loaded = true; render(); });
-      if (tg && tg.initData) {
-        api("/api/me", {}).then(function (me) { state.me = me; render(); }).catch(function () {});
-      }
+      if (inTG) refreshMe();
     }
 
     window.addEventListener("error", function (e) {
