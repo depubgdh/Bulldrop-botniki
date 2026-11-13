@@ -61,6 +61,39 @@ def set_daily_amount(amount: int) -> None:
     db.set_setting("wheel_daily", str(max(0, int(amount))) if amount > 0 else None)
 
 
+_SCHEMA_OK = False
+
+
+def _ensure_schema() -> None:
+    """Eski bazada (db.py yangilanmagan bo'lsa ham) kerakli jadval/ustunlar bo'lishini ta'minlaydi."""
+    global _SCHEMA_OK
+    if _SCHEMA_OK:
+        return
+    with db.connect() as con:
+        cols = [r["name"] for r in con.execute("PRAGMA table_info(users)")]
+        if cols:
+            for name, ddl in (("coins", "INTEGER NOT NULL DEFAULT 0"), ("opens", "INTEGER NOT NULL DEFAULT 0"),
+                              ("last_daily", "TEXT")):
+                if name not in cols:
+                    con.execute(f"ALTER TABLE users ADD COLUMN {name} {ddl}")
+        con.execute("""CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)""")
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS wheel_spins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                request_id TEXT NOT NULL UNIQUE,
+                user_id INTEGER NOT NULL,
+                bet INTEGER NOT NULL,
+                count INTEGER NOT NULL,
+                results TEXT NOT NULL,
+                total_bet INTEGER NOT NULL,
+                total_payout INTEGER NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        con.execute("CREATE INDEX IF NOT EXISTS idx_wheel_user ON wheel_spins(user_id, id)")
+    _SCHEMA_OK = True
+
+
 def _today() -> str:
     return datetime.now(DAILY_TZ).date().isoformat()
 
@@ -85,6 +118,7 @@ def _spin_json(row) -> dict:
 
 def play(user_id: int, bet, count, request_id: str) -> dict:
     """Bir yoki bir nechta o‘yin. Hammasi bitta tranzaksiyada."""
+    _ensure_schema()
     try:
         bet, count = int(bet), int(count)
     except (TypeError, ValueError):
@@ -148,6 +182,7 @@ def _balance(con, user_id) -> int:
 
 
 def claim_daily(user_id: int) -> dict:
+    _ensure_schema()
     amount = daily_amount()
     if amount <= 0:
         raise WheelError("no_daily")
@@ -171,6 +206,7 @@ def claim_daily(user_id: int) -> dict:
 
 
 def state_for(user_id: int) -> dict:
+    _ensure_schema()
     today = _today()
     con = db.connect()
     try:
