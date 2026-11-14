@@ -465,7 +465,27 @@ async def sell_one(call: CallbackQuery) -> None:
 
 # ------------------------------------------------------------------ boshqa
 
-@router.callback_query(F.data.in_({"menu_games", "menu_rewards", "menu_stats"}))
+def games_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💥 Crash — demo", callback_data="signal_crash")],
+        [InlineKeyboardButton(text="💣 Saper — demo", callback_data="signal_saper")],
+        [InlineKeyboardButton(text="🪜 Narvon — tez orada", callback_data="signal_ladder")],
+        [InlineKeyboardButton(text="🗼 Minora — tez orada", callback_data="signal_tower")],
+        [InlineKeyboardButton(text="🔙 Bosh menyu", callback_data="go_home")],
+    ])
+
+
+@router.callback_query(F.data == "menu_games")
+async def games_menu(call: CallbackQuery) -> None:
+    await call.answer()
+    if call.message:
+        await call.message.edit_text(
+            "🎮 Botdagi o‘yinlar\n\nBarcha o‘yinlar demo rejimda: natijalar tasodifiy, haqiqiy pul yoki yutuq yo‘q.",
+            reply_markup=games_keyboard(),
+        )
+
+
+@router.callback_query(F.data.in_({"menu_rewards", "menu_stats"}))
 async def planned_sections(call: CallbackQuery) -> None:
     await call.answer()
     if call.message:
@@ -474,4 +494,7 @@ async def planned_sections(call: CallbackQuery) -> None:
 
 @router.message()
 async def fallback(message: Message) -> None:
+    # Xizmat xabarlari (masalan, "fayl qadaldi") va botning o'z xabarlariga javob bermaymiz
+    if message.pinned_message or not message.from_user or message.from_user.is_bot:
+        return
     await message.answer("Menyudan tanlang yoki /start yuboring.", reply_markup=main_menu(message.from_user.id))

@@ -93,6 +93,23 @@ def init_db():
             con.execute("ALTER TABLE users ADD COLUMN coins INTEGER NOT NULL DEFAULT 0")
         if "opens" not in cols:
             con.execute("ALTER TABLE users ADD COLUMN opens INTEGER NOT NULL DEFAULT 0")
+        if "last_daily" not in cols:
+            con.execute("ALTER TABLE users ADD COLUMN last_daily TEXT")
+        # G'ildirak o'yini: har bir chaqiruv bir marta yoziladi (request_id bo'yicha)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS wheel_spins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                request_id TEXT NOT NULL UNIQUE,
+                user_id INTEGER NOT NULL,
+                bet INTEGER NOT NULL,
+                count INTEGER NOT NULL,
+                results TEXT NOT NULL,
+                total_bet INTEGER NOT NULL,
+                total_payout INTEGER NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        con.execute("CREATE INDEX IF NOT EXISTS idx_wheel_user ON wheel_spins(user_id, id)")
 
 
 # ------------------------------------------------------------------ sozlamalar

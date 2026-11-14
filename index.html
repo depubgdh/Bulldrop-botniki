@@ -100,12 +100,30 @@
     .hscroll::-webkit-scrollbar { display: none; }
 
     /* ---------- tugmalar ---------- */
-    .btn { border-radius: 14px; padding: 12px 16px; font-weight: 700; background: var(--card2); border: 1px solid var(--line); }
-    .btn.primary { background: linear-gradient(135deg, var(--pink), var(--purple)); border: 0; color: #fff; }
-    .btn.white { background: #fff; color: #1b1030; border: 0; }
+    .btn {
+      position: relative; border-radius: 16px; padding: 12px 16px; font-weight: 800; color: #fff;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .05));
+      border: 1px solid rgba(255, 255, 255, .22);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -8px 14px rgba(255, 255, 255, .03), 0 6px 18px rgba(0, 0, 0, .28);
+      -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .btn::after { content: ""; position: absolute; left: 12%; right: 12%; top: 2px; height: 42%; border-radius: 14px; background: linear-gradient(180deg, rgba(255, 255, 255, .22), transparent); pointer-events: none; }
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(255, 79, 163, .78), rgba(143, 90, 255, .78));
+      border: 1px solid rgba(255, 255, 255, .35);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 8px 24px rgba(214, 80, 220, .35);
+    }
+    .btn.white {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, .78)); color: #1b1030;
+      border: 1px solid rgba(255, 255, 255, .8);
+      box-shadow: inset 0 1px 0 #fff, 0 8px 22px rgba(0, 0, 0, .25);
+    }
+    .btn.white::after { display: none; }
+    .btn:disabled { opacity: .5; }
     .btn.big { width: 100%; padding: 15px; font-size: 16px; }
-    .btn.small { padding: 9px 10px; font-size: 13px; border-radius: 11px; width: 100%; margin-top: 8px; }
-    .btn:active:not(:disabled) { transform: scale(.98); }
+    .btn.small { padding: 9px 10px; font-size: 13px; border-radius: 13px; width: 100%; margin-top: 8px; }
+    .btn:active:not(:disabled) { transform: scale(.97); }
     .btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 
     /* ---------- media ---------- */
@@ -360,12 +378,21 @@
             var cx = cv.getContext("2d", { willReadFrequently: true });
             cx.drawImage(im, 0, 0, w, hh);
             var img = cx.getImageData(0, 0, w, hh), d = img.data;
-            function white(i) { return d[i + 3] <= 10 || Math.min(d[i], d[i + 1], d[i + 2]) >= 236; }
-            /* faqat chetlari oq bo'lgan rasm kesiladi (skrinshot va to'liq rasmlarga tegilmaydi) */
-            var edge = 0, tot = 0, x, y;
-            for (x = 0; x < w; x++) { tot += 2; if (white((x) * 4)) edge++; if (white(((hh - 1) * w + x) * 4)) edge++; }
-            for (y = 0; y < hh; y++) { tot += 2; if (white((y * w) * 4)) edge++; if (white((y * w + w - 1) * 4)) edge++; }
-            if (edge / tot < 0.85) { resolve(src); return; }
+            var mode = "white";
+            function isWhite(i) { return d[i + 3] <= 10 || Math.min(d[i], d[i + 1], d[i + 2]) >= 236; }
+            function isBlack(i) { return d[i + 3] <= 10 || Math.max(d[i], d[i + 1], d[i + 2]) <= 28; }
+            function ratio(fn) {
+              var e = 0, t = 0, x, y;
+              for (x = 0; x < w; x++) { t += 2; if (fn(x * 4)) e++; if (fn(((hh - 1) * w + x) * 4)) e++; }
+              for (y = 0; y < hh; y++) { t += 2; if (fn(y * w * 4)) e++; if (fn((y * w + w - 1) * 4)) e++; }
+              return e / t;
+            }
+            var x, y;
+            /* fon oq, qora yoki shaffof bo'lsa kesiladi (Telegram rasmni JPEG qilib, shaffoflikni qoraga aylantiradi) */
+            if (ratio(isWhite) >= 0.85) mode = "white";
+            else if (ratio(isBlack) >= 0.85) mode = "black";
+            else { resolve(src); return; }
+            var white = mode === "white" ? isWhite : isBlack;
             var seen = new Uint8Array(w * hh), stack = [];
             function push(px, py) {
               if (px < 0 || py < 0 || px >= w || py >= hh) return;
@@ -385,8 +412,13 @@
               var q = y * w + x;
               if (seen[q]) continue;
               if (seen[q - 1] || seen[q + 1] || seen[q - w] || seen[q + w]) {
-                var m = Math.min(d[q * 4], d[q * 4 + 1], d[q * 4 + 2]);
-                if (m > 190) d[q * 4 + 3] = Math.round(255 * (236 - m) / 46);
+                if (mode === "white") {
+                  var m = Math.min(d[q * 4], d[q * 4 + 1], d[q * 4 + 2]);
+                  if (m > 190) d[q * 4 + 3] = Math.round(255 * (236 - m) / 46);
+                } else {
+                  var mb = Math.max(d[q * 4], d[q * 4 + 1], d[q * 4 + 2]);
+                  if (mb < 70) d[q * 4 + 3] = Math.round(255 * Math.max(0, mb - 28) / 42);
+                }
               }
             }
             cx.putImageData(img, 0, 0);
