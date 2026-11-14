@@ -11,8 +11,7 @@ import re
 
 import db
 
-MIN_BET = 1
-MAX_BET = 1000
+MIN_BET = 500   # eng kam tikish; yuqori chegara yo‘q — balansdagi hamma coin
 CELLS = 25
 MODES = (3, 4)
 RTP = 0.95
@@ -123,7 +122,7 @@ def state_for(user_id: int) -> dict:
     finally:
         con.close()
     return {
-        "balance": balance, "min_bet": MIN_BET, "max_bet": MAX_BET, "modes": list(MODES),
+        "balance": balance, "min_bet": MIN_BET, "max_bet": balance, "modes": list(MODES),
         "tables": {str(m): table(m) for m in MODES},
         "game": _view(row) if row else None,
     }
@@ -137,7 +136,7 @@ def start(user_id: int, bet, mines, request_id) -> dict:
         raise MinesError("bad_request")
     if mines not in MODES or not REQUEST_RE.match(str(request_id or "")):
         raise MinesError("bad_request")
-    if not (MIN_BET <= bet <= MAX_BET):
+    if bet < MIN_BET:
         raise MinesError("bad_bet")
 
     def run(con):

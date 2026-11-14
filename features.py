@@ -312,6 +312,11 @@ async def saper_cell(call: CallbackQuery) -> None:
     await call.answer("Bu faqat demo ko‘rinish.")
 
 
+@router.callback_query(F.data == "game_soon")
+async def game_soon(call: CallbackQuery) -> None:
+    await call.answer("Crash tez orada qo‘shiladi.", show_alert=True)
+
+
 @router.callback_query(F.data.in_({"signal_ladder", "signal_tower"}))
 async def unavailable_signal(call: CallbackQuery) -> None:
     await call.answer("Bu bo‘lim hali ishlab chiqilmoqda.", show_alert=True)
@@ -477,9 +482,9 @@ def games_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [_game_button("🎡 G‘ildirak", "wheel", "menu_games")],
         [_game_button("💣 Saper", "mines", "signal_saper")],
-        [InlineKeyboardButton(text="💥 Crash — demo", callback_data="signal_crash")],
-        [InlineKeyboardButton(text="🪜 Narvon — tez orada", callback_data="signal_ladder")],
-        [InlineKeyboardButton(text="🗼 Minora — tez orada", callback_data="signal_tower")],
+        [_game_button("🗼 Minora", "tower", "signal_tower")],
+        [_game_button("🪜 Narvon", "ladder", "signal_ladder")],
+        [InlineKeyboardButton(text="💥 Crash — tez orada", callback_data="game_soon")],
         [InlineKeyboardButton(text="🔙 Bosh menyu", callback_data="go_home")],
     ])
 
@@ -489,7 +494,7 @@ async def games_menu(call: CallbackQuery) -> None:
     await call.answer()
     if call.message:
         await call.message.edit_text(
-            "🎮 Botdagi o‘yinlar\n\nBarcha o‘yinlar demo rejimda: natijalar tasodifiy, haqiqiy pul yoki yutuq yo‘q.",
+            "🎮 Botdagi o‘yinlar\n\nBarcha o‘yinlar demo: faqat virtual coin bilan o‘ynaladi, haqiqiy pul yo‘q. Eng kam tikish — 500 coin.",
             reply_markup=games_keyboard(),
         )
 

@@ -11,7 +11,9 @@ from aiohttp import web
 
 import db
 import tg_http
+import ladder
 import mines
+import tower
 import wheel
 from config import ADMIN_IDS, BOT_TOKEN, BOT_USERNAME
 
@@ -349,7 +351,7 @@ async def api_admin_overview(request):
 
 WHEEL_ERRORS = {
     "bad_request": (400, "Noto‘g‘ri so‘rov."),
-    "bad_bet": (400, "Tikish 1 dan 1000 gacha bo‘lishi kerak."),
+    "bad_bet": (400, "Tikish kamida 500 coin bo‘lishi kerak."),
     "no_funds": (402, "Coin yetarli emas."),
     "closed": (409, "Tikish yopildi. Keyingi raundni kuting."),
     "locked": (409, "Bu sektor vaqtincha qulflangan."),
@@ -381,7 +383,7 @@ async def api_wheel_bet(request):
 
 MINES_ERRORS = {
     "bad_request": (400, "Noto‘g‘ri so‘rov."),
-    "bad_bet": (400, "Tikish 1 dan 1000 gacha bo‘lishi kerak."),
+    "bad_bet": (400, "Tikish kamida 500 coin bo‘lishi kerak."),
     "no_funds": (402, "Coin yetarli emas."),
     "active": (409, "Tugallanmagan o‘yin bor — davom eting."),
     "no_game": (404, "Faol o‘yin yo‘q."),
@@ -430,6 +432,92 @@ async def api_mines_cashout(request):
     return web.json_response(res, headers=NO_STORE)
 
 
+TOWER_ERRORS = dict(MINES_ERRORS, nothing_opened=(409, "Avval kamida bitta qavatdan o‘ting."))
+
+
+def _game_api(module, error_cls, errors):
+    def raiser(exc):
+        status, message = errors.get(exc.code, (400, "Xatolik"))
+        return ApiError(status, exc.code, message)
+    return raiser
+
+
+_tower_error = _game_api(tower, tower.TowerError, TOWER_ERRORS)
+_ladder_error = _game_api(ladder, ladder.LadderError, TOWER_ERRORS)
+
+
+@api
+async def api_tower_state(request):
+    user_id, _, _, _ = await _auth(request)
+    return web.json_response(tower.state_for(user_id), headers=NO_STORE)
+
+
+@api
+async def api_tower_start(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        res = tower.start(user_id, body.get("bet"), body.get("request_id"))
+    except tower.TowerError as exc:
+        raise _tower_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_tower_pick(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        res = tower.pick(user_id, body.get("col"))
+    except tower.TowerError as exc:
+        raise _tower_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_tower_cashout(request):
+    user_id, _, _, _ = await _auth(request)
+    try:
+        res = tower.cashout(user_id)
+    except tower.TowerError as exc:
+        raise _tower_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_ladder_state(request):
+    user_id, _, _, _ = await _auth(request)
+    return web.json_response(ladder.state_for(user_id), headers=NO_STORE)
+
+
+@api
+async def api_ladder_start(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        res = ladder.start(user_id, body.get("bet"), body.get("stones"), body.get("request_id"))
+    except ladder.LadderError as exc:
+        raise _ladder_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_ladder_step(request):
+    user_id, _, _, _ = await _auth(request)
+    try:
+        res = ladder.step(user_id)
+    except ladder.LadderError as exc:
+        raise _ladder_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_ladder_cashout(request):
+    user_id, _, _, _ = await _auth(request)
+    try:
+        res = ladder.cashout(user_id)
+    except ladder.LadderError as exc:
+        raise _ladder_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
 @api
 async def api_wheel_daily(request):
     user_id, _, _, _ = await _auth(request)
@@ -447,6 +535,14 @@ def setup_routes(app: web.Application) -> None:
     app.router.add_post("/api/mines/start", api_mines_start)
     app.router.add_post("/api/mines/open", api_mines_open)
     app.router.add_post("/api/mines/cashout", api_mines_cashout)
+    app.router.add_post("/api/tower/state", api_tower_state)
+    app.router.add_post("/api/tower/start", api_tower_start)
+    app.router.add_post("/api/tower/pick", api_tower_pick)
+    app.router.add_post("/api/tower/cashout", api_tower_cashout)
+    app.router.add_post("/api/ladder/state", api_ladder_state)
+    app.router.add_post("/api/ladder/start", api_ladder_start)
+    app.router.add_post("/api/ladder/step", api_ladder_step)
+    app.router.add_post("/api/ladder/cashout", api_ladder_cashout)
     app.router.add_post("/api/wheel/daily", api_wheel_daily)
 
 

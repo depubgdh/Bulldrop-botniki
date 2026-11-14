@@ -12,8 +12,7 @@ from datetime import datetime, timedelta, timezone
 
 import db
 
-MIN_BET = 1
-MAX_BET = 1000
+MIN_BET = 500   # eng kam tikish; yuqori chegara yo‘q — balansdagi hamma coin
 AUTO_OPTIONS = (1, 5, 10, 25)
 CYCLE = 18          # soniya: bitta raund
 SPIN = 7            # soniya: aylanish
@@ -229,7 +228,7 @@ def place_bet(user_id: int, kind, amount, request_id, round_no=None) -> dict:
         amount = int(amount)
     except (TypeError, ValueError):
         raise WheelError("bad_request")
-    if not (MIN_BET <= amount <= MAX_BET):
+    if amount < MIN_BET:
         raise WheelError("bad_bet")
     if not REQUEST_RE.match(str(request_id or "")):
         raise WheelError("bad_request")
@@ -332,7 +331,7 @@ def state_for(user_id: int) -> dict:
         "round": r,
         "elapsed": elapsed,
         "balance": int(row["coins"]),
-        "min_bet": MIN_BET, "max_bet": MAX_BET, "auto_options": list(AUTO_OPTIONS),
+        "min_bet": MIN_BET, "max_bet": int(row["coins"]), "auto_options": list(AUTO_OPTIONS),
         "sectors": [{"type": k, "label": SECTOR_TYPES[k][0], "coef": SECTOR_TYPES[k][1]} for k in SECTORS],
         "types": [{"type": k, "label": v[0], "coef": v[1], "locked": k in locked} for k, v in SECTOR_TYPES.items()],
         "from_deg": rest_deg(prev) if prev else 0.0,

@@ -78,6 +78,49 @@
     .hero-content { position: relative; }
     .wheelcard { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px 16px; margin-top: 12px; }
     .wic { font-size: 30px; }
+    /* ---- umumiy o‘yinlar ---- */
+    .ggrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+    .gcard { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 14px; text-align: left; }
+    .gcard .gi { font-size: 30px; margin-bottom: 4px; }
+    .gcard small { color: var(--muted); }
+    .mbet.mbet3 { grid-template-columns: 1fr 52px 52px 60px; }
+    /* ---- Minora ---- */
+    .tgrid { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .trow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tcell { height: 58px; border-radius: 18px; color: #fff; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 6px;
+      background: #2a2c31; border: 2px solid transparent; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08); transition: transform .1s, background .15s; }
+    .tcell.cur { background: #353840; border-color: rgba(255, 255, 255, .75); box-shadow: 0 0 16px rgba(255, 255, 255, .18); }
+    .tcell.cur:active { transform: scale(.97); }
+    .tcell.ok { background: linear-gradient(180deg, rgba(53, 224, 138, .35), rgba(18, 137, 74, .55)); border-color: rgba(53, 224, 138, .7); }
+    .tcell.dim { opacity: .35; }
+    .tcell.bad { background: linear-gradient(180deg, rgba(255, 90, 100, .35), rgba(200, 25, 45, .7)); border-color: rgba(255, 90, 100, .8); box-shadow: 0 0 20px rgba(255, 40, 60, .5); }
+    .tcell.gbad { background: rgba(200, 25, 45, .3); opacity: .85; }
+    .tcell.gok { background: rgba(60, 140, 255, .22); opacity: .85; }
+    .tcell .big { font-size: 26px; }
+    .tcell.flip { animation: mflip .38s cubic-bezier(.2, .9, .3, 1.2); }
+    /* ---- Narvon ---- */
+    .lboard { background: #171a21; border: 1px solid var(--line); border-radius: 24px; padding: 14px 10px 10px; margin-top: 14px; }
+    .lrow { display: grid; grid-template-columns: repeat(19, 1fr); gap: 2px; height: 25px; }
+    .lc { position: relative; }
+    .lc .lp { position: absolute; left: 0; right: 0; bottom: 2px; height: 9px; border-radius: 6px; background: #272a32; }
+    .lrow.done .lp { background: #444853; }
+    .lrow.next .lp { background: #ff4d58; box-shadow: 0 0 8px rgba(255, 77, 88, .55); }
+    .lc .mk { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); width: 15px; height: 15px; line-height: 15px; font-size: 13px; text-align: center; z-index: 1; }
+    .lc .mk svg { width: 100%; height: 100%; display: block; }
+    .lc .mk.flip { animation: mflip .35s cubic-bezier(.2, .9, .3, 1.2); }
+    .trail { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, .55); vertical-align: middle; }
+    .lchips { display: flex; gap: 8px; overflow-x: auto; margin-top: 12px; scrollbar-width: none; }
+    .lchips::-webkit-scrollbar { display: none; }
+    .lchip2 { flex: none; padding: 10px 18px; border-radius: 14px; font-weight: 800; background: #25282f; }
+    .lchip2.next { background: #2fc96f; color: #fff; }
+    .lchip2.done { background: rgba(47, 201, 111, .2); color: #6fe4a2; }
+    .lsetup { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; margin-top: 12px; align-items: start; }
+    .lsetup .mbet.mbet3 { grid-template-columns: 1fr 1fr 1fr; }
+    .lsetup .mbet3 input { grid-column: 1 / -1; }
+    .lmodes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .lmode { height: 46px; border-radius: 14px; font-size: 18px; font-weight: 900; color: #fff; background: #2a2c31; }
+    .lmode.sel { background: #e9ecf2; color: #111; }
+    .lmode:disabled { opacity: .55; }
     /* ---- Saper ---- */
     .mgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 14px; }
     .mcell { aspect-ratio: 1 / 1; border-radius: 16px; padding: 8%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
@@ -739,15 +782,16 @@
         stat(state.me && state.me.referrals !== undefined ? state.me.referrals : "—", "Do‘stlar")
       ));
 
-      page.appendChild(h("button", { class: "card wheelcard", onclick: function () { go("wheel"); } },
-        h("span", { class: "wic" }, "🎡"),
-        h("div", null, h("b", null, "G‘ildirak"), h("div", { class: "muted" }, "Coin tikib, g‘ildirakni aylantiring"))
-      ));
-
-      page.appendChild(h("button", { class: "card wheelcard", onclick: function () { go("mines"); } },
-        h("span", { class: "wic" }, "💣"),
-        h("div", null, h("b", null, "Saper"), h("div", { class: "muted" }, "Seyflarni oching, minaga tushmang"))
-      ));
+      page.appendChild(h("h3", { class: "sec" }, "🎮 O‘yinlar"));
+      page.appendChild(h("div", { class: "ggrid" }, [
+        ["wheel", "🎡", "G‘ildirak", "To‘xtovsiz aylanadi"],
+        ["mines", "💣", "Saper", "Seyflarni oching"],
+        ["tower", "🗼", "Minora", "Qavatma-qavat"],
+        ["ladder", "🪜", "Narvon", "Toshlardan o‘ting"]
+      ].map(function (g) {
+        return h("button", { class: "card gcard", onclick: function () { go(g[0]); } },
+          h("span", { class: "gi" }, g[1]), h("b", null, g[2]), h("small", null, g[3]));
+      })));
 
       if (top.length) {
         page.appendChild(h("h3", { class: "sec" }, "🔥 Top sovg‘alar"));
@@ -837,7 +881,7 @@
     };
     var WCYCLE = 18, WSPIN = 7, WBET = 11, WTURNS = 4, WRT = 540;
     var WH = {
-      data: null, offset: 0, bet: 10, kind: "x2", rot: 0, betBusy: false, auto: null, autoOpen: false,
+      data: null, offset: 0, bet: 500, kind: "x2", rot: 0, betBusy: false, auto: null, autoOpen: false,
       loop: 0, fetching: false, lastFetchAt: 0, refs: null, wobble: 0, lastK: null, spinning: false,
       endedRound: -1, banner: null, mute: false, lastBtnKey: "", lastDispKey: ""
     };
@@ -930,6 +974,11 @@
     function speedP(p) { return (p < 0.1 ? p / 0.1 : 1) * Math.pow(1 - p, 1.8); }
     function pad2(n) { return (n < 10 ? "0" : "") + n; }
 
+    function clampBet(v, d) {
+      var max = Math.max(d.min_bet, (state.me && state.me.coins) || 0);
+      return Math.max(d.min_bet, Math.min(max, Math.round(v)));
+    }
+
     function applyBalance(b) {
       if (!state.me) state.me = {};
       state.me.coins = b;
@@ -987,7 +1036,7 @@
       var c = wheelClock();
       if (c.r !== d.round || c.el >= WBET - 0.4) { if (!isAuto) toast("Tikish yopiq — keyingi raundni kuting"); return; }
       var amount = WH.bet;
-      if (!(amount >= d.min_bet && amount <= d.max_bet)) { toast("Tikish " + d.min_bet + " dan " + d.max_bet + " gacha bo‘lishi kerak."); return; }
+      if (!(amount >= d.min_bet)) { toast("Tikish kamida " + d.min_bet + " coin bo‘lishi kerak."); return; }
       if (((state.me && state.me.coins) || 0) < amount) { toast("Coin yetarli emas"); if (isAuto) stopAuto(); return; }
       var kindInfo = d.types.filter(function (t) { return t.type === WH.kind; })[0];
       if (kindInfo && kindInfo.locked) { toast("Bu sektor vaqtincha qulflangan."); return; }
@@ -1224,20 +1273,20 @@
       page.appendChild(banner);
 
       /* ---- tikish paneli ---- */
-      var input = h("input", { class: "betinput wbetinput", type: "number", inputmode: "numeric", min: String(d.min_bet), max: String(d.max_bet), value: String(WH.bet) });
+      var input = h("input", { class: "betinput wbetinput", type: "number", inputmode: "numeric", min: String(d.min_bet), value: String(WH.bet) });
       input.addEventListener("input", function () {
         var v = parseInt(input.value, 10);
         if (!isNaN(v)) { WH.bet = v; WH.lastBtnKey = ""; }
       });
       function setBet(v) {
-        v = Math.max(d.min_bet, Math.min(d.max_bet, Math.round(v)));
+        v = clampBet(v, d);
         WH.bet = v; input.value = String(v); WH.lastBtnKey = "";
       }
       var quick = h("div", { class: "wquick" },
         h("button", { class: "btn small", onclick: function () { setBet(WH.bet / 2); } }, "½"),
         h("button", { class: "btn small", onclick: function () { setBet(WH.bet * 2); } }, "2×"),
-        h("button", { class: "btn small", onclick: function () { setBet(WH.bet + 10); } }, "+10"),
-        h("button", { class: "btn small", onclick: function () { setBet(Math.min(d.max_bet, (state.me && state.me.coins) || d.min_bet)); } }, "Max"));
+        h("button", { class: "btn small", onclick: function () { setBet(WH.bet + 500); } }, "+500"),
+        h("button", { class: "btn small", onclick: function () { setBet(1e12); } }, "Max"));
       var kinds = {}, kindSub = {};
       var grid = h("div", { class: "wkinds" }, d.types.map(function (t) {
         var sub = h("div", { class: "ks" }, "");
@@ -1287,7 +1336,7 @@
     }
 
     /* ===================== SAPER (Mines, demo) ===================== */
-    var MG = { data: null, mode: 3, bet: 10, busy: false, revealing: false, game: null, hit: -1, banner: null, refs: null, timers: [] };
+    var MG = { data: null, mode: 3, bet: 500, busy: false, revealing: false, game: null, hit: -1, banner: null, refs: null, timers: [] };
     var SVG_DIAL = '<svg viewBox="0 0 64 64"><g fill="#262a31" stroke="#4d535e" stroke-width="2"><rect x="29" y="5" width="6" height="26" rx="3"/><rect x="29" y="5" width="6" height="26" rx="3" transform="rotate(120 32 32)"/><rect x="29" y="5" width="6" height="26" rx="3" transform="rotate(240 32 32)"/></g><circle cx="32" cy="32" r="12" fill="#15171b" stroke="#5a606c" stroke-width="3"/><circle cx="32" cy="32" r="4.5" fill="#30343c"/></svg>';
     var SVG_COIN = '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="25" fill="#e0a22f" stroke="#ffd166" stroke-width="3"/><circle cx="32" cy="32" r="18" fill="#efb33f" stroke="#b9801a" stroke-width="2"/><path d="M32 19l4.3 8.8 9.7 1.4-7 6.8 1.6 9.6L32 41l-8.6 4.6 1.6-9.6-7-6.8 9.7-1.4z" fill="#b9801a"/><ellipse cx="24" cy="21" rx="8" ry="4" fill="#fff" opacity=".28" transform="rotate(-30 24 21)"/></svg>';
     var SVG_MINE = (function () {
@@ -1394,7 +1443,7 @@
       if (MG.busy || MG.revealing || mgActive()) return;
       if (!inTG) { toast("Telegram ichida oching"); return; }
       var bet = MG.bet, d = MG.data;
-      if (!(bet >= d.min_bet && bet <= d.max_bet)) { toast("Tikish " + d.min_bet + " dan " + d.max_bet + " gacha bo‘lishi kerak."); return; }
+      if (!(bet >= d.min_bet)) { toast("Tikish kamida " + d.min_bet + " coin bo‘lishi kerak."); return; }
       if (((state.me && state.me.coins) || 0) < bet) { toast("Coin yetarli emas"); return; }
       mgClearTimers();
       MG.busy = true;
@@ -1485,9 +1534,9 @@
         h("div", { class: "card minfo" }, infoVal, infoLabel),
         h("div", { class: "card mmode" }, prev, h("div", { class: "mv" }, h("div", { class: "mvn" }, modeVal, h("span", null, "💣")), h("small", null, "Minalar")), next)));
 
-      var input = h("input", { class: "betinput wbetinput", type: "number", inputmode: "numeric", value: String(MG.bet), min: String(d.min_bet), max: String(d.max_bet) });
+      var input = h("input", { class: "betinput wbetinput", type: "number", inputmode: "numeric", value: String(MG.bet), min: String(d.min_bet) });
       input.addEventListener("input", function () { var v = parseInt(input.value, 10); if (!isNaN(v)) { MG.bet = v; mgControls(); } });
-      function setBet(v) { v = Math.max(d.min_bet, Math.min(d.max_bet, Math.round(v))); MG.bet = v; input.value = String(v); mgControls(); }
+      function setBet(v) { v = clampBet(v, d); MG.bet = v; input.value = String(v); mgControls(); }
       var half = h("button", { class: "btn small", onclick: function () { setBet(MG.bet / 2); } }, "½");
       var dbl = h("button", { class: "btn small", onclick: function () { setBet(MG.bet * 2); } }, "×2");
       page.appendChild(h("div", { class: "mbet" }, input, half, dbl));
@@ -1507,6 +1556,352 @@
         }
       }
       mgControls();
+      return page;
+    }
+
+    /* ===================== MINORA (Tower, demo) ===================== */
+    var TW = { data: null, bet: 500, busy: false, revealing: false, game: null, banner: null, refs: null, timers: [], hit: null };
+
+    function loadTower() {
+      if (!inTG) { render(); return; }
+      request("/api/tower/state", {}).then(function (d) {
+        TW.data = d; TW.game = d.game; TW.hit = null; TW.banner = null;
+        if (d.game) TW.bet = d.game.bet;
+        applyBalance(d.balance);
+        if (state.tab === "tower") render();
+      }).catch(function (e) { toast(e.message || "Ulanish yo‘q"); });
+    }
+
+    function twActive() { return !!(TW.game && TW.game.status === "active"); }
+
+    /* level: 0 = eng pastki qavat; cell holati: "" | cur | ok | dim | bad | gbad | gok */
+    function twSetCell(level, col, cls, html) {
+      var el = TW.refs.cells[level][col];
+      el.className = "tcell" + (cls ? " " + cls : "");
+      el.innerHTML = html;
+    }
+
+    function twRowHtml(level) {
+      var g = TW.game;
+      var v = g && g.rows ? g.rows[level] : 0;
+      return "<span>+" + fmtNum(v) + "</span><b class=\"tc\">🪙</b>";
+    }
+
+    function twPaint() {
+      var R = TW.refs, g = TW.game; if (!R) return;
+      var picks = g ? g.picks.length : 0, active = twActive();
+      for (var lv = 0; lv < 8; lv++) {
+        for (var col = 0; col < 2; col++) {
+          var cls = "", html = twRowHtml(lv);
+          if (g && lv < picks) {
+            if (g.picks[lv] === col) { cls = "ok"; html = "<span>✓ +" + fmtNum(g.rows[lv]) + "</span><b class=\"tc\">🪙</b>"; }
+            else cls = "dim";
+          } else if (g && active && lv === picks) cls = "cur";
+          else if (g && !active && TW.hit && TW.hit.level === lv && TW.hit.col === col) { cls = "bad"; html = "<span class=\"big\">💥</span>"; }
+          twSetCell(lv, col, cls, html);
+        }
+      }
+      twControls();
+    }
+
+    function twControls() {
+      var R = TW.refs; if (!R) return;
+      var g = TW.game, active = twActive(), k = g ? g.picks.length : 0;
+      R.input.disabled = active || TW.revealing;
+      R.half.disabled = R.dbl.disabled = R.max.disabled = active || TW.revealing;
+      if (active) { R.main.textContent = k ? "Yutuqni olish " + fmtNum(g.cash) + " 🪙" : "Qavatni tanlang"; R.main.disabled = !k || TW.busy; }
+      else { R.main.textContent = TW.revealing ? "…" : "Boshlash"; R.main.disabled = TW.revealing || TW.busy; }
+      R.banner.textContent = TW.banner ? TW.banner.text : "";
+      R.banner.className = "wbanner" + (TW.banner ? (TW.banner.win ? " win show" : " lose show") : "");
+    }
+
+    function twRevealAll(game) {
+      var R = TW.refs; if (!R || !game.traps) { TW.revealing = false; twControls(); return; }
+      TW.revealing = true; twControls();
+      var start = game.picks.length + (TW.hit ? 1 : 0), items = [], lv, i;
+      for (lv = start; lv < 8; lv++) items.push(lv);
+      for (i = items.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = items[i]; items[i] = items[j]; items[j] = t; }
+      var step = items.length ? 1700 / items.length : 0;
+      items.forEach(function (level, n) {
+        TW.timers.push(setTimeout(function () {
+          var trap = game.traps[level];
+          twSetCell(level, trap, "gbad flip", "<span class=\"big\">💥</span>");
+          twSetCell(level, 1 - trap, "gok flip", "<span class=\"big\">💎</span>");
+          if (n % 2 === 0) mineSound("flip");
+        }, 150 + n * step));
+      });
+      TW.timers.push(setTimeout(function () { TW.revealing = false; twControls(); }, 150 + 1700 + 250));
+    }
+
+    function twStart() {
+      if (TW.busy || TW.revealing || twActive()) return;
+      if (!inTG) { toast("Telegram ichida oching"); return; }
+      var bet = TW.bet, d = TW.data;
+      if (!(bet >= d.min_bet)) { toast("Tikish kamida " + d.min_bet + " coin bo‘lishi kerak."); return; }
+      if (((state.me && state.me.coins) || 0) < bet) { toast("Coin yetarli emas"); return; }
+      TW.timers.forEach(clearTimeout); TW.timers = [];
+      TW.busy = true;
+      request("/api/tower/start", { bet: bet, request_id: randomId() }).then(function (res) {
+        TW.busy = false; TW.game = res.game; TW.hit = null; TW.banner = null;
+        applyBalance(res.balance); haptic(); mineSound("flip"); twPaint();
+      }).catch(function (e) {
+        TW.busy = false; toast(e.message || "Ulanish yo‘q");
+        if (e.code === "active") loadTower(); else twControls();
+      });
+    }
+
+    function twPick(level, col) {
+      var g = TW.game;
+      if (!twActive()) { if (!TW.revealing) toast("Avval «Boshlash» ni bosing"); return; }
+      if (TW.busy || TW.revealing || level !== g.picks.length) return;
+      TW.busy = true; twControls();
+      request("/api/tower/pick", { col: col }).then(function (res) {
+        TW.busy = false; TW.game = res.game; applyBalance(res.balance);
+        if (res.hit) {
+          TW.hit = { level: level, col: col };
+          twPaint();
+          TW.refs.cells[level][col].classList.add("flip");
+          mineSound("boom"); haptic("error");
+          TW.banner = { win: false, text: "💥 Tuzoq! −" + coin(res.game.bet) };
+          twControls();
+          TW.timers.push(setTimeout(function () { twRevealAll(res.game); }, 500));
+        } else {
+          twPaint();
+          TW.refs.cells[level][col].classList.add("flip");
+          mineSound("pop", res.game.picks.length); haptic("success");
+          if (res.game.status === "won") { mineSound("cash"); TW.banner = { win: true, text: "🏆 Cho‘qqiga chiqdingiz! +" + coin(res.game.payout - res.game.bet) }; twControls(); }
+        }
+      }).catch(function (e) { TW.busy = false; toast(e.message || "Ulanish yo‘q"); loadTower(); });
+    }
+
+    function twCash() {
+      if (!twActive() || TW.busy || !TW.game.picks.length) return;
+      TW.busy = true; twControls();
+      request("/api/tower/cashout", {}).then(function (res) {
+        TW.busy = false; TW.game = res.game; applyBalance(res.balance);
+        mineSound("cash"); haptic("success");
+        TW.banner = { win: true, text: "🎉 +" + coin(res.game.payout - res.game.bet) };
+        twPaint(); twRevealAll(res.game);
+      }).catch(function (e) { TW.busy = false; toast(e.message || "Ulanish yo‘q"); loadTower(); });
+    }
+
+    function betRow(S, getD, onChange) {
+      /* tikish maydoni + ½ / ×2 / Max — barcha o‘yinlar uchun umumiy */
+      var d = getD();
+      var input = h("input", { class: "betinput wbetinput", type: "number", inputmode: "numeric", min: String(d.min_bet), value: String(S.bet) });
+      input.addEventListener("input", function () { var v = parseInt(input.value, 10); if (!isNaN(v)) { S.bet = v; onChange(); } });
+      function set(v) { v = clampBet(v, getD()); S.bet = v; input.value = String(v); onChange(); }
+      var half = h("button", { class: "btn small", onclick: function () { set(S.bet / 2); } }, "½");
+      var dbl = h("button", { class: "btn small", onclick: function () { set(S.bet * 2); } }, "×2");
+      var max = h("button", { class: "btn small", onclick: function () { set(1e12); } }, "Max");
+      return { el: h("div", { class: "mbet mbet3" }, input, half, dbl, max), input: input, half: half, dbl: dbl, max: max };
+    }
+
+    function viewTower() {
+      var page = h("div", { class: "wpage" });
+      var sndBtn = h("button", { class: "wsnd", onclick: function () { WH.mute = !WH.mute; try { localStorage.setItem("wmute", WH.mute ? "1" : "0"); } catch (e) {} sndBtn.textContent = WH.mute ? "🔇" : "🔊"; if (!WH.mute) snd.unlock(); } }, WH.mute ? "🔇" : "🔊");
+      page.appendChild(h("div", { class: "whead" }, h("h1", { class: "page-title wt" }, "🗼 Minora"), sndBtn));
+      if (!inTG) { page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Minorani ochish uchun Telegram ichida oching."))); return page; }
+      if (!TW.data) { page.appendChild(h("div", { class: "skeleton", style: "height:360px" })); TW.refs = null; return page; }
+      var d = TW.data;
+      var cells = [];
+      var tgrid = h("div", { class: "tgrid" });
+      for (var lv = 7; lv >= 0; lv--) {
+        (function (level) {
+          var a = h("button", { class: "tcell", onclick: function () { twPick(level, 0); } });
+          var b = h("button", { class: "tcell", onclick: function () { twPick(level, 1); } });
+          cells[level] = [a, b];
+          tgrid.appendChild(h("div", { class: "trow" }, a, b));
+        })(lv);
+      }
+      page.appendChild(tgrid);
+      var banner = h("div", { class: "wbanner", style: "margin-top:12px" });
+      page.appendChild(banner);
+      var br = betRow(TW, function () { return d; }, function () { twControls(); });
+      page.appendChild(br.el);
+      var main = h("button", { class: "btn primary big", style: "margin-top:12px", onclick: function () { snd.unlock(); if (twActive()) twCash(); else twStart(); } }, "Boshlash");
+      page.appendChild(main);
+      page.appendChild(h("p", { class: "note" }, "Demo o‘yin: faqat virtual coin. 8 qavat, har qavatda 2 katak: biri xavfsiz, biri tuzoq. Pastdan yuqoriga o‘ting; har qavatda yutuq ikki baravar oshadi (×1.9, ×3.8, ×7.6 …). Istalgan payt yutuqni oling. Eng kam tikish — 500 coin. Tuzoqlar o‘yin boshida serverda belgilanadi."));
+      TW.refs = { cells: cells, input: br.input, half: br.half, dbl: br.dbl, max: br.max, main: main, banner: banner };
+      twPaint();
+      /* tugagan o‘yinning ochilgan qismi qayta chizilganda */
+      return page;
+    }
+
+    /* ===================== NARVON (Ladder, demo) ===================== */
+    var LD = { data: null, mode: 3, bet: 500, busy: false, revealing: false, game: null, banner: null, refs: null, timers: [], lost: false };
+    var SVG_ROCK = '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.8" fill="#a39b92" stroke="#6a645d" stroke-width="1.2"/><circle cx="5.8" cy="6" r="1.5" fill="#7c766f"/><circle cx="10.2" cy="10" r="1.2" fill="#7c766f"/><circle cx="10" cy="5.5" r=".9" fill="#8a847d"/></svg>';
+
+    function loadLadder() {
+      if (!inTG) { render(); return; }
+      request("/api/ladder/state", {}).then(function (d) {
+        LD.data = d; LD.game = d.game; LD.lost = false; LD.banner = null;
+        if (d.game) { LD.mode = d.game.stones; LD.bet = d.game.bet; }
+        applyBalance(d.balance);
+        if (state.tab === "ladder") render();
+      }).catch(function (e) { toast(e.message || "Ulanish yo‘q"); });
+    }
+
+    function ldActive() { return !!(LD.game && LD.game.status === "active"); }
+    function ldFmt(m) { return "X" + String(m).replace(".", ","); }
+
+    /* r = 0 — yer; 1..12 — pog‘onalar */
+    function ldPaintRow(r, mode) {
+      var R = LD.refs, g = LD.game; if (!R) return;
+      var steps = g ? g.steps : 0, active = ldActive();
+      var row = R.rows[r], cells = row.children, i;
+      var cls = "lrow";
+      if (r <= steps) cls += " done";
+      else if (r === steps + 1 && (!g || active)) cls += " next";
+      row.className = cls;
+      for (i = 0; i < cells.length; i++) { var mk = cells[i].querySelector(".mk"); if (mk) cells[i].removeChild(mk); }
+      function put(col, html, extra) {
+        var mk = h("span", { class: "mk" + (extra ? " " + extra : "") }); mk.innerHTML = html; cells[col].appendChild(mk);
+      }
+      if (r === 0) { if (steps === 0 && !LD.lost) put(0, "🧍"); return; }
+      var info = g && g.rows ? g.rows[r - 1] : null;
+      if (!info && mode === "reveal" && g && g.plan) info = g.plan[r - 1];
+      if (info) {
+        info.stones.forEach(function (c) { if (!(LD.lost && r === steps + 1 && c === info.jump)) put(c, SVG_ROCK, mode === "reveal" ? "flip" : ""); });
+        if (r === steps && !LD.lost) put(info.jump, "🧗", "flip");
+        else if (r < steps) put(info.jump, "<span class=\"trail\"></span>");
+        if (LD.lost && r === steps + 1) put(info.jump, "💥", "flip");
+      }
+    }
+
+    function ldPaint() {
+      var R = LD.refs; if (!R) return;
+      for (var r = 0; r <= 12; r++) ldPaintRow(r);
+      ldChips(); ldControls();
+    }
+
+    function ldChips() {
+      var R = LD.refs, g = LD.game, active = ldActive();
+      var t = LD.data.tables[String(LD.mode)] || [];
+      var steps = g ? g.steps : 0;
+      R.chips.textContent = "";
+      t.forEach(function (m, idx) {
+        var k = idx + 1;
+        var cls = "lchip2" + (k === steps + 1 && (!g || active) ? " next" : "") + (k <= steps ? " done" : "");
+        var chip = h("div", { class: cls }, ldFmt(m));
+        R.chips.appendChild(chip);
+        if (k === steps + 1) setTimeout(function () { try { R.chips.scrollLeft = chip.offsetLeft - 20; } catch (e) {} }, 0);
+      });
+    }
+
+    function ldControls() {
+      var R = LD.refs; if (!R) return;
+      var g = LD.game, active = ldActive();
+      R.input.disabled = active || LD.revealing;
+      R.half.disabled = R.dbl.disabled = R.max.disabled = active || LD.revealing;
+      R.modes.forEach(function (b) { b.disabled = active || LD.revealing; b.classList.toggle("sel", +b.getAttribute("data-m") === LD.mode); });
+      if (active) {
+        R.main.textContent = "Qadam tashlash ⬆️"; R.main.disabled = LD.busy;
+        R.cash.style.display = ""; R.cash.textContent = g.steps ? "Yutuqni olish " + fmtNum(g.cash) + " 🪙" : "Yutuqni olish";
+        R.cash.disabled = !g.steps || LD.busy;
+      } else {
+        R.main.textContent = LD.revealing ? "…" : "Boshlash"; R.main.disabled = LD.revealing || LD.busy;
+        R.cash.style.display = "none";
+      }
+      R.banner.textContent = LD.banner ? LD.banner.text : "";
+      R.banner.className = "wbanner" + (LD.banner ? (LD.banner.win ? " win show" : " lose show") : "");
+    }
+
+    function ldRevealAll(game) {
+      var R = LD.refs; if (!R || !game.plan) { LD.revealing = false; ldControls(); return; }
+      LD.revealing = true; ldControls();
+      var from = game.rows.length + 1, items = [], r, i;
+      for (r = from; r <= 12; r++) items.push(r);
+      for (i = items.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = items[i]; items[i] = items[j]; items[j] = t; }
+      var step = items.length ? 1700 / items.length : 0;
+      items.forEach(function (row, n) {
+        LD.timers.push(setTimeout(function () {
+          var saved = LD.game; ldPaintRow(row, "reveal"); LD.game = saved;
+          if (n % 2 === 0) mineSound("flip");
+        }, 150 + n * step));
+      });
+      LD.timers.push(setTimeout(function () { LD.revealing = false; ldControls(); }, 150 + 1700 + 250));
+    }
+
+    function ldStart() {
+      if (LD.busy || LD.revealing || ldActive()) return;
+      if (!inTG) { toast("Telegram ichida oching"); return; }
+      var d = LD.data, bet = LD.bet;
+      if (!(bet >= d.min_bet)) { toast("Tikish kamida " + d.min_bet + " coin bo‘lishi kerak."); return; }
+      if (((state.me && state.me.coins) || 0) < bet) { toast("Coin yetarli emas"); return; }
+      LD.timers.forEach(clearTimeout); LD.timers = [];
+      LD.busy = true;
+      request("/api/ladder/start", { bet: bet, stones: LD.mode, request_id: randomId() }).then(function (res) {
+        LD.busy = false; LD.game = res.game; LD.lost = false; LD.banner = null;
+        applyBalance(res.balance); haptic(); mineSound("flip"); ldPaint();
+      }).catch(function (e) {
+        LD.busy = false; toast(e.message || "Ulanish yo‘q");
+        if (e.code === "active") loadLadder(); else ldControls();
+      });
+    }
+
+    function ldStep() {
+      if (!ldActive() || LD.busy || LD.revealing) return;
+      LD.busy = true; ldControls();
+      request("/api/ladder/step", {}).then(function (res) {
+        LD.busy = false; LD.game = res.game; applyBalance(res.balance);
+        if (res.hit) {
+          LD.lost = true; ldPaint();
+          mineSound("boom"); haptic("error");
+          LD.banner = { win: false, text: "💥 Toshga tushdingiz! −" + coin(res.game.bet) };
+          ldControls();
+          LD.timers.push(setTimeout(function () { ldRevealAll(res.game); }, 500));
+        } else {
+          ldPaint(); mineSound("pop", res.game.steps); haptic("success");
+          if (res.game.status === "won") { mineSound("cash"); LD.banner = { win: true, text: "🏆 Cho‘qqiga chiqdingiz! +" + coin(res.game.payout - res.game.bet) }; ldControls(); }
+        }
+      }).catch(function (e) { LD.busy = false; toast(e.message || "Ulanish yo‘q"); loadLadder(); });
+    }
+
+    function ldCash() {
+      if (!ldActive() || LD.busy || !LD.game.steps) return;
+      LD.busy = true; ldControls();
+      request("/api/ladder/cashout", {}).then(function (res) {
+        LD.busy = false; LD.game = res.game; applyBalance(res.balance);
+        mineSound("cash"); haptic("success");
+        LD.banner = { win: true, text: "🎉 +" + coin(res.game.payout - res.game.bet) + " (" + ldFmt(res.game.mult) + ")" };
+        ldPaint(); ldRevealAll(res.game);
+      }).catch(function (e) { LD.busy = false; toast(e.message || "Ulanish yo‘q"); loadLadder(); });
+    }
+
+    function viewLadder() {
+      var page = h("div", { class: "wpage" });
+      var sndBtn = h("button", { class: "wsnd", onclick: function () { WH.mute = !WH.mute; try { localStorage.setItem("wmute", WH.mute ? "1" : "0"); } catch (e) {} sndBtn.textContent = WH.mute ? "🔇" : "🔊"; if (!WH.mute) snd.unlock(); } }, WH.mute ? "🔇" : "🔊");
+      page.appendChild(h("div", { class: "whead" }, h("h1", { class: "page-title wt" }, "🪜 Narvon"), sndBtn));
+      if (!inTG) { page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Narvonni ochish uchun Telegram ichida oching."))); return page; }
+      if (!LD.data) { page.appendChild(h("div", { class: "skeleton", style: "height:380px" })); LD.refs = null; return page; }
+      var d = LD.data;
+      var rows = [];
+      var board = h("div", { class: "lboard" });
+      for (var r = 12; r >= 0; r--) {
+        var row = h("div", { class: "lrow" });
+        for (var c = 0; c < d.cols; c++) row.appendChild(h("div", { class: "lc" }, h("i", { class: "lp" })));
+        rows[r] = row; board.appendChild(row);
+      }
+      var chips = h("div", { class: "lchips" });
+      board.appendChild(chips);
+      page.appendChild(board);
+      var banner = h("div", { class: "wbanner", style: "margin-top:12px" });
+      page.appendChild(banner);
+
+      var br = betRow(LD, function () { return d; }, function () { ldControls(); });
+      var modes = d.modes.map(function (m) {
+        return h("button", { class: "lmode", "data-m": String(m), onclick: function () { LD.mode = m; haptic(); ldPaint(); } }, String(m));
+      });
+      page.appendChild(h("div", { class: "lsetup" },
+        h("div", null, h("div", { class: "wlabel" }, "🪙 Tikish summasi"), br.el),
+        h("div", null, h("div", { class: "wlabel" }, "🪨 Toshlar soni"), h("div", { class: "lmodes" }, modes))));
+      var main = h("button", { class: "btn primary big", style: "margin-top:12px", onclick: function () { snd.unlock(); if (ldActive()) ldStep(); else ldStart(); } }, "Boshlash");
+      var cash = h("button", { class: "btn big", style: "margin-top:10px;display:none", onclick: function () { ldCash(); } }, "Yutuqni olish");
+      page.appendChild(main); page.appendChild(cash);
+      page.appendChild(h("p", { class: "note" }, "Demo o‘yin: faqat virtual coin. Har pog‘onada 19 ta katak va 3 yoki 4 ta tosh bor. «Qadam tashlash» bosilganda qahramon tasodifiy katakka sakraydi: toshga tushsa o‘yin tugaydi, aks holda koeffitsiyent oshadi. Istalgan payt yutuqni oling. Eng kam tikish — 500 coin. Toshlar o‘yin boshida serverda belgilanadi."));
+      LD.refs = { rows: rows, chips: chips, input: br.input, half: br.half, dbl: br.dbl, max: br.max, modes: modes, main: main, cash: cash, banner: banner };
+      ldPaint();
       return page;
     }
 
@@ -1807,6 +2202,8 @@
       if (tab === "admin") loadAdmin();
       if (tab === "wheel") loadWheel();
       if (tab === "mines") loadMines();
+      if (tab === "tower") loadTower();
+      if (tab === "ladder") loadLadder();
       render();
       window.scrollTo(0, 0);
     }
@@ -1826,6 +2223,8 @@
         else if (state.tab === "admin") view.appendChild(viewAdmin());
         else if (state.tab === "wheel") view.appendChild(viewWheel());
         else if (state.tab === "mines") view.appendChild(viewMines());
+        else if (state.tab === "tower") view.appendChild(viewTower());
+        else if (state.tab === "ladder") view.appendChild(viewLadder());
         else view.appendChild(viewHome());
       } catch (e) {
         view.appendChild(h("div", { class: "card empty" }, h("p", null, "Xatolik: " + e.message)));
@@ -1880,7 +2279,7 @@
     load();
     try {
       var gm = new URLSearchParams(location.search).get("game");
-      if (gm === "wheel" || gm === "mines") go(gm);
+      if (gm === "wheel" || gm === "mines" || gm === "tower" || gm === "ladder") go(gm);
     } catch (e) {}
   })();
   </script>
