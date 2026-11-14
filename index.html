@@ -78,9 +78,57 @@
     .hero-content { position: relative; }
     .wheelcard { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px 16px; margin-top: 12px; }
     .wic { font-size: 30px; }
-    .wheel-wrap { position: relative; width: 300px; max-width: 86vw; margin: 8px auto 6px; }
-    .wheel-wrap svg { width: 100%; height: auto; display: block; }
-    .wheel-pointer { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 22px solid #fff; z-index: 2; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)); }
+    /* ---- G‘ildirak ---- */
+    .whead { display: flex; align-items: center; justify-content: space-between; }
+    .whead .wt { margin: 0; }
+    .wsnd { width: 40px; height: 40px; border-radius: 14px; font-size: 18px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+    .wstage { position: relative; height: 290px; margin: 12px -16px 0; overflow: hidden; border-radius: 26px; background: linear-gradient(180deg, #232832, #0c0f14 70%); border: 1px solid rgba(255, 255, 255, .08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08); }
+    .wring { position: absolute; left: 50%; width: 1360px; height: 1360px; margin-left: -680px; top: -1050px; border-radius: 50%; will-change: transform;
+      background: radial-gradient(circle, #090b0f 0 56%, #3b414d 56.4%, #15181e 58%, #0e1014 70%); }
+    .wtile { position: absolute; left: calc(50% - 37px); top: calc(50% - 50px); width: 74px; height: 100px; border-radius: 16px; text-align: center; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transform-origin: 37px 50px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -14px 20px rgba(0, 0, 0, .25), 0 6px 14px rgba(0, 0, 0, .45); }
+    .wtile .wti { font-size: 34px; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .45)); }
+    .wtile .wtl { font-size: 15px; font-weight: 900; text-shadow: 0 1px 2px rgba(0, 0, 0, .5); }
+    .k-x1 { background: linear-gradient(160deg, #4d9bff, #1b4fb8); }
+    .k-x2 { background: linear-gradient(160deg, #36d983, #12894a); }
+    .k-x5 { background: linear-gradient(160deg, #ff5d73, #a8132b); }
+    .k-x10 { background: linear-gradient(160deg, #bd7bff, #6428cc); }
+    .wtile.locked { filter: grayscale(1) brightness(.45); }
+    .wtile.hit { box-shadow: 0 0 0 2px #fff, 0 0 26px 4px rgba(255, 255, 255, .55), inset 0 1px 0 rgba(255, 255, 255, .5); z-index: 2; }
+    .wshade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(8, 10, 14, .85), transparent 22%, transparent 78%, rgba(8, 10, 14, .85)), linear-gradient(0deg, rgba(8, 10, 14, .9), transparent 28%); }
+    .wdisp { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 210px; height: 70px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(180deg, #14171c, #07090c); border: 1px solid #4a505c; box-shadow: inset 0 0 18px rgba(0, 0, 0, .8), 0 0 0 4px #20242b, 0 8px 20px rgba(0, 0, 0, .5); overflow: hidden; }
+    .wdisp::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(0, 0, 0, .55) 38%, transparent 42%); background-size: 5px 5px; pointer-events: none; }
+    .wdisp .dl { font: 700 10px/1 monospace; letter-spacing: 3px; color: #7da2ff; opacity: .8; }
+    .wdisp .db { font: 900 32px/1.1 monospace; letter-spacing: 5px; color: #eaf1ff; text-shadow: 0 0 10px rgba(130, 170, 255, .9); }
+    .wdisp.spin .db { color: #ffd966; text-shadow: 0 0 12px rgba(255, 200, 80, .95); }
+    .wpointer { position: absolute; top: 88px; left: 50%; width: 40px; height: 52px; transform: translateX(-50%); transform-origin: 50% 8%; z-index: 3; background: linear-gradient(180deg, #fff, #aeb6c4); clip-path: polygon(50% 100%, 0 20%, 14% 0, 86% 0, 100% 20%); filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .6)); }
+    .whist { display: flex; gap: 7px; align-items: center; margin-top: 12px; padding: 10px 12px; min-height: 44px; border-radius: 16px; background: rgba(255, 255, 255, .05); border: 1px solid var(--line); overflow: hidden; }
+    .hd { width: 22px; height: 22px; border-radius: 8px; flex: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4); }
+    .wchips { display: flex; justify-content: center; gap: 10px; margin: 12px 0; }
+    .wchip { padding: 9px 16px; border-radius: 14px; font-weight: 800; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+    .wbanner { text-align: center; font-weight: 900; font-size: 18px; padding: 0; max-height: 0; overflow: hidden; border-radius: 16px; transition: max-height .25s, padding .25s; }
+    .wbanner.show { max-height: 70px; padding: 12px; margin-bottom: 12px; }
+    .wbanner.win { background: rgba(53, 224, 138, .16); color: #5cf0a5; border: 1px solid rgba(53, 224, 138, .4); }
+    .wbanner.lose { background: rgba(255, 255, 255, .06); color: var(--muted); border: 1px solid var(--line); }
+    .wpanel { padding: 14px; }
+    .wlabel { font-weight: 800; font-size: 14px; margin-bottom: 8px; }
+    .wbetinput { text-align: left; font-weight: 800; }
+    .wquick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
+    .wquick .btn { margin-top: 0; }
+    .wkinds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .wk { position: relative; overflow: hidden; height: 92px; border-radius: 18px; text-align: left; padding: 12px 14px; color: #fff; border: 2px solid transparent; opacity: .72; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3); transition: transform .12s, opacity .12s; }
+    .wk.sel { opacity: 1; border-color: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .15), 0 8px 20px rgba(0, 0, 0, .4); }
+    .wk .kx { font-size: 28px; font-weight: 900; }
+    .wk .ks { font-size: 12px; font-weight: 700; opacity: .9; margin-top: 2px; }
+    .wk .ka { position: absolute; right: 8px; bottom: -4px; font-size: 52px; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .45)); }
+    .wk.locked { filter: grayscale(1) brightness(.5); }
+    .wk:active { transform: scale(.97); }
+    .wrow { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 14px; }
+    .wrow .btn { margin-top: 0; }
+    .wauto { min-width: 92px; }
+    .wauto.on { background: linear-gradient(135deg, rgba(53, 224, 138, .7), rgba(18, 137, 74, .7)); }
+    .up { color: #5cf0a5; }
+    .down { color: var(--muted); }
+    i.dot.k-x1, i.dot.k-x2, i.dot.k-x5, i.dot.k-x10 { }
     .bets { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 10px 0; }
     .chipbtn { padding: 9px 14px; border-radius: 12px; background: var(--card2); border: 1px solid var(--line); font-weight: 700; font-size: 13px; }
     .chipbtn.on { background: linear-gradient(135deg, var(--pink), var(--purple)); border: 0; color: #fff; }
@@ -742,38 +790,107 @@
     }
 
     /* ---------- G‘ildirak ---------- */
-    var WHEEL_COLORS = { lose: "#3a4658", x0: "#4da3ff", x2: "#9b68ff", x5: "#e4b85c", x10: "#ff4d9e" };
-
     function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
     function randomId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
 
-    function wheelSvg(sectors, rot) {
-      var N = sectors.length, R = 140, C = 150, step = 360 / N;
-      var pt = function (deg, r) { var a = (deg - 90) * Math.PI / 180; return [C + r * Math.cos(a), C + r * Math.sin(a)]; };
-      var parts = [];
-      sectors.forEach(function (s, i) {
-        var a0 = i * step, a1 = (i + 1) * step;
-        var p0 = pt(a0, R), p1 = pt(a1, R);
-        var fill = s.locked ? "#222b38" : WHEEL_COLORS[s.type];
-        parts.push('<path d="M' + C + ',' + C + ' L' + p0[0] + ',' + p0[1] + ' A' + R + ',' + R + ' 0 0 1 ' + p1[0] + ',' + p1[1] + ' Z" fill="' + fill + '" stroke="#101722" stroke-width="1"/>');
-        if (!s.locked && s.type !== "lose") {
-          var mid = (a0 + a1) / 2, t = pt(mid, R * 0.72);
-          parts.push('<text x="' + t[0] + '" y="' + t[1] + '" fill="#fff" font-size="9" font-weight="800" text-anchor="middle" dominant-baseline="middle" transform="rotate(' + mid + ' ' + t[0] + ' ' + t[1] + ')">' + s.label + '</text>');
-        }
-      });
-      return '<svg viewBox="0 0 300 300"><g id="wheelg" style="transform-origin:150px 150px;transform:rotate(' + rot + 'deg)">' +
-        parts.join("") + '</g><circle cx="150" cy="150" r="10" fill="#101722" stroke="#fff" stroke-width="2"/></svg>';
-    }
+    /* ===================== G‘ILDIRAK (demo, server to‘xtovsiz aylantiradi) ===================== */
+    var WK = {
+      x1: { icon: "🪙" }, x2: { icon: "💵" }, x5: { icon: "💎" }, x10: { icon: "🍀" }
+    };
+    var WCYCLE = 18, WSPIN = 7, WBET = 11, WTURNS = 4, WRT = 540;
+    var WH = {
+      data: null, offset: 0, bet: 10, kind: "x2", rot: 0, betBusy: false, auto: null, autoOpen: false,
+      loop: 0, fetching: false, lastFetchAt: 0, refs: null, wobble: 0, lastK: null, spinning: false,
+      endedRound: -1, banner: null, mute: false, lastBtnKey: "", lastDispKey: ""
+    };
+    try { WH.mute = localStorage.getItem("wmute") === "1"; } catch (e) {}
 
-    /* Natija sektorini tepadagi ko‘rsatkichga olib keladigan burilish (kamida 3 marta aylanib). */
-    function landRot(cur, idx, N) {
-      var step = 360 / N;
-      var target = (360 - (idx * step + step / 2)) % 360;
-      var base = cur - (((cur % 360) + 360) % 360);
-      var rot = base + target;
-      while (rot <= cur + 1080) rot += 360;
-      return rot;
+    /* ---- ovoz (WebAudio) ---- */
+    var snd = (function () {
+      var ctx = null, noiseBuf = null, src = null, gain = null, filt = null, lastTick = 0;
+      function ensure() {
+        if (!ctx) {
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          try { ctx = new AC(); } catch (e) { return null; }
+        }
+        if (ctx.state === "suspended") { try { ctx.resume(); } catch (e) {} }
+        return ctx;
+      }
+      function tone(freq, t0, dur, type, vol) {
+        var c = ctx, o = c.createOscillator(), g = c.createGain();
+        o.type = type || "sine"; o.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(vol || 0.2, t0 + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+      }
+      return {
+        unlock: ensure,
+        tick: function (speed) {
+          if (WH.mute) return;
+          var now = performance.now();
+          if (now - lastTick < 32) return;
+          lastTick = now;
+          var c = ensure(); if (!c) return;
+          tone(1000 + 700 * Math.min(1, speed), c.currentTime, 0.045, "triangle", 0.16);
+        },
+        spinStart: function () {
+          if (WH.mute) return;
+          var c = ensure(); if (!c || src) return;
+          if (!noiseBuf) {
+            noiseBuf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
+            var d = noiseBuf.getChannelData(0);
+            for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+          }
+          src = c.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+          filt = c.createBiquadFilter(); filt.type = "bandpass"; filt.frequency.value = 500; filt.Q.value = 0.9;
+          gain = c.createGain(); gain.gain.value = 0;
+          src.connect(filt); filt.connect(gain); gain.connect(c.destination); src.start();
+        },
+        spinLevel: function (v) {
+          if (!src || !ctx) return;
+          gain.gain.setTargetAtTime(v * 0.13, ctx.currentTime, 0.06);
+          filt.frequency.setTargetAtTime(350 + 1100 * v, ctx.currentTime, 0.06);
+        },
+        spinStop: function () {
+          if (!src) return;
+          try { gain.gain.setTargetAtTime(0, ctx.currentTime, 0.05); var s = src; setTimeout(function () { try { s.stop(); } catch (e) {} }, 300); } catch (e) {}
+          src = null; gain = null; filt = null;
+        },
+        win: function () {
+          if (WH.mute) return;
+          var c = ensure(); if (!c) return;
+          [523.25, 659.25, 783.99, 1046.5].forEach(function (f, i) { tone(f, c.currentTime + i * 0.09, 0.28, "triangle", 0.22); });
+        },
+        lose: function () {
+          if (WH.mute) return;
+          var c = ensure(); if (!c) return;
+          tone(220, c.currentTime, 0.25, "sine", 0.16); tone(165, c.currentTime + 0.14, 0.32, "sine", 0.14);
+        },
+        bet: function () {
+          if (WH.mute) return;
+          var c = ensure(); if (!c) return;
+          tone(660, c.currentTime, 0.08, "square", 0.08); tone(880, c.currentTime + 0.07, 0.1, "square", 0.08);
+        }
+      };
+    })();
+    document.addEventListener("pointerdown", function () { snd.unlock(); }, { passive: true });
+
+    /* ---- aylanish profili: silliq boshlanadi, sekin to‘xtaydi ---- */
+    var SPD = (function () {
+      var N = 400, cum = [0], s = 0, i;
+      for (i = 1; i <= N; i++) { var p = i / N; s += (p < 0.1 ? p / 0.1 : 1) * Math.pow(1 - p, 1.8); cum.push(s); }
+      return cum.map(function (x) { return x / s; });
+    })();
+    function easeP(p) {
+      if (p <= 0) return 0;
+      if (p >= 1) return 1;
+      var x = p * 400, i = Math.floor(x);
+      return SPD[i] + (SPD[i + 1] - SPD[i]) * (x - i);
     }
+    function speedP(p) { return (p < 0.1 ? p / 0.1 : 1) * Math.pow(1 - p, 1.8); }
+    function pad2(n) { return (n < 10 ? "0" : "") + n; }
 
     function applyBalance(b) {
       if (!state.me) state.me = {};
@@ -781,134 +898,353 @@
       renderTop();
     }
 
+    /* ---- server bilan aloqa ---- */
+    function fetchWheel() {
+      if (WH.fetching || !inTG) return;
+      WH.fetching = true;
+      WH.lastFetchAt = Date.now();
+      var t0 = Date.now();
+      request("/api/wheel/state", {}).then(function (d) {
+        WH.offset = d.server_ms + (Date.now() - t0) / 2 - Date.now();
+        WH.data = d;
+        WH.fetching = false;
+        applyBalance(d.balance);
+        if (WH.refs && !document.body.contains(WH.refs.ring)) { render(); return; }
+        if (!WH.refs) render(); else { buildTilesState(); updatePanel(); }
+      }).catch(function (e) {
+        WH.fetching = false;
+        if (!WH.errShown) { WH.errShown = true; toast(e.message || "Ulanish yo‘q"); setTimeout(function () { WH.errShown = false; }, 6000); }
+      });
+    }
+
     function loadWheel() {
       if (!inTG) { render(); return; }
-      request("/api/wheel/state", {}).then(function (d) {
-        state.wheel.data = d;
-        applyBalance(d.balance);
-        render();
-      }).catch(function (e) { toast(e.message); });
+      fetchWheel();
+      startWheelLoop();
+    }
+
+    function startWheelLoop() {
+      if (WH.loop) return;
+      WH.loop = requestAnimationFrame(wheelFrame);
     }
 
     function claimDaily() {
       request("/api/wheel/daily", {}).then(function (res) {
         applyBalance(res.balance);
-        if (state.wheel.data) state.wheel.data.daily.available = false;
+        if (WH.data) WH.data.daily.available = false;
         toast("+" + coin(res.amount) + " kunlik ✅");
         render();
       }).catch(function (e) { toast(e.message); });
     }
 
-    function spinWheel() {
-      var w = state.wheel;
-      if (w.busy || !w.data) return;
+    function wheelClock() {
+      var now = Date.now() + WH.offset, r = Math.floor(now / (WCYCLE * 1000));
+      return { r: r, el: (now - r * WCYCLE * 1000) / 1000 };
+    }
+
+    function placeBet(isAuto) {
+      var d = WH.data;
+      if (!d || WH.betBusy) return;
       if (!inTG) { toast("Telegram ichida oching"); return; }
-      /* Bir xil request_id: internet uzilsa, qayta bosganda natija ikki marta hisoblanmaydi */
-      var p = w.pending || { request_id: randomId(), bet: w.bet, count: w.count };
-      w.pending = p;
-      w.busy = true;
-      w.result = null;
-      render();
-      request("/api/wheel/spin", { bet: p.bet, count: p.count, request_id: p.request_id }).then(function (res) {
-        w.pending = null;
+      var c = wheelClock();
+      if (c.r !== d.round || c.el >= WBET - 0.4) { if (!isAuto) toast("Tikish yopiq — keyingi raundni kuting"); return; }
+      var amount = WH.bet;
+      if (!(amount >= d.min_bet && amount <= d.max_bet)) { toast("Tikish " + d.min_bet + " dan " + d.max_bet + " gacha bo‘lishi kerak."); return; }
+      if (((state.me && state.me.coins) || 0) < amount) { toast("Coin yetarli emas"); if (isAuto) stopAuto(); return; }
+      var kindInfo = d.types.filter(function (t) { return t.type === WH.kind; })[0];
+      if (kindInfo && kindInfo.locked) { toast("Bu sektor vaqtincha qulflangan."); return; }
+      WH.betBusy = true;
+      request("/api/wheel/bet", { kind: WH.kind, amount: amount, request_id: randomId(), round: d.round }).then(function (res) {
+        WH.betBusy = false;
         applyBalance(res.balance);
-        var N = w.data.sectors.length;
-        var last = res.results[res.results.length - 1];
-        w.rot = landRot(w.rot, last, N);
-        var g = document.getElementById("wheelg");
-        if (g) {
-          g.style.transition = "transform 4.2s cubic-bezier(.12,.7,.08,1)";
-          g.style.transform = "rotate(" + w.rot + "deg)";
+        if (!res.replayed && WH.data === d) {
+          d.mine[res.kind] = (d.mine[res.kind] || 0) + res.amount;
+          d.pool[res.kind] = (d.pool[res.kind] || 0) + res.amount;
+          d.total += res.amount;
+          if (Object.keys(d.mine).length === 1 && d.mine[res.kind] === res.amount) d.players += 1;
         }
-        return sleep(4300).then(function () {
-          w.busy = false;
-          w.result = res;
-          w.data.last = res;
-          haptic("success");
-          render();
-        });
+        snd.bet();
+        haptic("success");
+        updatePanel();
+        fetchWheel();
       }).catch(function (e) {
-        w.busy = false;
-        if (e.code) w.pending = null; /* server rad etdi: qayta urinishda yangi so‘rov */
-        toast(e.message || "Ulanish yo‘q. Qayta bosing, natija saqlanadi.");
-        render();
+        WH.betBusy = false;
+        toast(e.message || "Ulanish yo‘q");
+        if (e.code === "closed" || e.code === "no_funds" || e.code === "locked") stopAuto();
+        fetchWheel();
       });
     }
 
+    function stopAuto() { WH.auto = null; WH.autoOpen = false; updatePanel(); }
+
+    function startAuto(n) {
+      WH.auto = { left: n, round: -1 };
+      WH.autoOpen = false;
+      toast("Auto: " + n + " ta raund");
+      updatePanel();
+    }
+
+    function toggleMute() {
+      WH.mute = !WH.mute;
+      try { localStorage.setItem("wmute", WH.mute ? "1" : "0"); } catch (e) {}
+      if (WH.mute) snd.spinStop(); else snd.unlock();
+      if (WH.refs) WH.refs.sndBtn.textContent = WH.mute ? "🔇" : "🔊";
+    }
+
+    /* ---- raund tugaganda: yutuq/yutqazish ---- */
+    function endRound(d) {
+      WH.endedRound = d.round;
+      snd.spinStop();
+      WH.spinning = false;
+      if (!d.result) return;
+      var stake = 0, k;
+      for (k in d.mine) stake += d.mine[k];
+      var kind = d.result.kind, coef = 0;
+      d.types.forEach(function (t) { if (t.type === kind) coef = t.coef; });
+      var won = d.mine[kind] ? d.mine[kind] * (1 + coef) : 0;
+      haptic(won ? "success" : "light");
+      if (stake > 0) {
+        WH.banner = { win: won > 0, text: won > 0 ? "🎉 +" + coin(won - stake) + " (" + d.result.kind.replace("x", "") + "x tushdi)" : "😕 −" + coin(stake) + " (" + d.result.kind.replace("x", "") + "x tushdi)" };
+        if (won) { snd.win(); if (state.me) { state.me.coins = (state.me.coins || 0) + won; renderTop(); } } else snd.lose();
+        if (WH.refs) paintBanner();
+      }
+    }
+
+    /* ---- har kadr: g‘ildirak burchagi, ovoz, tablo ---- */
+    function wheelFrame() {
+      WH.loop = requestAnimationFrame(wheelFrame);
+      if (state.tab !== "wheel") {
+        cancelAnimationFrame(WH.loop); WH.loop = 0;
+        snd.spinStop(); WH.spinning = false;
+        return;
+      }
+      var R = WH.refs, d = WH.data;
+      if (!R || !d || !document.body.contains(R.ring)) return;
+      var c = wheelClock(), r = c.r, el = c.el, now = Date.now();
+      var STEP = 360 / d.sectors.length;
+
+      if (r !== d.round && now - WH.lastFetchAt > 600) fetchWheel();
+      if (r === d.round && el >= WBET && !d.result && now - WH.lastFetchAt > 450) fetchWheel();
+
+      var rot = WH.rot, p = -1;
+      if (r === d.round) {
+        if (el < WBET) rot = d.from_deg;
+        else if (d.result) {
+          p = Math.min(1, (el - WBET) / WSPIN);
+          var total = (((d.result.deg - d.from_deg) % 360) + 360) % 360 + 360 * WTURNS;
+          rot = d.from_deg + total * easeP(p);
+        }
+      } else if (d.result) {
+        rot = d.result.deg;
+      }
+      WH.rot = rot;
+      R.ring.style.transform = "rotate(" + rot.toFixed(2) + "deg)";
+
+      var spinningNow = r === d.round && p >= 0 && p < 1 && WH.endedRound !== d.round;
+      if (spinningNow) {
+        if (!WH.spinning) { WH.spinning = true; snd.spinStart(); }
+        var sp = speedP(p);
+        snd.spinLevel(sp);
+        var k = Math.floor(-rot / STEP);
+        if (WH.lastK !== null && k !== WH.lastK) { snd.tick(sp); WH.wobble = 5 + 8 * sp; }
+        WH.lastK = k;
+      } else {
+        if (WH.spinning) { snd.spinStop(); WH.spinning = false; }
+        WH.lastK = null;
+      }
+      if (WH.endedRound !== d.round && d.result && ((r === d.round && p >= 1) || el >= WCYCLE - 0.05 || r > d.round)) endRound(d);
+
+      if (WH.wobble > 0.3) { WH.wobble *= 0.8; R.pointer.style.transform = "translateX(-50%) rotate(" + (WH.wobble).toFixed(1) + "deg)"; }
+      else if (WH.wobble !== 0) { WH.wobble = 0; R.pointer.style.transform = "translateX(-50%)"; }
+
+      /* tushgan sektorni yoritish */
+      var hit = -1;
+      if (!spinningNow && (r > d.round || el < WBET || p >= 1)) {
+        hit = ((Math.floor(-rot / STEP) % d.sectors.length) + d.sectors.length) % d.sectors.length;
+      }
+      if (hit !== R.hit) {
+        if (R.hit >= 0 && R.tiles[R.hit]) R.tiles[R.hit].classList.remove("hit");
+        if (hit >= 0 && R.tiles[hit]) R.tiles[hit].classList.add("hit");
+        R.hit = hit;
+      }
+
+      /* tablo */
+      var label = "", big = "";
+      if (r === d.round && el >= WBET) { label = "SPIN"; big = ""; }
+      else if (el < 2.6 && d.history.length) { label = "NATIJA"; big = d.history[0].replace("x", "") + "x"; }
+      else { label = "TIKISH"; big = pad2(Math.max(0, Math.ceil(WBET - el))); }
+      var dk = label + "|" + big;
+      if (dk !== WH.lastDispKey) {
+        WH.lastDispKey = dk;
+        R.dispLabel.textContent = label;
+        R.dispBig.textContent = label === "SPIN" ? "SPIN" : big;
+        R.disp.classList.toggle("spin", label === "SPIN");
+      }
+
+      /* tikish tugmasi + avto */
+      var open = r === d.round && el < WBET - 0.4;
+      var bk = (open ? "o" : "c") + Math.ceil(WBET - el) + "|" + WH.bet + "|" + (WH.auto ? WH.auto.left : 0) + "|" + WH.betBusy;
+      if (bk !== WH.lastBtnKey) { WH.lastBtnKey = bk; updateBetBtn(open, el); }
+
+      if (WH.auto && WH.auto.left > 0 && open && el < 9 && WH.auto.round !== r && !WH.betBusy) {
+        WH.auto.round = r;
+        WH.auto.left -= 1;
+        placeBet(true);
+        if (WH.auto && WH.auto.left <= 0) { WH.auto = null; WH.lastBtnKey = ""; }
+      }
+    }
+
+    function updateBetBtn(open, el) {
+      var R = WH.refs; if (!R) return;
+      var txt;
+      if (!open) txt = el >= WBET ? "Aylanmoqda…" : "Tikish yopiq";
+      else txt = "Stavka qilish " + fmtNum(WH.bet) + " 🪙";
+      R.betBtn.textContent = txt;
+      R.betBtn.disabled = !open || WH.betBusy;
+      R.autoBtn.textContent = WH.auto ? "Auto · " + WH.auto.left : "Auto";
+      R.autoBtn.classList.toggle("on", !!WH.auto);
+    }
+
+    function paintBanner() {
+      var R = WH.refs; if (!R) return;
+      R.banner.textContent = WH.banner ? WH.banner.text : "";
+      R.banner.className = "wbanner" + (WH.banner ? (WH.banner.win ? " win show" : " lose show") : "");
+    }
+
+    function buildTilesState() {
+      var R = WH.refs, d = WH.data; if (!R || !d) return;
+      d.types.forEach(function (t) {
+        R.ring.querySelectorAll(".k-" + t.type).forEach(function (el) { el.classList.toggle("locked", !!t.locked); });
+      });
+    }
+
+    function updatePanel() {
+      var R = WH.refs, d = WH.data; if (!R || !d) return;
+      d.types.forEach(function (t) {
+        var el = R.kinds[t.type]; if (!el) return;
+        el.classList.toggle("sel", WH.kind === t.type);
+        el.classList.toggle("locked", !!t.locked);
+        var mine = d.mine[t.type] || 0, pool = d.pool[t.type] || 0;
+        R.kindSub[t.type].textContent = t.locked ? "🔒 qulflangan" : (mine ? "Sizniki: " + fmtNum(mine) : (pool ? "Jami: " + fmtNum(pool) : "Qaytim ×" + (1 + t.coef)));
+      });
+      R.players.textContent = "👤 " + d.players;
+      R.pool.textContent = fmtNum(d.total) + " 🪙";
+      R.hist.style.display = d.history.length ? "" : "none";
+      R.hist.textContent = "";
+      d.history.forEach(function (k) { R.hist.appendChild(h("i", { class: "hd k-" + k, title: k.replace("x", "") + "x" })); });
+      R.recent.textContent = "";
+      d.recent.forEach(function (b) {
+        var res = !b.settled ? "kutilmoqda…" : (b.payout > 0 ? "+" + fmtNum(b.payout - b.amount) : "−" + fmtNum(b.amount));
+        R.recent.appendChild(h("div", { class: "kv" },
+          h("span", null, h("i", { class: "dot k-" + b.kind }), b.kind.replace("x", "") + "x · " + fmtNum(b.amount) + " 🪙"),
+          h("b", { class: b.settled ? (b.payout > 0 ? "up" : "down") : "" }, res + (b.settled && b.result ? " · tushdi " + b.result.replace("x", "") + "x" : ""))));
+      });
+      if (!d.recent.length) R.recent.appendChild(h("p", { class: "note" }, "Hali tikish yo‘q."));
+      R.autoRow.style.display = WH.autoOpen ? "" : "none";
+      WH.lastBtnKey = "";
+    }
+
     function viewWheel() {
-      var w = state.wheel;
-      var page = h("div", null, h("h1", { class: "page-title" }, "🎡 G‘ildirak"));
+      var page = h("div", { class: "wpage" });
+      var sndBtn = h("button", { class: "wsnd", onclick: toggleMute }, WH.mute ? "🔇" : "🔊");
+      page.appendChild(h("div", { class: "whead" }, h("h1", { class: "page-title wt" }, "🎡 G‘ildirak"), sndBtn));
       if (!inTG) {
         page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "G‘ildirakni ochish uchun Telegram ichida oching.")));
         return page;
       }
-      if (!w.data) {
-        page.appendChild(h("div", { class: "skeleton" }));
-        return page;
-      }
-      var d = w.data;
-      page.appendChild(h("p", { class: "muted", style: "margin:0 2px 10px" },
-        "Faqat virtual coin: pul yechib bo‘lmaydi. Natija serverda belgilanadi va saqlanadi."));
+      var d = WH.data;
+      if (!d) { page.appendChild(h("div", { class: "skeleton", style: "height:300px" })); WH.refs = null; return page; }
 
       if (d.daily.available) {
         page.appendChild(h("button", { class: "btn primary big", style: "margin-bottom:12px", onclick: claimDaily },
           "🎁 Kunlik coin: +" + coin(d.daily.amount)));
       }
 
-      var box = h("div", { class: "wheel-box" });
-      box.innerHTML = wheelSvg(d.sectors, w.rot);
-      page.appendChild(h("div", { class: "wheel-wrap" }, h("div", { class: "wheel-pointer" }), box));
+      /* ---- baraban ---- */
+      var N = d.sectors.length, STEP = 360 / N;
+      var ring = h("div", { class: "wring" });
+      var tiles = d.sectors.map(function (s, i) {
+        var t = h("div", { class: "wtile k-" + s.type },
+          h("div", { class: "wti" }, (WK[s.type] || {}).icon || "🎁"),
+          h("div", { class: "wtl" }, s.label));
+        t.style.transform = "rotate(" + ((i + 0.5) * STEP).toFixed(3) + "deg) translateY(" + WRT + "px)";
+        ring.appendChild(t);
+        return t;
+      });
+      var dispLabel = h("div", { class: "dl" }, "TIKISH"), dispBig = h("div", { class: "db" }, "--");
+      var disp = h("div", { class: "wdisp" }, dispLabel, dispBig);
+      var pointer = h("div", { class: "wpointer" });
+      var stage = h("div", { class: "wstage" }, ring, h("div", { class: "wshade" }), disp, pointer);
+      page.appendChild(stage);
 
-      if (w.result) {
-        var r = w.result;
-        page.appendChild(h("div", { class: "result show", style: "--c:" + (r.net >= 0 ? "var(--gold)" : "var(--r-common)") },
-          h("div", { class: "rar" }, r.count + " ta o‘yin"),
-          h("div", { class: "rname" }, (r.net >= 0 ? "+" : "−") + coin(Math.abs(r.net))),
-          h("p", { class: "muted" }, "Tikish: " + coin(r.total_bet) + " · Qaytim: " + coin(r.total_payout))
-        ));
-      } else if (d.last) {
-        page.appendChild(h("p", { class: "note" },
-          "Oxirgi o‘yin: " + (d.last.net >= 0 ? "+" : "−") + coin(Math.abs(d.last.net))));
-      }
+      var hist = h("div", { class: "whist" });
+      var players = h("div", { class: "wchip" }), pool = h("div", { class: "wchip" });
+      page.appendChild(hist);
+      page.appendChild(h("div", { class: "wchips" }, players, pool));
 
-      page.appendChild(h("h3", { class: "sec" }, "Tikish miqdori"));
-      page.appendChild(h("div", { class: "bets" }, d.bet_presets.map(function (v) {
-        return h("button", { class: "chipbtn" + (w.bet === v ? " on" : ""), onclick: function () { w.bet = v; render(); } }, String(v));
-      })));
-      var input = h("input", { class: "betinput", type: "number", min: String(d.min_bet), max: String(d.max_bet), value: String(w.bet) });
-      input.addEventListener("change", function () {
+      var banner = h("div", { class: "wbanner" });
+      page.appendChild(banner);
+
+      /* ---- tikish paneli ---- */
+      var input = h("input", { class: "betinput wbetinput", type: "number", inputmode: "numeric", min: String(d.min_bet), max: String(d.max_bet), value: String(WH.bet) });
+      input.addEventListener("input", function () {
         var v = parseInt(input.value, 10);
-        if (isNaN(v) || v < d.min_bet || v > d.max_bet) { toast("Tikish " + d.min_bet + " dan " + d.max_bet + " gacha bo‘lishi kerak."); }
-        else { w.bet = v; }
-        render();
+        if (!isNaN(v)) { WH.bet = v; WH.lastBtnKey = ""; }
       });
-      page.appendChild(input);
+      function setBet(v) {
+        v = Math.max(d.min_bet, Math.min(d.max_bet, Math.round(v)));
+        WH.bet = v; input.value = String(v); WH.lastBtnKey = "";
+      }
+      var quick = h("div", { class: "wquick" },
+        h("button", { class: "btn small", onclick: function () { setBet(WH.bet / 2); } }, "½"),
+        h("button", { class: "btn small", onclick: function () { setBet(WH.bet * 2); } }, "2×"),
+        h("button", { class: "btn small", onclick: function () { setBet(WH.bet + 10); } }, "+10"),
+        h("button", { class: "btn small", onclick: function () { setBet(Math.min(d.max_bet, (state.me && state.me.coins) || d.min_bet)); } }, "Max"));
+      var kinds = {}, kindSub = {};
+      var grid = h("div", { class: "wkinds" }, d.types.map(function (t) {
+        var sub = h("div", { class: "ks" }, "");
+        var b = h("button", { class: "wk k-" + t.type, onclick: function () {
+          if (t.locked) { toast("Bu sektor vaqtincha qulflangan."); return; }
+          WH.kind = t.type; haptic(); updatePanel();
+        } }, h("div", { class: "kx" }, t.label), sub, h("div", { class: "ka" }, (WK[t.type] || {}).icon || "🎁"));
+        kinds[t.type] = b; kindSub[t.type] = sub;
+        return b;
+      }));
+      var betBtn = h("button", { class: "btn primary big wbet", onclick: function () { snd.unlock(); placeBet(false); } }, "Stavka qilish");
+      var autoBtn = h("button", { class: "btn wauto", onclick: function () {
+        snd.unlock();
+        if (WH.auto) stopAuto(); else { WH.autoOpen = !WH.autoOpen; updatePanel(); }
+      } }, "Auto");
+      var autoRow = h("div", { class: "bets", style: "display:none" }, d.auto_options.map(function (n) {
+        return h("button", { class: "chipbtn", onclick: function () { startAuto(n); } }, n + " raund");
+      }));
+      page.appendChild(h("div", { class: "card wpanel" },
+        h("div", { class: "wlabel" }, "Stavka summasi"),
+        input, quick,
+        h("div", { class: "wlabel", style: "margin-top:12px" }, "Qaysi koeffitsiyentga tikasiz?"),
+        grid,
+        h("div", { class: "wrow" }, betBtn, autoBtn),
+        autoRow));
 
-      page.appendChild(h("h3", { class: "sec" }, "Avtomatik o‘yinlar soni"));
-      page.appendChild(h("div", { class: "bets" }, d.auto_options.map(function (v) {
-        return h("button", { class: "chipbtn" + (w.count === v ? " on" : ""), onclick: function () { w.count = v; render(); } }, v + " ta");
-      })));
+      page.appendChild(h("h3", { class: "sec" }, "Mening tikishlarim"));
+      var recent = h("div", { class: "card" });
+      page.appendChild(recent);
 
-      page.appendChild(h("button", { class: "btn primary big", style: "margin-top:8px", disabled: w.busy ? "" : null, onclick: spinWheel },
-        w.busy ? "Aylanmoqda..." : "🎡 O‘ynash — " + fmtNum(w.bet * w.count) + " coin"));
+      var cnt = {};
+      d.sectors.forEach(function (s) { cnt[s.type] = (cnt[s.type] || 0) + 1; });
+      page.appendChild(h("p", { class: "note" },
+        "Demo o‘yin: faqat virtual coin. Har 18 soniyada raund: 11 soniya tikish, 7 soniya aylanish. Tushish ehtimoli: " +
+        d.types.map(function (t) { return t.label + " — " + (100 * (cnt[t.type] || 0) / N).toFixed(1) + "%"; }).join(", ") +
+        ". Qaytim = tikish + tikish × koeffitsiyent."));
 
-      /* Sektorlar ro‘yxati */
-      var kinds = {};
-      d.sectors.forEach(function (s) {
-        if (!kinds[s.type]) kinds[s.type] = { label: s.label, coef: s.coef, count: 0, locked: false };
-        kinds[s.type].count += 1;
-        if (s.locked) kinds[s.type].locked = true;
-      });
-      var rows = Object.keys(kinds).map(function (k) {
-        var x = kinds[k];
-        var rowText = x.coef < 0 ? "Tikish yo‘qoladi" : (x.coef === 0 ? "Tikish qaytadi" : "Qaytim: tikish × " + (1 + x.coef));
-        return h("div", { class: "kv" },
-          h("span", null, h("i", { class: "dot", style: "background:" + WHEEL_COLORS[k] }), x.label + " (" + x.count + " ta)"),
-          h("b", null, x.locked ? "🔒 " + rowText : rowText));
-      });
-      page.appendChild(h("h3", { class: "sec" }, "Sektorlar"));
-      page.appendChild(h("div", { class: "card" }, rows));
-      page.appendChild(h("p", { class: "note" }, "Qaytim = tikish + tikish × koeffitsiyent. Natijalar tasodifiy."));
+      WH.refs = { ring: ring, tiles: tiles, hit: -1, disp: disp, dispLabel: dispLabel, dispBig: dispBig, pointer: pointer,
+        hist: hist, players: players, pool: pool, banner: banner, kinds: kinds, kindSub: kindSub, betBtn: betBtn, autoBtn: autoBtn,
+        autoRow: autoRow, recent: recent, sndBtn: sndBtn };
+      WH.lastDispKey = ""; WH.lastBtnKey = "";
+      buildTilesState();
+      updatePanel();
+      paintBanner();
+      ring.style.transform = "rotate(" + WH.rot.toFixed(2) + "deg)";
       return page;
     }
 

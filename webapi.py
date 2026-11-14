@@ -238,6 +238,10 @@ async def api_cases(request):
 @api
 async def api_me(request):
     user_id, user, _, gate = await _auth(request, require_ok=False)
+    try:
+        wheel.settle(user_id)  # tugagan g‘ildirak raundlari yutug‘i
+    except Exception:
+        logging.exception("wheel.settle")
     wallet = db.wallet(user_id)
     channel = db.get_setting("required_channel")
     return web.json_response({
@@ -345,9 +349,9 @@ async def api_admin_overview(request):
 WHEEL_ERRORS = {
     "bad_request": (400, "Noto‘g‘ri so‘rov."),
     "bad_bet": (400, "Tikish 1 dan 1000 gacha bo‘lishi kerak."),
-    "bad_count": (400, "Avtomatik o‘yin soni noto‘g‘ri."),
     "no_funds": (402, "Coin yetarli emas."),
-    "no_sectors": (409, "Hozircha barcha sektorlar qulflangan."),
+    "closed": (409, "Tikish yopildi. Keyingi raundni kuting."),
+    "locked": (409, "Bu sektor vaqtincha qulflangan."),
     "no_daily": (404, "Kunlik coin yo‘q."),
     "claimed": (409, "Bugungi kunlik coin allaqachon olingan."),
 }
@@ -365,10 +369,10 @@ async def api_wheel_state(request):
 
 
 @api
-async def api_wheel_spin(request):
+async def api_wheel_bet(request):
     user_id, _, body, _ = await _auth(request)
     try:
-        res = wheel.play(user_id, body.get("bet"), body.get("count"), body.get("request_id"))
+        res = wheel.place_bet(user_id, body.get("kind"), body.get("amount"), body.get("request_id"), body.get("round"))
     except wheel.WheelError as exc:
         raise _wheel_error(exc)
     return web.json_response(res, headers=NO_STORE)
@@ -386,7 +390,7 @@ async def api_wheel_daily(request):
 
 def setup_routes(app: web.Application) -> None:
     app.router.add_post("/api/wheel/state", api_wheel_state)
-    app.router.add_post("/api/wheel/spin", api_wheel_spin)
+    app.router.add_post("/api/wheel/bet", api_wheel_bet)
     app.router.add_post("/api/wheel/daily", api_wheel_daily)
 
 

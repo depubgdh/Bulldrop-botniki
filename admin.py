@@ -63,6 +63,7 @@ class AdminStates(StatesGroup):
     waiting_free_opens = State()
     # mavjud quti/sovg'aga rasm o'rnatish
     waiting_set_image = State()
+    waiting_edit_value = State()
     # Mini App bosh sahifasi
     waiting_hero_title = State()
     waiting_hero_text = State()
@@ -151,6 +152,8 @@ def case_keyboard(case_id: int) -> InlineKeyboardMarkup:
     rows = [
         [b("🎁 Sovg‘a qo‘shish", f"admin_item_{case_id}")],
         [b("🖼 Quti rasmi / GIF", f"admin_cimg_{case_id}")],
+        [b("✏️ Nomi", f"admin_ed_c_name_{case_id}"), b("💰 Narxi", f"admin_ed_c_price_{case_id}")],
+        [b("📝 Tavsifi", f"admin_ed_c_desc_{case_id}")],
     ]
     for item in db.get_case_items(case_id):
         rows.append([b(f"✏️ {item['name']}", f"admin_it_{item['id']}")])
@@ -269,6 +272,8 @@ async def admin_item_card(call: CallbackQuery) -> None:
             text,
             kb(
                 [b("🖼 Rasm / GIF / stiker", f"admin_iimg_{item['id']}")],
+                [b("✏️ Nomi", f"admin_ed_i_name_{item['id']}"), b("💰 Qiymati", f"admin_ed_i_price_{item['id']}")],
+                [b("🎲 Foizi", f"admin_ed_i_prob_{item['id']}"), b("✨ Darajasi", f"admin_ed_i_rarity_{item['id']}")],
                 [b("🗑 O‘chirish", f"admin_di_{item['id']}")],
                 [b("🔙 Quti", f"admin_case_{item['case_id']}")],
             ),
@@ -313,6 +318,108 @@ async def admin_set_image_value(message: Message, state: FSMContext) -> None:
         db.set_item_image(target, image)
         case_id = item["case_id"]
     await message.answer("✅ Rasm saqlandi.\n\n" + case_text(case_id), reply_markup=case_keyboard(case_id))
+
+
+# ------------------------------------------------------------------ tahrirlash (nom, narx, foiz, daraja)
+
+EDIT_PROMPTS = {
+    "name": "Yangi nomni yozing:",
+    "price": f"Yangi narxni {COIN} coin bilan, son qilib yozing (0 — tekin):",
+    "desc": "Yangi tavsifni yozing («-» — tavsifni o‘chirish):",
+    "prob": "Yangi tushish foizini yozing (masalan 12.5):",
+}
+
+
+def _edit_back(kind: str, target: int):
+    if kind == "c":
+        return case_text(target), case_keyboard(target)
+    item = db.get_case_item(target)
+    return (case_text(item["case_id"]), case_keyboard(item["case_id"])) if item else ("Topilmadi.", admin_menu())
+
+
+@router.callback_query(F.data.startswith("admin_ed_"))
+async def admin_edit_start(call: CallbackQuery, state: FSMContext) -> None:
+    try:
+        _, _, kind, field, raw = call.data.split("_", 4)
+        target = int(raw)
+    except ValueError:
+        await call.answer("Noto‘g‘ri so‘rov.", show_alert=True)
+        return
+    exists = db.get_case(target) if kind == "c" else db.get_case_item(target)
+    if not exists:
+        await call.answer("Topilmadi.", show_alert=True)
+        return
+    await call.answer()
+    if kind == "i" and field == "rarity":
+        if call.message:
+            await call.message.answer(
+                "Yangi noyoblik darajasini tanlang:",
+                reply_markup=kb(
+                    [b("⚪ Oddiy", f"admin_setrar_{target}_common"), b("🔵 Noyob", f"admin_setrar_{target}_rare")],
+                    [b("🟣 Epik", f"admin_setrar_{target}_epic"), b("🟡 Afsonaviy", f"admin_setrar_{target}_legendary")],
+                    [b("🔴 Mifik", f"admin_setrar_{target}_mythic")],
+                ),
+            )
+        return
+    if field not in EDIT_PROMPTS:
+        return
+    await state.update_data(edit_kind=kind, edit_field=field, edit_target=target)
+    await state.set_state(AdminStates.waiting_edit_value)
+    if call.message:
+        await call.message.answer(EDIT_PROMPTS[field] + "\nBekor qilish: /cancel")
+
+
+@router.callback_query(F.data.startswith("admin_setrar_"))
+async def admin_set_rarity(call: CallbackQuery) -> None:
+    try:
+        _, _, raw, rarity = call.data.split("_", 3)
+        target = int(raw)
+    except ValueError:
+        await call.answer("Noto‘g‘ri so‘rov.", show_alert=True)
+        return
+    if rarity not in RARITIES or not db.get_case_item(target):
+        await call.answer("Topilmadi.", show_alert=True)
+        return
+    db.update_item(target, rarity=rarity)
+    await call.answer("Saqlandi.")
+    if call.message:
+        text, markup = _edit_back("i", target)
+        await edit_or_send(call.message, "✅ Daraja o‘zgardi.\n\n" + text, markup)
+
+
+@router.message(AdminStates.waiting_edit_value, not_command)
+async def admin_edit_value(message: Message, state: FSMContext) -> None:
+    data = await state.get_data()
+    kind, field, target = data.get("edit_kind"), data.get("edit_field"), data.get("edit_target")
+    raw = (message.text or "").strip()
+    if not raw:
+        await message.answer("Matn yoki son yozing:")
+        return
+    try:
+        if field == "name":
+            value = raw[:80]
+        elif field == "desc":
+            value = "" if raw == "-" else raw[:500]
+        elif field == "price":
+            value = int(raw.replace(" ", ""))
+            if value < 0:
+                raise ValueError
+        else:  # prob
+            value = float(raw.replace(",", "."))
+            if not (0 < value <= 100):
+                raise ValueError
+    except ValueError:
+        await message.answer("Noto‘g‘ri qiymat. Qayta yozing (yoki /cancel):")
+        return
+    if kind == "c":
+        column = {"name": "name", "desc": "description", "price": "price"}[field]
+        db.update_case(target, **{column: value})
+    else:
+        column = {"name": "name", "price": "price", "prob": "probability"}[field]
+        db.update_item(target, **{column: value})
+    await state.clear()
+    text, markup = _edit_back(kind, target)
+    await message.answer("✅ Saqlandi.\n\n" + text, reply_markup=markup)
 
 
 @router.message(AdminStates.waiting_case_name, not_command)
@@ -1243,10 +1350,10 @@ def wheel_view() -> str:
     amount = wheel.daily_amount()
     lines = [
         "🎡 G‘ildirak\n",
-        "Faqat virtual coin. Pul yechib bo‘lmaydi.\n",
+        "Demo o‘yin, faqat virtual coin. G‘ildirak serverda to‘xtovsiz aylanadi: har 18 soniyada raund (11 s tikish + 7 s aylanish).\n",
         f"🪙 Kunlik coin: {amount if amount > 0 else 'o‘chiq (0)'} — har kuni har bir foydalanuvchiga beriladi.",
         "",
-        "Sektor turlari (bosib qulflang yoki oching):",
+        "Sektor turlari (qulflangan tur tushmaydi va unga tikib bo‘lmaydi):",
     ]
     for kind, (label, coef) in wheel.SECTOR_TYPES.items():
         state_text = "🔒 qulflangan" if kind in locked else "🔓 ochiq"

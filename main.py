@@ -12,7 +12,7 @@ import wheel
 
 
 async def health(request: web.Request) -> web.Response:
-    return web.json_response({"status": "ok", "service": "bulldrop", "wheel": hasattr(wheel, "play")})
+    return web.json_response({"status": "ok", "service": "bulldrop", "wheel": hasattr(wheel, "place_bet")})
 
 
 async def miniapp(request: web.Request) -> web.FileResponse:
@@ -47,9 +47,11 @@ async def main() -> None:
     except (NotImplementedError, RuntimeError):
         pass
     runner = await start_web_server()
+    wheel_task = asyncio.create_task(wheel.tick_loop())
     try:
         await run_bot()
     finally:
+        wheel_task.cancel()
         await runner.cleanup()
 
 

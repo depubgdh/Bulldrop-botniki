@@ -323,6 +323,38 @@ def set_case_image(case_id, image_url):
         con.execute("UPDATE cases SET image_url=? WHERE id=?", (image_url or "", int(case_id)))
 
 
+def update_case(case_id, name=None, price=None, description=None):
+    sets, args = [], []
+    if name is not None:
+        sets.append("name=?"); args.append(name)
+    if price is not None:
+        sets.append("price=?"); args.append(int(price))
+    if description is not None:
+        sets.append("description=?"); args.append(description)
+    if not sets:
+        return
+    args.append(int(case_id))
+    with connect() as con:
+        con.execute(f"UPDATE cases SET {', '.join(sets)} WHERE id=?", args)
+
+
+def update_item(item_id, name=None, price=None, rarity=None, probability=None):
+    sets, args = [], []
+    if name is not None:
+        sets.append("name=?"); args.append(name)
+    if price is not None:
+        sets.append("price=?"); args.append(int(price))
+    if rarity is not None:
+        sets.append("rarity=?"); args.append(rarity)
+    if probability is not None:
+        sets.append("probability=?"); args.append(float(probability))
+    if not sets:
+        return
+    args.append(int(item_id))
+    with connect() as con:
+        con.execute(f"UPDATE case_items SET {', '.join(sets)} WHERE id=?", args)
+
+
 def add_case_item(case_id, name, price, image_url="", probability=0.0, rarity="common"):
     with connect() as con:
         con.execute(

@@ -37,10 +37,26 @@ def _snapshot(dest: Path) -> None:
         dst = sqlite3.connect(dest)
         try:
             src.backup(dst)
+            try:  # g‘ildirak raundlari tez-tez o‘zgaradi va tiklash uchun kerak emas
+                dst.execute("DELETE FROM wheel_rounds")
+                dst.commit()
+            except sqlite3.Error:
+                pass
         finally:
             dst.close()
     finally:
         src.close()
+
+
+def _logical_hash(path: Path) -> str:
+    con = sqlite3.connect(path)
+    try:
+        h = hashlib.sha256()
+        for line in con.iterdump():
+            h.update(line.encode("utf-8", "replace"))
+        return h.hexdigest()
+    finally:
+        con.close()
 
 
 def _has_data(path: Path) -> bool:
@@ -95,7 +111,7 @@ async def save_now(bot: Bot) -> bool:
     with tempfile.TemporaryDirectory() as tmpdir:
         snap = Path(tmpdir) / (FILE_PREFIX + ".sqlite3")
         await asyncio.to_thread(_snapshot, snap)
-        digest = hashlib.sha256(snap.read_bytes()).hexdigest()
+        digest = await asyncio.to_thread(_logical_hash, snap)
         if digest == _last_hash:
             return False
         msg = await bot.send_document(
