@@ -465,10 +465,19 @@ async def sell_one(call: CallbackQuery) -> None:
 
 # ------------------------------------------------------------------ boshqa
 
+def _game_button(text: str, game: str, fallback: str) -> InlineKeyboardButton:
+    """Mini App'ni to‘g‘ridan-to‘g‘ri shu o‘yin ochiq holda ishga tushiradi."""
+    if WEBAPP_URL.startswith("https://"):
+        sep = "&" if "?" in WEBAPP_URL else "?"
+        return InlineKeyboardButton(text=text, web_app=WebAppInfo(url=f"{WEBAPP_URL}{sep}game={game}"))
+    return InlineKeyboardButton(text=text, callback_data=fallback)
+
+
 def games_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
+        [_game_button("🎡 G‘ildirak", "wheel", "menu_games")],
+        [_game_button("💣 Saper", "mines", "signal_saper")],
         [InlineKeyboardButton(text="💥 Crash — demo", callback_data="signal_crash")],
-        [InlineKeyboardButton(text="💣 Saper — demo", callback_data="signal_saper")],
         [InlineKeyboardButton(text="🪜 Narvon — tez orada", callback_data="signal_ladder")],
         [InlineKeyboardButton(text="🗼 Minora — tez orada", callback_data="signal_tower")],
         [InlineKeyboardButton(text="🔙 Bosh menyu", callback_data="go_home")],

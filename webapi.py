@@ -11,6 +11,7 @@ from aiohttp import web
 
 import db
 import tg_http
+import mines
 import wheel
 from config import ADMIN_IDS, BOT_TOKEN, BOT_USERNAME
 
@@ -378,6 +379,57 @@ async def api_wheel_bet(request):
     return web.json_response(res, headers=NO_STORE)
 
 
+MINES_ERRORS = {
+    "bad_request": (400, "Noto‘g‘ri so‘rov."),
+    "bad_bet": (400, "Tikish 1 dan 1000 gacha bo‘lishi kerak."),
+    "no_funds": (402, "Coin yetarli emas."),
+    "active": (409, "Tugallanmagan o‘yin bor — davom eting."),
+    "no_game": (404, "Faol o‘yin yo‘q."),
+    "nothing_opened": (409, "Avval kamida bitta katakni oching."),
+}
+
+
+def _mines_error(exc: "mines.MinesError") -> ApiError:
+    status, message = MINES_ERRORS.get(exc.code, (400, "Xatolik"))
+    return ApiError(status, exc.code, message)
+
+
+@api
+async def api_mines_state(request):
+    user_id, _, _, _ = await _auth(request)
+    return web.json_response(mines.state_for(user_id), headers=NO_STORE)
+
+
+@api
+async def api_mines_start(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        res = mines.start(user_id, body.get("bet"), body.get("mines"), body.get("request_id"))
+    except mines.MinesError as exc:
+        raise _mines_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_mines_open(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        res = mines.open_cell(user_id, body.get("cell"))
+    except mines.MinesError as exc:
+        raise _mines_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_mines_cashout(request):
+    user_id, _, _, _ = await _auth(request)
+    try:
+        res = mines.cashout(user_id)
+    except mines.MinesError as exc:
+        raise _mines_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
 @api
 async def api_wheel_daily(request):
     user_id, _, _, _ = await _auth(request)
@@ -391,6 +443,10 @@ async def api_wheel_daily(request):
 def setup_routes(app: web.Application) -> None:
     app.router.add_post("/api/wheel/state", api_wheel_state)
     app.router.add_post("/api/wheel/bet", api_wheel_bet)
+    app.router.add_post("/api/mines/state", api_mines_state)
+    app.router.add_post("/api/mines/start", api_mines_start)
+    app.router.add_post("/api/mines/open", api_mines_open)
+    app.router.add_post("/api/mines/cashout", api_mines_cashout)
     app.router.add_post("/api/wheel/daily", api_wheel_daily)
 
 
