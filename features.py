@@ -1,5 +1,6 @@
 import asyncio
 import random
+from urllib.parse import quote
 
 from aiogram import BaseMiddleware, F, Router
 from aiogram.filters import Command
@@ -26,7 +27,7 @@ from common import (
     fmt_num,
     menu_layout,
 )
-from config import ADMIN_IDS, SUPPORT_USERNAME, TERMS_TEXT, WEBAPP_URL
+from config import ADMIN_IDS, BOT_USERNAME, SUPPORT_USERNAME, TERMS_TEXT, WEBAPP_URL
 
 router = Router()
 
@@ -246,6 +247,15 @@ async def receive_phone(message: Message, state: FSMContext) -> None:
         return
     db.save_user(message.from_user.id, message.from_user.username, phone=contact.phone_number)
     await state.clear()
+    paid = db.pay_referral(message.from_user.id)  # do'st taklifi bonusi (bir marta)
+    if paid and paid["amount"] > 0:
+        try:
+            await message.bot.send_message(
+                paid["referrer_id"],
+                f"🎉 Do‘stingiz ro‘yxatdan o‘tdi! Sizga +{fmt_num(paid['amount'])} {COIN} demo bonus berildi.",
+            )
+        except Exception:
+            pass
     await message.answer("✅ Ro‘yxatdan o‘tdingiz!", reply_markup=ReplyKeyboardRemove())
     await show_home(message, message.from_user.id)
 
@@ -468,6 +478,146 @@ async def sell_one(call: CallbackQuery) -> None:
         await edit_or_send(call.message, text, markup)
 
 
+
+# ------------------------------------------------------------------ bonus: do'st chaqirish va shartlar
+
+TASK_ICONS = {"approved": "✅", "pending": "⏳", "rejected": "❌"}
+
+
+def referral_link(user_id: int) -> str:
+    return f"https://t.me/{BOT_USERNAME}?start=ref_{user_id}" if BOT_USERNAME else ""
+
+
+def bonus_view(user_id: int):
+    reward = db.ref_reward()
+    link = referral_link(user_id)
+    tasks = db.get_tasks()
+    status = db.claim_statuses(user_id)
+    text = (
+        "💎 Bonus\n\n"
+        f"👥 Do‘st chaqirish\n"
+        f"Taklif qilgan har bir do‘stingiz ro‘yxatdan o‘tsa (telefon yuborsa) — sizga +{fmt_num(reward)} {COIN}.\n"
+        + (f"Sizning havolangiz:\n{link}\n" if link else "Havola hozircha mavjud emas (BOT_USERNAME sozlanmagan).\n")
+        + f"Ro‘yxatdan o‘tgan do‘stlar: {db.count_referrals(user_id)}\n\n"
+        "🎯 Shartlar\n"
+        + ("Quyidagi shartlarni bajaring va bonus oling:" if tasks else "Hozircha shartlar yo‘q.")
+        + "\n\nBonus faqat o‘yin ichidagi demo coin; pulga almashtirilmaydi."
+    )
+    rows = []
+    for task in tasks:
+        icon = TASK_ICONS.get(status.get(task["id"]), "🎯")
+        rows.append([InlineKeyboardButton(
+            text=f"{icon} {task['title']} +{fmt_num(task['reward'])} {COIN}"[:60],
+            callback_data=f"bonus_t_{task['id']}",
+        )])
+    if link:
+        share = f"https://t.me/share/url?url={quote(link)}&text={quote('BULLDROP — demo o‘yinlar va sovg‘a qutilari!')}"
+        rows.append([InlineKeyboardButton(text="📤 Do‘stga yuborish", url=share)])
+    rows.append([InlineKeyboardButton(text="↩️ Bosh menyu", callback_data="go_home")])
+    return text, InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+@router.callback_query(F.data == "menu_bonus")
+async def menu_bonus(call: CallbackQuery) -> None:
+    await call.answer()
+    if call.message:
+        text, markup = bonus_view(call.from_user.id)
+        await edit_or_send(call.message, text, markup)
+
+
+@router.callback_query(F.data.startswith("bonus_t_"))
+async def bonus_task_view(call: CallbackQuery) -> None:
+    await call.answer()
+    task = db.get_task(call.data.replace("bonus_t_", "")) if call.data.replace("bonus_t_", "").isdigit() else None
+    if not task or not task["is_active"]:
+        if call.message:
+            await edit_or_send(call.message, "Bu shart topilmadi.", InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text="🔙 Bonus", callback_data="menu_bonus")]]))
+        return
+    status = db.claim_statuses(call.from_user.id).get(task["id"])
+    text = f"🎯 {task['title']}\n\n{task['description'] or ''}\n\nMukofot: +{fmt_num(task['reward'])} {COIN}"
+    rows = []
+    if task["url"].lower().startswith(("https://", "http://")):
+        rows.append([InlineKeyboardButton(text="🔗 Bajarish uchun havola", url=task["url"])])
+    if status == "approved":
+        text += "\n\n✅ Bu shart bajarilgan, bonus olingan."
+    elif status == "pending":
+        text += "\n\n⏳ So‘rovingiz admin tasdig‘ini kutmoqda."
+    else:
+        if status == "rejected":
+            text += "\n\n❌ Oldingi so‘rovingiz rad etilgan. Shartni bajarib, qayta yuboring."
+        rows.append([InlineKeyboardButton(text="✅ Bajardim", callback_data=f"bonus_d_{task['id']}")])
+    rows.append([InlineKeyboardButton(text="🔙 Bonus", callback_data="menu_bonus")])
+    if call.message:
+        await edit_or_send(call.message, text, InlineKeyboardMarkup(inline_keyboard=rows))
+
+
+async def _is_channel_member(bot, channel: str, user_id: int):
+    """True/False — a'zo yoki yo'q; None — tekshirib bo'lmadi (bot kanalda admin emas va hokazo)."""
+    chat = int(channel) if channel.lstrip("-").isdigit() else channel
+    try:
+        member = await bot.get_chat_member(chat, user_id)
+    except Exception:
+        return None
+    return member.status in ("creator", "administrator", "member", "restricted")
+
+
+@router.callback_query(F.data.startswith("bonus_d_"))
+async def bonus_done(call: CallbackQuery) -> None:
+    raw = call.data.replace("bonus_d_", "")
+    task = db.get_task(raw) if raw.isdigit() else None
+    if not task or not task["is_active"]:
+        await call.answer("Bu shart topilmadi.", show_alert=True)
+        return
+    user = call.from_user
+    if not is_registered(user.id):
+        await call.answer("Avval /start bosib ro‘yxatdan o‘ting.", show_alert=True)
+        return
+
+    # Kanal sharti: bot kanalda admin bo'lsa, a'zolik avtomatik tekshiriladi
+    if task["channel"]:
+        member = await _is_channel_member(call.bot, task["channel"], user.id)
+        if member is False:
+            await call.answer("Siz hali kanalga a‘zo emassiz. A‘zo bo‘lib, qayta bosing.", show_alert=True)
+            return
+        if member:
+            res = db.auto_approve(task["id"], user.id)
+            if not res["ok"]:
+                await call.answer("Bu bonus allaqachon olingan.", show_alert=True)
+            else:
+                await call.answer(f"🎉 +{fmt_num(res['reward'])} {COIN} bonus berildi!", show_alert=True)
+            if call.message:
+                text, markup = bonus_view(user.id)
+                await edit_or_send(call.message, text, markup)
+            return
+        # member is None: bot tekshira olmadi — qo'lda tasdiqlashga o'tamiz
+
+    res = db.submit_claim(task["id"], user.id)
+    if not res["ok"]:
+        msg = "Bonus allaqachon olingan." if res["status"] == "approved" else "So‘rovingiz allaqachon admin tasdig‘ida."
+        await call.answer(msg, show_alert=True)
+        return
+    await call.answer("✅ So‘rov adminga yuborildi. Tasdiqlansa, bonus beriladi.", show_alert=True)
+    name = user.full_name + (f" (@{user.username})" if user.username else "")
+    note = (
+        f"🧾 Bonus so‘rovi #{res['claim_id']}\n\n"
+        f"Foydalanuvchi: {name}\nID: {user.id}\n"
+        f"Shart: {task['title']}\nMukofot: {fmt_num(task['reward'])} {COIN}\n\n"
+        "Shartni bajarganini tekshirib, qaror qiling:"
+    )
+    markup = InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="✅ Tasdiqlash", callback_data=f"bonus_ok_{res['claim_id']}"),
+        InlineKeyboardButton(text="❌ Rad etish", callback_data=f"bonus_no_{res['claim_id']}"),
+    ]])
+    for admin_id in ADMIN_IDS:
+        try:
+            await call.bot.send_message(admin_id, note, reply_markup=markup)
+        except Exception:
+            pass
+    if call.message:
+        text, markup2 = bonus_view(user.id)
+        await edit_or_send(call.message, text, markup2)
+
 # ------------------------------------------------------------------ boshqa
 
 def _game_button(text: str, game: str, fallback: str) -> InlineKeyboardButton:
@@ -484,6 +634,7 @@ def games_keyboard() -> InlineKeyboardMarkup:
         [_game_button("💣 Saper", "mines", "signal_saper")],
         [_game_button("🗼 Minora", "tower", "signal_tower")],
         [_game_button("🪜 Narvon", "ladder", "signal_ladder")],
+        [_game_button("🏗 Qurilish", "build", "menu_games")],
         [InlineKeyboardButton(text="💥 Crash — tez orada", callback_data="game_soon")],
         [InlineKeyboardButton(text="🔙 Bosh menyu", callback_data="go_home")],
     ])

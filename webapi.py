@@ -11,6 +11,7 @@ from aiohttp import web
 
 import db
 import tg_http
+import crane
 import ladder
 import mines
 import tower
@@ -442,6 +443,8 @@ def _game_api(module, error_cls, errors):
     return raiser
 
 
+CRANE_ERRORS = dict(MINES_ERRORS, nothing_opened=(409, "Avval kamida bitta qavat quring."))
+_crane_error = _game_api(crane, crane.CraneError, CRANE_ERRORS)
 _tower_error = _game_api(tower, tower.TowerError, TOWER_ERRORS)
 _ladder_error = _game_api(ladder, ladder.LadderError, TOWER_ERRORS)
 
@@ -519,6 +522,42 @@ async def api_ladder_cashout(request):
 
 
 @api
+async def api_build_state(request):
+    user_id, _, _, _ = await _auth(request)
+    return web.json_response(crane.state_for(user_id), headers=NO_STORE)
+
+
+@api
+async def api_build_start(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        res = crane.start(user_id, body.get("bet"), body.get("request_id"))
+    except crane.CraneError as exc:
+        raise _crane_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_build_drop(request):
+    user_id, _, _, _ = await _auth(request)
+    try:
+        res = crane.drop(user_id)
+    except crane.CraneError as exc:
+        raise _crane_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_build_cashout(request):
+    user_id, _, _, _ = await _auth(request)
+    try:
+        res = crane.cashout(user_id)
+    except crane.CraneError as exc:
+        raise _crane_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
 async def api_wheel_daily(request):
     user_id, _, _, _ = await _auth(request)
     try:
@@ -544,6 +583,10 @@ def setup_routes(app: web.Application) -> None:
     app.router.add_post("/api/ladder/step", api_ladder_step)
     app.router.add_post("/api/ladder/cashout", api_ladder_cashout)
     app.router.add_post("/api/wheel/daily", api_wheel_daily)
+    app.router.add_post("/api/build/state", api_build_state)
+    app.router.add_post("/api/build/start", api_build_start)
+    app.router.add_post("/api/build/drop", api_build_drop)
+    app.router.add_post("/api/build/cashout", api_build_cashout)
 
 
     app.router.add_post("/api/admin/overview", api_admin_overview)

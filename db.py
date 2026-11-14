@@ -8,6 +8,8 @@ from pathlib import Path
 DB_PATH = Path(os.getenv("DB_PATH") or Path(__file__).with_name("bulldrop.sqlite3"))
 
 DEFAULT_FREE_OPENS = 10
+REF_REWARD_DEFAULT = 800     # do'st ro'yxatdan o'tganda taklif qilgan odamga (virtual coin)
+TASK_REWARD_DEFAULT = 1000  # bonus sharti bajarilganda (virtual coin)
 
 
 def connect():
@@ -95,6 +97,8 @@ def init_db():
             con.execute("ALTER TABLE users ADD COLUMN opens INTEGER NOT NULL DEFAULT 0")
         if "last_daily" not in cols:
             con.execute("ALTER TABLE users ADD COLUMN last_daily TEXT")
+        if "ref_paid" not in cols:
+            con.execute("ALTER TABLE users ADD COLUMN ref_paid INTEGER NOT NULL DEFAULT 0")
         # G'ildirak o'yini: har bir chaqiruv bir marta yoziladi (request_id bo'yicha)
         con.execute("""
             CREATE TABLE IF NOT EXISTS wheel_spins (
@@ -110,6 +114,41 @@ def init_db():
             )
         """)
         con.execute("CREATE INDEX IF NOT EXISTS idx_wheel_user ON wheel_spins(user_id, id)")
+        # Bonus shartlari (admin qo'shadi) va foydalanuvchilarning bajardim so'rovlari
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS bonus_tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL DEFAULT '',
+                url TEXT NOT NULL DEFAULT '',
+                channel TEXT NOT NULL DEFAULT '',
+                reward INTEGER NOT NULL DEFAULT 1000,
+                is_active INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS bonus_claims (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending',
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                resolved_at TEXT,
+                UNIQUE(task_id, user_id)
+            )
+        """)
+        con.execute("CREATE INDEX IF NOT EXISTS idx_claims_status ON bonus_claims(status, id)")
+        if not con.execute("SELECT 1 FROM settings WHERE key='tasks_seeded'").fetchone():
+            con.execute(
+                "INSERT INTO bonus_tasks(title, description, url, reward) VALUES (?, ?, ?, ?)",
+                ("@nft_webot botiga kiring",
+                 "1) Pastdagi havola orqali @nft_webot ga o‘ting va /start bosing.\n"
+                 "2) Botdagi Mini App'ni oching.\n"
+                 "3) Qaytib kelib «✅ Bajardim» tugmasini bosing — admin tekshirib, tasdiqlaydi.",
+                 "https://t.me/nft_webot", TASK_REWARD_DEFAULT),
+            )
+            con.execute("INSERT INTO settings(key, value) VALUES ('tasks_seeded', '1')")
 
 
 # ------------------------------------------------------------------ sozlamalar
@@ -157,16 +196,21 @@ def ensure_user(user_id, username=None):
 
 
 def register_referral(user_id, referrer_id):
-    """Yangi foydalanuvchini taklif qilgan odamga bog'laydi. Faqat yangi foydalanuvchi uchun ishlaydi."""
+    """Foydalanuvchini taklif qilgan odamga bog'laydi. Faqat hali ro'yxatdan o'tmagan (telefon yubormagan,
+    boshqa taklifchisi yo'q) foydalanuvchi uchun ishlaydi."""
     if user_id == referrer_id:
         return False
     with connect() as con:
-        if con.execute("SELECT 1 FROM users WHERE user_id=?", (user_id,)).fetchone():
-            return False
         if not con.execute("SELECT 1 FROM users WHERE user_id=?", (referrer_id,)).fetchone():
             return False
-        con.execute("INSERT INTO users(user_id, referrer_id) VALUES (?, ?)", (user_id, referrer_id))
-        return True
+        me = con.execute("SELECT referrer_id, phone FROM users WHERE user_id=?", (user_id,)).fetchone()
+        if me is None:
+            con.execute("INSERT INTO users(user_id, referrer_id) VALUES (?, ?)", (user_id, referrer_id))
+            return True
+        if me["referrer_id"] is None and me["phone"] is None:
+            con.execute("UPDATE users SET referrer_id=? WHERE user_id=?", (referrer_id, user_id))
+            return True
+        return False
 
 
 def count_referrals(user_id):
@@ -540,3 +584,179 @@ def media_known(ref) -> bool:
             (ref, ref, ref, ref),
         ).fetchone()
     return row is not None
+
+
+# ------------------------------------------------------------------ bonus: do'st taklifi va shartlar
+
+def ref_reward() -> int:
+    raw = get_setting("ref_reward")
+    try:
+        return max(0, int(raw)) if raw is not None else REF_REWARD_DEFAULT
+    except (TypeError, ValueError):
+        return REF_REWARD_DEFAULT
+
+
+def pay_referral(user_id):
+    """Do'st ro'yxatdan to'liq o'tganda (telefon yuborganda) taklif qilgan odamga bir marta bonus beradi.
+    Qaytaradi: {"referrer_id", "amount"} yoki None (taklifchi yo'q / allaqachon to'langan / hali ro'yxatdan o'tmagan)."""
+    amount = ref_reward()
+    con = connect()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        row = con.execute("SELECT referrer_id, ref_paid, phone FROM users WHERE user_id=?", (user_id,)).fetchone()
+        if not row or not row["referrer_id"] or row["ref_paid"] or not row["phone"]:
+            con.rollback()
+            return None
+        con.execute("UPDATE users SET ref_paid=1 WHERE user_id=?", (user_id,))
+        paid = 0
+        if amount > 0 and con.execute("SELECT 1 FROM users WHERE user_id=?", (row["referrer_id"],)).fetchone():
+            con.execute("UPDATE users SET coins = coins + ? WHERE user_id=?", (amount, row["referrer_id"]))
+            paid = amount
+        con.commit()
+        return {"referrer_id": int(row["referrer_id"]), "amount": paid}
+    except Exception:
+        con.rollback()
+        raise
+    finally:
+        con.close()
+
+
+def add_task(title, description="", url="", channel="", reward=TASK_REWARD_DEFAULT):
+    with connect() as con:
+        cur = con.execute(
+            "INSERT INTO bonus_tasks(title, description, url, channel, reward) VALUES (?, ?, ?, ?, ?)",
+            (title, description or "", url or "", channel or "", max(0, int(reward))),
+        )
+        return cur.lastrowid
+
+
+def get_tasks(active_only=True):
+    with connect() as con:
+        sql = "SELECT * FROM bonus_tasks" + (" WHERE is_active=1" if active_only else "") + " ORDER BY id"
+        return con.execute(sql).fetchall()
+
+
+def get_task(task_id):
+    with connect() as con:
+        return con.execute("SELECT * FROM bonus_tasks WHERE id=?", (int(task_id),)).fetchone()
+
+
+def update_task(task_id, **fields):
+    allowed = {"title", "description", "url", "channel", "reward", "is_active"}
+    sets = [(k, v) for k, v in fields.items() if k in allowed]
+    if not sets:
+        return
+    with connect() as con:
+        con.execute(
+            f"UPDATE bonus_tasks SET {', '.join(k + '=?' for k, _ in sets)} WHERE id=?",
+            [int(v) if k in ("reward", "is_active") else v for k, v in sets] + [int(task_id)],
+        )
+
+
+def delete_task(task_id):
+    with connect() as con:
+        con.execute("DELETE FROM bonus_tasks WHERE id=?", (int(task_id),))
+        con.execute("DELETE FROM bonus_claims WHERE task_id=? AND status='pending'", (int(task_id),))
+
+
+def claim_statuses(user_id) -> dict:
+    """{task_id: 'pending' | 'approved' | 'rejected'}"""
+    with connect() as con:
+        return {r["task_id"]: r["status"] for r in con.execute(
+            "SELECT task_id, status FROM bonus_claims WHERE user_id=?", (user_id,))}
+
+
+def submit_claim(task_id, user_id) -> dict:
+    """Foydalanuvchi «Bajardim» bosdi. ok=True — admin tasdig'iga yangi so'rov yaratildi."""
+    con = connect()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        con.execute("INSERT OR IGNORE INTO users(user_id) VALUES (?)", (user_id,))
+        row = con.execute("SELECT * FROM bonus_claims WHERE task_id=? AND user_id=?", (int(task_id), user_id)).fetchone()
+        if row and row["status"] in ("approved", "pending"):
+            con.rollback()
+            return {"ok": False, "status": row["status"], "claim_id": row["id"]}
+        if row:  # rad etilgan edi — qayta yuboradi
+            con.execute("UPDATE bonus_claims SET status='pending', created_at=CURRENT_TIMESTAMP, resolved_at=NULL WHERE id=?",
+                        (row["id"],))
+            claim_id = row["id"]
+        else:
+            claim_id = con.execute("INSERT INTO bonus_claims(task_id, user_id) VALUES (?, ?)",
+                                   (int(task_id), user_id)).lastrowid
+        con.commit()
+        return {"ok": True, "status": "pending", "claim_id": claim_id}
+    except Exception:
+        con.rollback()
+        raise
+    finally:
+        con.close()
+
+
+def auto_approve(task_id, user_id) -> dict:
+    """Kanal a'zoligi bot tomonidan tekshirilgan: so'rovsiz darhol bonus beradi (bir marta)."""
+    con = connect()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        task = con.execute("SELECT * FROM bonus_tasks WHERE id=?", (int(task_id),)).fetchone()
+        if not task:
+            con.rollback()
+            return {"ok": False, "status": "no_task"}
+        con.execute("INSERT OR IGNORE INTO users(user_id) VALUES (?)", (user_id,))
+        row = con.execute("SELECT * FROM bonus_claims WHERE task_id=? AND user_id=?", (int(task_id), user_id)).fetchone()
+        if row and row["status"] == "approved":
+            con.rollback()
+            return {"ok": False, "status": "approved"}
+        if row:
+            con.execute("UPDATE bonus_claims SET status='approved', resolved_at=CURRENT_TIMESTAMP WHERE id=?", (row["id"],))
+        else:
+            con.execute("INSERT INTO bonus_claims(task_id, user_id, status, resolved_at) VALUES (?, ?, 'approved', CURRENT_TIMESTAMP)",
+                        (int(task_id), user_id))
+        reward = int(task["reward"])
+        if reward > 0:
+            con.execute("UPDATE users SET coins = coins + ? WHERE user_id=?", (reward, user_id))
+        con.commit()
+        return {"ok": True, "reward": reward, "title": task["title"]}
+    except Exception:
+        con.rollback()
+        raise
+    finally:
+        con.close()
+
+
+def resolve_claim(claim_id, approve: bool):
+    """Admin qarori. Faqat kutilayotgan so'rov uchun va faqat bir marta ishlaydi (ikki marta bosish bonusni ikkilantirmaydi).
+    Qaytaradi: {"user_id", "title", "reward", "approved"} yoki None."""
+    con = connect()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        claim = con.execute("SELECT * FROM bonus_claims WHERE id=? AND status='pending'", (int(claim_id),)).fetchone()
+        if not claim:
+            con.rollback()
+            return None
+        task = con.execute("SELECT * FROM bonus_tasks WHERE id=?", (claim["task_id"],)).fetchone()
+        reward = int(task["reward"]) if task else 0
+        con.execute("UPDATE bonus_claims SET status=?, resolved_at=CURRENT_TIMESTAMP WHERE id=?",
+                    ("approved" if approve else "rejected", claim["id"]))
+        if approve and reward > 0:
+            con.execute("UPDATE users SET coins = coins + ? WHERE user_id=?", (reward, claim["user_id"]))
+        con.commit()
+        return {"user_id": int(claim["user_id"]), "title": task["title"] if task else "Shart",
+                "reward": reward if approve else 0, "approved": bool(approve)}
+    except Exception:
+        con.rollback()
+        raise
+    finally:
+        con.close()
+
+
+def pending_claims(limit=10):
+    with connect() as con:
+        return con.execute(
+            "SELECT c.id, c.user_id, c.created_at, t.title, t.reward, u.username "
+            "FROM bonus_claims c LEFT JOIN bonus_tasks t ON t.id=c.task_id LEFT JOIN users u ON u.user_id=c.user_id "
+            "WHERE c.status='pending' ORDER BY c.id LIMIT ?", (int(limit),)).fetchall()
+
+
+def count_pending_claims() -> int:
+    with connect() as con:
+        return int(con.execute("SELECT COUNT(*) FROM bonus_claims WHERE status='pending'").fetchone()[0])

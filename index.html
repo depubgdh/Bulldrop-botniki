@@ -366,6 +366,36 @@
     @keyframes up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
     @keyframes pop { from { transform: scale(.9); opacity: 0; } to { transform: none; opacity: 1; } }
+      /* ---------- Qurilish (kran) ---------- */
+    .bhud { display: grid; grid-template-columns: 1fr 1.3fr .7fr; gap: 8px; margin-bottom: 10px; }
+    .bchipbar { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 9px 8px; text-align: center; font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .bchipbar b { color: var(--text); }
+    .bchipbar.wind { color: #7fd0ff; font-weight: 800; }
+    .bchipbar.gold { color: var(--gold); font-weight: 900; }
+    .bstage { position: relative; height: 440px; border-radius: 20px; overflow: hidden; border: 1px solid var(--line); background: linear-gradient(#3f9fe8 0%, #86cdf6 55%, #d4eefc 82%); user-select: none; -webkit-user-select: none; }
+    .bsky { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .bsky > svg { position: absolute; left: 0; bottom: 66px; width: 100%; height: 150px; }
+    .bgust { position: absolute; width: 90px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.85), transparent); opacity: .0; }
+    .bgust.l { animation: bgustL 3s linear infinite; }
+    .bgust.r { animation: bgustR 3s linear infinite; }
+    @keyframes bgustL { from { left: 105%; opacity: 0; } 15% { opacity: .9; } 85% { opacity: .9; } to { left: -30%; opacity: 0; } }
+    @keyframes bgustR { from { left: -30%; opacity: 0; } 15% { opacity: .9; } 85% { opacity: .9; } to { left: 105%; opacity: 0; } }
+    .bworld { position: absolute; inset: 0; transform-origin: 50% 100%; transition: transform .5s ease; }
+    .bground { position: absolute; left: 0; right: 0; bottom: 0; height: 70px; background: linear-gradient(#6bbf59 0, #4a9a3f 26px, #8a6a45 27px, #6d5136 100%); }
+    .bbase { position: absolute; left: 50%; bottom: 70px; width: 120px; height: 40px; margin-left: -60px; }
+    .bbase svg, .bfloor svg, .bfall svg, .bblk svg, .bbull svg { display: block; width: 100%; height: 100%; }
+    .bfloors { position: absolute; inset: 0; }
+    .bfloor { position: absolute; left: 50%; width: 96px; height: 44px; margin-left: -48px; }
+    .bbull { position: absolute; left: 7%; bottom: 66px; width: 52px; height: 66px; }
+    .brail { position: absolute; left: 0; right: 0; top: 12px; height: 16px; background: repeating-linear-gradient(90deg, #f5b400 0 14px, #d99a00 14px 16px); border-top: 3px solid #ffd24a; border-bottom: 3px solid #b97f00; }
+    .bhang { position: absolute; top: 28px; left: 50%; width: 96px; margin-left: -48px; height: 120px; transform-origin: 48px 0; pointer-events: none; }
+    .bcable { position: absolute; left: 47px; top: 0; width: 2px; height: 70px; background: #2a3140; }
+    .bhang .bblk { position: absolute; left: 0; top: 70px; width: 96px; height: 44px; }
+    .bfall { position: absolute; left: 0; top: 0; width: 96px; height: 44px; will-change: transform; pointer-events: none; }
+    .bchips { display: flex; gap: 6px; overflow-x: auto; margin-top: 10px; padding-bottom: 4px; }
+    .bchip { flex: none; min-width: 46px; text-align: center; padding: 6px 8px; font-size: 12px; font-weight: 800; border-radius: 10px; background: var(--card); border: 1px solid var(--line); color: var(--muted); }
+    .bchip.done { background: rgba(53, 224, 138, .16); color: #5cf0a5; border-color: rgba(53, 224, 138, .4); }
+    .bchip.next { color: var(--gold); border-color: var(--gold); }
   </style>
 </head>
 <body>
@@ -787,7 +817,8 @@
         ["wheel", "🎡", "G‘ildirak", "To‘xtovsiz aylanadi"],
         ["mines", "💣", "Saper", "Seyflarni oching"],
         ["tower", "🗼", "Minora", "Qavatma-qavat"],
-        ["ladder", "🪜", "Narvon", "Toshlardan o‘ting"]
+        ["ladder", "🪜", "Narvon", "Toshlardan o‘ting"],
+        ["build", "🏗", "Qurilish", "Shamolga qarshi quring"]
       ].map(function (g) {
         return h("button", { class: "card gcard", onclick: function () { go(g[0]); } },
           h("span", { class: "gi" }, g[1]), h("b", null, g[2]), h("small", null, g[3]));
@@ -1728,6 +1759,227 @@
       return page;
     }
 
+    /* ===================== QURILISH (Crane, demo) ===================== */
+    var BD = { data: null, bet: 500, busy: false, dropping: false, game: null, banner: null, refs: null, timers: [], raf: 0, theta: 0, shift: 0, collapsed: false };
+    var BD_H = 44, BD_W = 96, BD_GROUND = 70, BD_BASE = 40, BD_L = 92, BD_STAGE_H = 440;
+    var SVG_BLK = '<svg viewBox="0 0 96 44"><rect width="96" height="44" rx="3" fill="#c4573c"/><path d="M0 12h96M0 24h96M0 36h96" stroke="#b44a31" stroke-width="1"/><rect width="96" height="6" fill="#f1e7d3"/><g fill="#7cc4ee" stroke="#f1e7d3" stroke-width="2"><rect x="10" y="12" width="20" height="22"/><rect x="38" y="12" width="20" height="22"/><rect x="66" y="12" width="20" height="22"/></g><path d="M0 42h96" stroke="#9c3b25" stroke-width="3"/></svg>';
+    var SVG_BASE = '<svg viewBox="0 0 120 40"><rect width="120" height="40" rx="3" fill="#d9c7a3"/><rect width="120" height="6" fill="#f1e7d3"/><path d="M12 6h96v8H12z" fill="#e9eef5"/><path d="M12 6h12v8H12zM36 6h12v8H36zM60 6h12v8H60zM84 6h12v8H84z" fill="#e23b3b"/><rect x="50" y="18" width="20" height="22" rx="2" fill="#7a4b2a"/><rect x="14" y="18" width="24" height="14" fill="#7cc4ee" stroke="#f1e7d3" stroke-width="2"/><rect x="82" y="18" width="24" height="14" fill="#7cc4ee" stroke="#f1e7d3" stroke-width="2"/></svg>';
+    var SVG_BULL = '<svg viewBox="0 0 64 80"><ellipse cx="32" cy="77" rx="18" ry="3" fill="rgba(0,0,0,.18)"/><rect x="18" y="44" width="28" height="28" rx="8" fill="#f28c1b"/><rect x="18" y="52" width="28" height="4" fill="#fff3c4"/><rect x="22" y="70" width="8" height="8" rx="3" fill="#3b4a6b"/><rect x="34" y="70" width="8" height="8" rx="3" fill="#3b4a6b"/><path d="M12 24c-6-2-8-9-6-13 3 4 7 6 11 6z" fill="#f4ead2"/><path d="M52 24c6-2 8-9 6-13-3 4-7 6-11 6z" fill="#f4ead2"/><ellipse cx="32" cy="32" rx="18" ry="16" fill="#8a5a3b"/><ellipse cx="32" cy="40" rx="11" ry="8" fill="#e8b9a0"/><circle cx="29" cy="40" r="1.4" fill="#5a3a28"/><circle cx="35" cy="40" r="1.4" fill="#5a3a28"/><circle cx="24" cy="30" r="2.6" fill="#fff"/><circle cx="40" cy="30" r="2.6" fill="#fff"/><circle cx="24.6" cy="30.4" r="1.3" fill="#222"/><circle cx="40.6" cy="30.4" r="1.3" fill="#222"/><path d="M15 22a17 12 0 0 1 34 0z" fill="#ffc414"/><rect x="12" y="21" width="40" height="4" rx="2" fill="#f0a800"/><rect x="28" y="12" width="8" height="10" rx="2" fill="#f0a800"/></svg>';
+    var SVG_SKY = '<svg viewBox="0 0 400 150" preserveAspectRatio="none"><g fill="#c9a574" opacity=".9"><rect x="10" y="70" width="60" height="80"/><rect x="300" y="60" width="90" height="90"/></g><g fill="#2fa6a6"><rect x="40" y="20" width="20" height="130" fill="#d7b27a"/><path d="M36 22a14 14 0 0 1 28 0z"/><circle cx="345" cy="58" r="22"/><circle cx="110" cy="92" r="16"/></g><g fill="#e7cf9f" opacity=".95"><rect x="90" y="92" width="40" height="58"/><rect x="150" y="104" width="60" height="46"/><rect x="230" y="96" width="50" height="54"/></g><g fill="#3d8d4a"><ellipse cx="14" cy="130" rx="14" ry="22"/><ellipse cx="215" cy="132" rx="12" ry="20"/><ellipse cx="385" cy="128" rx="14" ry="24"/></g></svg>';
+
+    function loadBuild() {
+      if (!inTG) { render(); return; }
+      request("/api/build/state", {}).then(function (d) {
+        BD.data = d; BD.game = d.game; BD.banner = null; BD.collapsed = false;
+        if (d.game) BD.bet = d.game.bet;
+        applyBalance(d.balance);
+        if (state.tab === "build") render();
+      }).catch(function (e) { toast(e.message || "Ulanish yo‘q"); });
+    }
+
+    function bdActive() { return !!(BD.game && BD.game.status === "active"); }
+    function bdFloors() { return (BD.game && !BD.collapsed) ? BD.game.floors : 0; }
+    function bdShiftFor(n) { return Math.max(0, BD_H * n - 100); }
+    function bdTop(n) { return BD_STAGE_H - BD_GROUND - BD_BASE - BD_H * (n + 1); } /* n-qavat ustiga qo‘yiladigan blokning yuqori y si (shift'siz) */
+
+    function bdWind() {
+      var d = BD.data, g = BD.game, k = bdActive() ? g.floors : 0;
+      if (g && g.winds && g.winds[k]) return g.winds[k];
+      return { speed: d ? d.base_winds[Math.min(k, 11)] : 1, dir: -1 };
+    }
+
+    function bdPaint() {
+      var R = BD.refs, g = BD.game, d = BD.data; if (!R || !d) return;
+      var n = bdFloors(), active = bdActive();
+      R.floors.textContent = "";
+      for (var i = 0; i < n; i++) {
+        var off = g.landed[i] || 0;
+        var el = h("div", { class: "bfloor", style: "top:" + (BD_STAGE_H - BD_GROUND - BD_BASE - BD_H * (i + 1)) + "px;transform:translateX(" + (off * 34) + "px) rotate(" + (off * 2) + "deg)" });
+        el.innerHTML = SVG_BLK;
+        R.floors.appendChild(el);
+      }
+      BD.shift = bdShiftFor(n);
+      R.world.style.transform = "translateY(" + BD.shift + "px)";
+      R.hang.style.display = (active && !BD.dropping) ? "block" : "none";
+      var w = bdWind();
+      R.wind.textContent = "💨 " + String(w.speed).replace(".", ",") + " m/s " + (w.dir < 0 ? "←" : "→");
+      R.floorChip.innerHTML = "Qavat: <b>" + n + "</b> / 12";
+      R.multChip.textContent = "×" + String(g && n ? g.mult : 1).replace(".", ",");
+      R.gusts.forEach(function (el, i) {
+        el.className = "bgust " + (w.dir < 0 ? "l" : "r");
+        el.style.animationDuration = Math.max(1.1, 7 / w.speed) + "s";
+        el.style.animationDelay = (-i * 0.7) + "s";
+      });
+      R.chips.forEach(function (c, i) {
+        c.className = "bchip" + (i < n ? " done" : "") + (active && i === n ? " next" : "");
+      });
+      bdControls();
+    }
+
+    function bdControls() {
+      var R = BD.refs; if (!R) return;
+      var g = BD.game, active = bdActive(), n = g ? g.floors : 0;
+      R.input.disabled = active || BD.busy;
+      R.half.disabled = R.dbl.disabled = R.max.disabled = active || BD.busy;
+      R.betrow.style.display = active ? "none" : "";
+      if (active) {
+        R.main.textContent = "🏗 QURISH";
+        R.main.disabled = BD.busy || BD.dropping;
+        R.cash.style.display = n ? "" : "none";
+        R.cash.textContent = "💰 Yutuqni olish " + fmtNum(g.cash) + " 🪙";
+        R.cash.disabled = BD.busy || BD.dropping;
+      } else {
+        R.main.textContent = "Boshlash";
+        R.main.disabled = BD.busy || BD.dropping;
+        R.cash.style.display = "none";
+      }
+      R.banner.textContent = BD.banner ? BD.banner.text : "";
+      R.banner.className = "wbanner" + (BD.banner ? (BD.banner.win ? " win show" : " lose show") : "");
+    }
+
+    function bdLoop(ts) {
+      var R = BD.refs;
+      if (!R || !document.body.contains(R.stage)) { BD.raf = 0; return; }
+      if (bdActive() && !BD.dropping) {
+        var w = bdWind(), amp = 3 + w.speed * 1.6, t = ts / 1000;
+        BD.theta = amp * Math.sin(t * 1.35) + amp * 0.25 * Math.sin(t * 3.1 + 1);
+        R.hang.style.transform = "rotate(" + BD.theta.toFixed(2) + "deg)";
+      }
+      BD.raf = requestAnimationFrame(bdLoop);
+    }
+
+    function bdStart() {
+      if (BD.busy || BD.dropping || bdActive()) return;
+      if (!inTG) { toast("Telegram ichida oching"); return; }
+      var bet = BD.bet, d = BD.data;
+      if (!(bet >= d.min_bet)) { toast("Tikish kamida " + d.min_bet + " coin bo‘lishi kerak."); return; }
+      if (((state.me && state.me.coins) || 0) < bet) { toast("Coin yetarli emas"); return; }
+      BD.timers.forEach(clearTimeout); BD.timers = [];
+      BD.busy = true; bdControls();
+      request("/api/build/start", { bet: bet, request_id: randomId() }).then(function (res) {
+        BD.busy = false; BD.game = res.game; BD.banner = null; BD.collapsed = false;
+        applyBalance(res.balance); haptic(); mineSound("flip"); bdPaint();
+      }).catch(function (e) {
+        BD.busy = false; toast(e.message || "Ulanish yo‘q");
+        if (e.code === "active") loadBuild(); else bdControls();
+      });
+    }
+
+    function bdDrop() {
+      var R = BD.refs;
+      if (!bdActive() || BD.busy || BD.dropping || !R) return;
+      BD.busy = true; bdControls();
+      var theta = BD.theta;
+      request("/api/build/drop", {}).then(function (res) {
+        BD.busy = false;
+        if (BD.refs !== R) { BD.game = res.game; applyBalance(res.balance); bdPaint(); return; }
+        var n = BD.game.floors, stageW = R.stage.clientWidth;
+        BD.dropping = true;
+        R.hang.style.display = "none";
+        var rad = theta * Math.PI / 180;
+        var sx = stageW / 2 + BD_L * Math.sin(rad) - BD_W / 2, sy = 28 + BD_L * Math.cos(rad) - BD_H / 2;
+        var offPx = res.hit ? res.off * 72 : res.off * 34;
+        var tx = stageW / 2 + offPx - BD_W / 2, ty = bdTop(n) + BD.shift;
+        var fall = h("div", { class: "bfall" });
+        fall.innerHTML = SVG_BLK;
+        R.stage.appendChild(fall);
+        var dur = 380 + Math.max(0, ty - sy) * 1.6;
+        var a = fall.animate([
+          { transform: "translate(" + sx + "px," + sy + "px) rotate(" + theta + "deg)" },
+          { transform: "translate(" + tx + "px," + ty + "px) rotate(" + (res.off * 2) + "deg)" }
+        ], { duration: dur, easing: "cubic-bezier(.45,0,.85,.55)", fill: "forwards" });
+        a.onfinish = function () {
+          if (!res.hit) {
+            fall.remove();
+            BD.dropping = false; BD.game = res.game; applyBalance(res.balance);
+            haptic("success"); mineSound("pop", res.game.floors);
+            bdPaint();
+            if (res.game.status === "won") {
+              mineSound("cash");
+              BD.banner = { win: true, text: "🏆 12 qavat! +" + coin(res.game.payout - res.game.bet) };
+              bdControls();
+            }
+            return;
+          }
+          /* shamol uni yiqitdi: blok chetga qulaydi, minora yiqiladi */
+          mineSound("boom"); haptic("error");
+          var d2 = res.dir || 1;
+          var b = fall.animate([
+            { transform: "translate(" + tx + "px," + ty + "px) rotate(" + (res.off * 2) + "deg)", opacity: 1 },
+            { transform: "translate(" + (tx + d2 * 70) + "px," + (BD_STAGE_H - BD_GROUND - BD_H + 8) + "px) rotate(" + (d2 * 95) + "deg)", opacity: 1 }
+          ], { duration: 560, easing: "cubic-bezier(.5,0,.9,.6)", fill: "forwards" });
+          var w2 = BD.game.floors ? R.world.animate([
+            { transform: "translateY(" + BD.shift + "px) rotate(0deg)", opacity: 1 },
+            { transform: "translateY(" + (BD.shift + 20) + "px) rotate(" + (d2 * 16) + "deg)", opacity: 0 }
+          ], { duration: 950, delay: 350, easing: "ease-in", fill: "forwards" }) : null;
+          BD.banner = { win: false, text: "🌬 Shamol minorani yiqitdi! −" + coin(res.game.bet) };
+          BD.game = res.game; applyBalance(res.balance); bdControls();
+          BD.timers.push(setTimeout(function () {
+            fall.remove();
+            if (w2) w2.cancel();
+            BD.collapsed = true; BD.dropping = false;
+            bdPaint();
+          }, w2 ? 1450 : 900));
+        };
+      }).catch(function (e) { BD.busy = false; BD.dropping = false; toast(e.message || "Ulanish yo‘q"); loadBuild(); });
+    }
+
+    function bdCash() {
+      if (!bdActive() || BD.busy || BD.dropping || !BD.game.floors) return;
+      BD.busy = true; bdControls();
+      request("/api/build/cashout", {}).then(function (res) {
+        BD.busy = false; BD.game = res.game; applyBalance(res.balance);
+        mineSound("cash"); haptic("success");
+        BD.banner = { win: true, text: "🎉 +" + coin(res.game.payout - res.game.bet) };
+        bdPaint();
+      }).catch(function (e) { BD.busy = false; toast(e.message || "Ulanish yo‘q"); loadBuild(); });
+    }
+
+    function viewBuild() {
+      var page = h("div", { class: "wpage" });
+      var sndBtn = h("button", { class: "wsnd", onclick: function () { WH.mute = !WH.mute; try { localStorage.setItem("wmute", WH.mute ? "1" : "0"); } catch (e) {} sndBtn.textContent = WH.mute ? "🔇" : "🔊"; if (!WH.mute) snd.unlock(); } }, WH.mute ? "🔇" : "🔊");
+      page.appendChild(h("div", { class: "whead" }, h("h1", { class: "page-title wt" }, "🏗 Qurilish"), sndBtn));
+      if (!inTG) { page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Qurilishni ochish uchun Telegram ichida oching."))); return page; }
+      if (!BD.data) { page.appendChild(h("div", { class: "skeleton", style: "height:420px" })); BD.refs = null; return page; }
+      var d = BD.data;
+
+      var floorChip = h("div", { class: "bchipbar" });
+      var wind = h("div", { class: "bchipbar wind" });
+      var multChip = h("div", { class: "bchipbar gold" });
+      page.appendChild(h("div", { class: "bhud" }, floorChip, wind, multChip));
+
+      var sky = h("div", { class: "bsky" });
+      sky.innerHTML = SVG_SKY;
+      var gusts = [];
+      for (var i = 0; i < 5; i++) { var gu = h("div", { class: "bgust l", style: "top:" + (60 + i * 55) + "px" }); gusts.push(gu); sky.appendChild(gu); }
+      var floors = h("div", { class: "bfloors" });
+      var base = h("div", { class: "bbase" }); base.innerHTML = SVG_BASE;
+      var bull = h("div", { class: "bbull" }); bull.innerHTML = SVG_BULL;
+      var world = h("div", { class: "bworld" }, h("div", { class: "bground" }), base, floors, bull);
+      var hang = h("div", { class: "bhang" }, h("div", { class: "bcable" }), h("div", { class: "bblk" }));
+      hang.lastChild.innerHTML = SVG_BLK;
+      var stage = h("div", { class: "bstage" }, sky, world, h("div", { class: "brail" }), hang);
+      page.appendChild(stage);
+
+      var chips = d.mults.map(function (m, i) { return h("div", { class: "bchip" }, "×" + String(m).replace(".", ",")); });
+      page.appendChild(h("div", { class: "bchips" }, chips));
+
+      var banner = h("div", { class: "wbanner", style: "margin-top:12px" });
+      page.appendChild(banner);
+      var br = betRow(BD, function () { return d; }, function () { bdControls(); });
+      page.appendChild(br.el);
+      var main = h("button", { class: "btn primary big", style: "margin-top:12px", onclick: function () { snd.unlock(); if (bdActive()) bdDrop(); else bdStart(); } }, "Boshlash");
+      var cash = h("button", { class: "btn white big", style: "margin-top:10px;display:none", onclick: bdCash }, "");
+      page.appendChild(main); page.appendChild(cash);
+      page.appendChild(h("p", { class: "note" }, "Demo o‘yin: faqat virtual coin. 12 qavat; har qavatda shamol kuchayadi va koeffitsiyent oshadi (×1,1 dan ×40 gacha). Shamol minorani yiqitsa, tikish yo‘qoladi. Istalgan payt yutuqni oling. Natija serverda tasodifiy belgilanadi — bosish vaqti natijaga ta’sir qilmaydi. Eng kam tikish — 500 coin."));
+      BD.refs = { stage: stage, world: world, floors: floors, hang: hang, wind: wind, floorChip: floorChip, multChip: multChip, gusts: gusts, chips: chips,
+                  input: br.input, half: br.half, dbl: br.dbl, max: br.max, betrow: br.el, main: main, cash: cash, banner: banner };
+      bdPaint();
+      if (BD.raf) cancelAnimationFrame(BD.raf);
+      BD.raf = requestAnimationFrame(bdLoop);
+      return page;
+    }
+
     /* ===================== NARVON (Ladder, demo) ===================== */
     var LD = { data: null, mode: 3, bet: 500, busy: false, revealing: false, game: null, banner: null, refs: null, timers: [], lost: false };
     var SVG_ROCK = '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.8" fill="#a39b92" stroke="#6a645d" stroke-width="1.2"/><circle cx="5.8" cy="6" r="1.5" fill="#7c766f"/><circle cx="10.2" cy="10" r="1.2" fill="#7c766f"/><circle cx="10" cy="5.5" r=".9" fill="#8a847d"/></svg>';
@@ -2204,6 +2456,7 @@
       if (tab === "mines") loadMines();
       if (tab === "tower") loadTower();
       if (tab === "ladder") loadLadder();
+      if (tab === "build") loadBuild();
       render();
       window.scrollTo(0, 0);
     }
@@ -2225,6 +2478,7 @@
         else if (state.tab === "mines") view.appendChild(viewMines());
         else if (state.tab === "tower") view.appendChild(viewTower());
         else if (state.tab === "ladder") view.appendChild(viewLadder());
+        else if (state.tab === "build") view.appendChild(viewBuild());
         else view.appendChild(viewHome());
       } catch (e) {
         view.appendChild(h("div", { class: "card empty" }, h("p", null, "Xatolik: " + e.message)));
@@ -2279,7 +2533,7 @@
     load();
     try {
       var gm = new URLSearchParams(location.search).get("game");
-      if (gm === "wheel" || gm === "mines" || gm === "tower" || gm === "ladder") go(gm);
+      if (gm === "wheel" || gm === "mines" || gm === "tower" || gm === "ladder" || gm === "build") go(gm);
     } catch (e) {}
   })();
   </script>

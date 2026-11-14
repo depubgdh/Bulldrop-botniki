@@ -72,6 +72,14 @@ class AdminStates(StatesGroup):
     waiting_hero_url = State()
     # G'ildirak o'yini
     waiting_wheel_daily = State()
+    # Bonus shartlari
+    waiting_task_title = State()
+    waiting_task_desc = State()
+    waiting_task_url = State()
+    waiting_task_channel = State()
+    waiting_task_reward = State()
+    waiting_task_edit_reward = State()
+    waiting_ref_reward = State()
 
 
 # ------------------------------------------------------------------ yordamchilar
@@ -113,6 +121,7 @@ def admin_menu() -> InlineKeyboardMarkup:
         [b("🏠 Bosh menyu matni va rasmi", "admin_home")],
         [b("📱 Mini App bosh sahifasi", "admin_hero")],
         [b("🎡 G‘ildirak", "admin_wheel")],
+        [b("🎯 Bonus shartlari", "atk_list")],
         [b("🧩 Menyu tugmalari (rang/joy)", "admin_mbtn")],
         [b("⬅️ Asosiy menyu", "go_home")],
     )
@@ -1424,3 +1433,257 @@ async def admin_wheel_daily_value(message: Message, state: FSMContext) -> None:
     wheel.set_daily_amount(number)
     await state.clear()
     await message.answer("✅ Saqlandi.\n\n" + wheel_view(), reply_markup=wheel_keyboard())
+
+
+
+# ------------------------------------------------------------------ 🎯 Bonus shartlari
+
+def tasks_text() -> str:
+    pending = db.count_pending_claims()
+    return (
+        "🎯 Bonus shartlari\n\n"
+        f"👥 Do‘st taklifi bonusi: {fmt_num(db.ref_reward())} {COIN} (do‘st ro‘yxatdan o‘tganda)\n"
+        f"⏳ Kutilayotgan so‘rovlar: {pending}\n\n"
+        "🟢 — faol, ⚪ — o‘chirilgan. Shartni bosib tahrirlang."
+    )
+
+
+def tasks_keyboard() -> InlineKeyboardMarkup:
+    rows = []
+    for t in db.get_tasks(active_only=False):
+        rows.append([b(f"{'🟢' if t['is_active'] else '⚪'} {t['title']} · {fmt_num(t['reward'])}"[:60], f"atk_v_{t['id']}")])
+    rows.append([b("➕ Shart qo‘shish", "atk_add")])
+    rows.append([b("👥 Do‘st bonusini o‘zgartirish", "atk_ref")])
+    rows.append([b(f"⏳ Kutilayotgan so‘rovlar ({db.count_pending_claims()})", "atk_pend")])
+    rows.append([b("🔙 Admin panel", "menu_admin")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+@router.callback_query(F.data == "atk_list")
+async def atk_list(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await state.clear()
+    if call.message:
+        await edit_or_send(call.message, tasks_text(), tasks_keyboard())
+
+
+def task_text(task) -> str:
+    check = (f"Kanal: {task['channel']} — a‘zolik bot tomonidan avtomatik tekshiriladi (bot kanalda admin bo‘lishi kerak; "
+             "tekshira olmasa, qo‘lda tasdiqlashga o‘tadi)") if task["channel"] else "Tekshirish: qo‘lda (siz tasdiqlaysiz yoki rad etasiz)"
+    return (
+        f"🎯 {task['title']}\n\n{task['description'] or '—'}\n\n"
+        f"Havola: {task['url'] or '—'}\n{check}\n"
+        f"Mukofot: {fmt_num(task['reward'])} {COIN}\nHolati: {'🟢 faol' if task['is_active'] else '⚪ o‘chirilgan'}"
+    )
+
+
+def task_keyboard(task) -> InlineKeyboardMarkup:
+    return kb(
+        [b("⚪ O‘chirish" if task["is_active"] else "🟢 Yoqish", f"atk_on_{task['id']}")],
+        [b("💰 Mukofotni o‘zgartirish", f"atk_rw_{task['id']}")],
+        [b("🗑 Butunlay o‘chirish", f"atk_del_{task['id']}")],
+        [b("🔙 Shartlar", "atk_list")],
+    )
+
+
+def _task_from(call: CallbackQuery, prefix: str):
+    raw = call.data.replace(prefix, "")
+    return db.get_task(raw) if raw.isdigit() else None
+
+
+@router.callback_query(F.data.startswith("atk_v_"))
+async def atk_view(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await state.clear()
+    task = _task_from(call, "atk_v_")
+    if call.message:
+        if task:
+            await edit_or_send(call.message, task_text(task), task_keyboard(task))
+        else:
+            await edit_or_send(call.message, "Shart topilmadi.", back_kb())
+
+
+@router.callback_query(F.data.startswith("atk_on_"))
+async def atk_toggle(call: CallbackQuery) -> None:
+    task = _task_from(call, "atk_on_")
+    if not task:
+        await call.answer("Topilmadi.", show_alert=True)
+        return
+    db.update_task(task["id"], is_active=0 if task["is_active"] else 1)
+    await call.answer("Saqlandi.")
+    task = db.get_task(task["id"])
+    if call.message:
+        await edit_or_send(call.message, task_text(task), task_keyboard(task))
+
+
+@router.callback_query(F.data.startswith("atk_del_"))
+async def atk_delete(call: CallbackQuery) -> None:
+    task = _task_from(call, "atk_del_")
+    if task:
+        db.delete_task(task["id"])
+    await call.answer("Shart o‘chirildi.")
+    if call.message:
+        await edit_or_send(call.message, tasks_text(), tasks_keyboard())
+
+
+# --- yangi shart qo'shish: nom -> tavsif -> havola -> kanal -> mukofot
+
+@router.callback_query(F.data == "atk_add")
+async def atk_add(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await state.set_state(AdminStates.waiting_task_title)
+    if call.message:
+        await call.message.answer("➕ Yangi shart\n\nShart nomini yozing (masalan: «@kanal ga obuna bo‘ling»):")
+
+
+@router.message(AdminStates.waiting_task_title, not_command)
+async def atk_title(message: Message, state: FSMContext) -> None:
+    title = (message.text or "").strip()
+    if not title or len(title) > 80:
+        await message.answer("Nom 1–80 belgi bo‘lishi kerak:")
+        return
+    await state.update_data(task_title=title)
+    await state.set_state(AdminStates.waiting_task_desc)
+    await message.answer("Foydalanuvchiga ko‘rsatiladigan tushuntirishni yozing («-» — bo‘sh qoldirish):")
+
+
+@router.message(AdminStates.waiting_task_desc, not_command)
+async def atk_desc(message: Message, state: FSMContext) -> None:
+    text = (message.text or "").strip()
+    await state.update_data(task_desc="" if text == "-" else text[:800])
+    await state.set_state(AdminStates.waiting_task_url)
+    await message.answer("Havolani yozing (https://t.me/... yoki boshqa https:// havola; «-» — havolasiz):")
+
+
+@router.message(AdminStates.waiting_task_url, not_command)
+async def atk_url(message: Message, state: FSMContext) -> None:
+    text = (message.text or "").strip()
+    if text != "-" and not text.lower().startswith(("http://", "https://")):
+        await message.answer("Havola https:// bilan boshlanishi kerak (yoki «-»):")
+        return
+    await state.update_data(task_url="" if text == "-" else text)
+    await state.set_state(AdminStates.waiting_task_channel)
+    await message.answer(
+        "Bu kanalga obuna sharti bo‘lsa, kanalni yozing (@kanal yoki -100... ID) — bot a‘zolikni O‘ZI tekshiradi "
+        "(botni o‘sha kanalda admin qiling).\nAks holda «-» yozing — so‘rov sizga tasdiqlash uchun keladi:"
+    )
+
+
+@router.message(AdminStates.waiting_task_channel, not_command)
+async def atk_channel(message: Message, state: FSMContext) -> None:
+    text = (message.text or "").strip()
+    if text != "-" and not (text.startswith("@") or text.lstrip("-").isdigit()):
+        await message.answer("Kanal @username yoki raqamli ID ko‘rinishida bo‘lishi kerak (yoki «-»):")
+        return
+    await state.update_data(task_channel="" if text == "-" else text)
+    await state.set_state(AdminStates.waiting_task_reward)
+    await message.answer(f"Mukofot miqdori ({COIN}). Standart: {db.TASK_REWARD_DEFAULT}:")
+
+
+@router.message(AdminStates.waiting_task_reward, not_command)
+async def atk_reward(message: Message, state: FSMContext) -> None:
+    reward = parse_int(message.text, minimum=0)
+    if reward is None or reward > 100_000_000:
+        await message.answer("0 dan katta bo‘lmagan butun son yozing:")
+        return
+    data = await state.get_data()
+    await state.clear()
+    task_id = db.add_task(data["task_title"], data.get("task_desc", ""), data.get("task_url", ""),
+                          data.get("task_channel", ""), reward)
+    await message.answer("✅ Shart qo‘shildi.\n\n" + task_text(db.get_task(task_id)), reply_markup=task_keyboard(db.get_task(task_id)))
+
+
+@router.callback_query(F.data.startswith("atk_rw_"))
+async def atk_reward_edit(call: CallbackQuery, state: FSMContext) -> None:
+    task = _task_from(call, "atk_rw_")
+    if not task:
+        await call.answer("Topilmadi.", show_alert=True)
+        return
+    await call.answer()
+    await state.update_data(edit_task=task["id"])
+    await state.set_state(AdminStates.waiting_task_edit_reward)
+    if call.message:
+        await call.message.answer(f"Yangi mukofot miqdorini yozing ({COIN}):")
+
+
+@router.message(AdminStates.waiting_task_edit_reward, not_command)
+async def atk_reward_edit_value(message: Message, state: FSMContext) -> None:
+    reward = parse_int(message.text, minimum=0)
+    if reward is None or reward > 100_000_000:
+        await message.answer("Butun son yozing:")
+        return
+    data = await state.get_data()
+    await state.clear()
+    db.update_task(data["edit_task"], reward=reward)
+    task = db.get_task(data["edit_task"])
+    await message.answer("✅ Saqlandi.\n\n" + task_text(task), reply_markup=task_keyboard(task))
+
+
+@router.callback_query(F.data == "atk_ref")
+async def atk_ref(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await state.set_state(AdminStates.waiting_ref_reward)
+    if call.message:
+        await call.message.answer(f"Do‘st ro‘yxatdan o‘tganda taklif qilgan odamga beriladigan {COIN} miqdorini yozing (0 — o‘chirish). Hozir: {db.ref_reward()}:")
+
+
+@router.message(AdminStates.waiting_ref_reward, not_command)
+async def atk_ref_value(message: Message, state: FSMContext) -> None:
+    amount = parse_int(message.text, minimum=0)
+    if amount is None or amount > 100_000_000:
+        await message.answer("Butun son yozing:")
+        return
+    db.set_setting("ref_reward", amount)
+    await state.clear()
+    await message.answer("✅ Saqlandi.\n\n" + tasks_text(), reply_markup=tasks_keyboard())
+
+
+# --- so'rovlarni tasdiqlash / rad etish
+
+def claim_markup(claim_id: int) -> InlineKeyboardMarkup:
+    return kb([b("✅ Tasdiqlash", f"bonus_ok_{claim_id}"), b("❌ Rad etish", f"bonus_no_{claim_id}")])
+
+
+@router.callback_query(F.data == "atk_pend")
+async def atk_pending(call: CallbackQuery) -> None:
+    await call.answer()
+    rows = db.pending_claims(10)
+    if not call.message:
+        return
+    if not rows:
+        await call.message.answer("Kutilayotgan so‘rovlar yo‘q.", reply_markup=kb([b("🔙 Shartlar", "atk_list")]))
+        return
+    for r in rows:
+        who = f"@{r['username']}" if r["username"] else "—"
+        await call.message.answer(
+            f"🧾 So‘rov #{r['id']}\nFoydalanuvchi: {who}\nID: {r['user_id']}\n"
+            f"Shart: {r['title'] or '(o‘chirilgan)'}\nMukofot: {fmt_num(r['reward'] or 0)} {COIN}",
+            reply_markup=claim_markup(r["id"]),
+        )
+
+
+@router.callback_query(F.data.startswith("bonus_ok_") | F.data.startswith("bonus_no_"))
+async def bonus_decide(call: CallbackQuery) -> None:
+    approve = call.data.startswith("bonus_ok_")
+    raw = call.data.split("_", 2)[2]
+    res = db.resolve_claim(int(raw), approve) if raw.isdigit() else None
+    if not res:
+        await call.answer("Bu so‘rov allaqachon hal qilingan.", show_alert=True)
+        if call.message:
+            try:
+                await call.message.edit_reply_markup(reply_markup=None)
+            except Exception:
+                pass
+        return
+    await call.answer("✅ Tasdiqlandi" if approve else "❌ Rad etildi")
+    if call.message:
+        verdict = f"✅ Tasdiqlandi (+{fmt_num(res['reward'])} {COIN})" if approve else "❌ Rad etildi"
+        try:
+            await call.message.edit_text(f"{call.message.text}\n\n{verdict}", reply_markup=None)
+        except Exception:
+            pass
+    if approve:
+        text = f"🎉 «{res['title']}» sharti tasdiqlandi! Sizga +{fmt_num(res['reward'])} {COIN} demo bonus berildi."
+    else:
+        text = f"❌ «{res['title']}» bo‘yicha so‘rovingiz rad etildi. Shartni to‘liq bajarib, 💎 Bonus bo‘limidan qayta yuboring."
+    await notify(call.bot, res["user_id"], text)

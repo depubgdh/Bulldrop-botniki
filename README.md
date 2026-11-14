@@ -6,6 +6,16 @@ Telegram botning mavjud demo prototipiga Mini App sahifasi va Web App tugmasi qo
 
 Bu **demo/prototip**: real pul qabul qilish, pul yechish, tikish, sovrinli o‘yinlar yoki uchinchi tomon o‘yini natijalarini bashorat qilish yo‘q. `/admin` faqat admin ID ni tekshiradi va demo xabar ko‘rsatadi; balans va to‘lovlarni tahrirlamaydi.
 
+## Yangi: Qurilish o'yini va Bonus bo'limi
+
+**🏗 Qurilish** (Mini App → O'yinlar): kran blokni tebratadi, «Qurish» bosilganda blok tushadi. 12 qavat, shamol har qavatda kuchayadi (0,9 → 9,2 m/s), koeffitsiyent ×1,1 dan ×40 gacha. Shamol minorani yiqitsa — tikish yo'qoladi; istalgan payt yutuqni olish mumkin. Natija o'yin boshida serverda belgilanadi (`crane.py`), bosish vaqti natijaga ta'sir qilmaydi; har qavatda kutiladigan qaytim 95%. Faqat virtual coin.
+
+**💎 Bonus** (bot menyusi): do'st chaqirish havolasi (do'st telefon yuborsa, taklif qilgan odamga +800 coin; admin o'zgartiradi) va admin qo'shadigan shartlar (standart: @nft_webot ga /start va Mini App, +1000 coin).
+- Shartda kanal ko'rsatilsa (@kanal) va bot o'sha kanalda admin bo'lsa — a'zolik avtomatik tekshiriladi va bonus darhol beriladi.
+- Aks holda «✅ Bajardim» bosilganda adminlarga «✅ Tasdiqlash / ❌ Rad etish» tugmali xabar keladi; tasdiqlansa bonus beriladi, rad etilsa foydalanuvchi qayta yuborishi mumkin.
+- Admin panel → «🎯 Bonus shartlari»: shart qo'shish/o'chirish/yoqish, mukofotni o'zgartirish, kutilayotgan so'rovlar.
+- Boshqa bot (masalan @nft_webot) ichidagi harakatni Telegram bot tekshira olmaydi — shuning uchun bunday shartlar qo'lda tasdiqlanadi.
+
 ## Render sozlamalari
 
 - Web Service, Python

@@ -8,6 +8,7 @@ import signal
 import backup
 from bot import main as run_bot
 from webapi import setup_routes
+import crane
 import ladder
 import mines
 import tower
@@ -15,7 +16,7 @@ import wheel
 
 
 async def health(request: web.Request) -> web.Response:
-    return web.json_response({"status": "ok", "service": "bulldrop", "wheel": hasattr(wheel, "place_bet"), "mines": hasattr(mines, "start"), "tower": hasattr(tower, "start"), "ladder": hasattr(ladder, "start")})
+    return web.json_response({"status": "ok", "service": "bulldrop", "wheel": hasattr(wheel, "place_bet"), "mines": hasattr(mines, "start"), "tower": hasattr(tower, "start"), "ladder": hasattr(ladder, "start"), "crane": hasattr(crane, "start")})
 
 
 async def miniapp(request: web.Request) -> web.FileResponse:

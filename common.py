@@ -11,6 +11,7 @@ COIN = "🪙"
 # Bot bosh menyusidagi sozlanadigan tugmalar (callback_data = "menu_<id>")
 MENU_ITEMS = {
     "boxes": "🎁 Super Qutilar",
+    "bonus": "💎 Bonus",
     "signal": "📡 Bulldrop Signal",
     "inventory": "🎒 Inventory",
     "account": "👤 Hisobim",
