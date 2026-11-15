@@ -464,9 +464,19 @@ def case_ev(case_id) -> float:
 
 # ------------------------------------------------------------------ ochish, inventory, sotish
 
-def open_case(user_id, case_id) -> dict:
-    """Qutini ochadi. Birinchi N ta ochish tekin, keyin quti narxi coin'dan yechiladi.
-    Hammasi bitta tranzaksiyada: coin yechish, sovg'ani tanlash va inventoryga yozish."""
+OPEN_COUNTS = (1, 2, 3, 5, 10)
+
+
+def open_case(user_id, case_id, count=1) -> dict:
+    """Qutini count marta (1, 2, 3, 5 yoki 10) ochadi. Avval bepul ochishlar ishlatiladi, qolganlari uchun quti narxi
+    coin'dan yechiladi. Hammasi bitta tranzaksiyada: coin yechish, sovg'alarni tanlash va inventoryga yozish
+    (coin yetmasa — hech narsa o'zgarmaydi)."""
+    try:
+        count = int(count)
+    except (TypeError, ValueError):
+        return {"ok": False, "error": "bad_count"}
+    if count not in OPEN_COUNTS:
+        return {"ok": False, "error": "bad_count"}
     con = connect()
     try:
         con.execute("BEGIN IMMEDIATE")
@@ -485,29 +495,60 @@ def open_case(user_id, case_id) -> dict:
 
         wallet_before = _wallet(con, user_id)
         price = int(case["price"])
-        free = wallet_before["free_left"] > 0 or price <= 0
-        if not free and wallet_before["coins"] < price:
+        free_n = count if price <= 0 else min(count, wallet_before["free_left"])
+        cost = (count - free_n) * price
+        if wallet_before["coins"] < cost:
             con.rollback()
             return {"ok": False, "error": "no_funds", "price": price, "coins": wallet_before["coins"]}
 
-        winner = _pick(items)
-        con.execute(
-            "UPDATE users SET coins = coins - ?, opens = opens + 1 WHERE user_id=?",
-            (0 if free else price, user_id),
-        )
-        cur = con.execute(
-            "INSERT INTO inventory(user_id, item_id, case_id, name, price, image_url, rarity) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (user_id, winner["id"], case["id"], winner["name"], int(winner["price"]),
-             winner["image_url"] or "", winner["rarity"]),
-        )
-        inv_id = cur.lastrowid
+        con.execute("UPDATE users SET coins = coins - ?, opens = opens + ? WHERE user_id=?", (cost, count, user_id))
+        won = []
+        for _ in range(count):
+            winner = _pick(items)
+            cur = con.execute(
+                "INSERT INTO inventory(user_id, item_id, case_id, name, price, image_url, rarity) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (user_id, winner["id"], case["id"], winner["name"], int(winner["price"]),
+                 winner["image_url"] or "", winner["rarity"]),
+            )
+            won.append(con.execute("SELECT * FROM inventory WHERE id=?", (cur.lastrowid,)).fetchone())
         result = {
             "ok": True,
-            "free": free,
-            "item": con.execute("SELECT * FROM inventory WHERE id=?", (inv_id,)).fetchone(),
+            "free": free_n == count,
+            "free_used": free_n,
+            "cost": cost,
+            "item": won[0],
+            "items": won,
             "wallet": _wallet(con, user_id),
         }
+        con.commit()
+        return result
+    except Exception:
+        con.rollback()
+        raise
+    finally:
+        con.close()
+
+
+def sell_items(user_id, ids) -> dict:
+    """Tanlangan buyumlarni (faqat shu foydalanuvchiniki va sotilmaganlarini) bitta tranzaksiyada sotadi."""
+    ids = sorted({int(i) for i in ids})[:50]
+    con = connect()
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        gained = count = 0
+        for inv_id in ids:
+            row = con.execute("SELECT * FROM inventory WHERE id=? AND user_id=? AND sold=0", (inv_id, user_id)).fetchone()
+            if not row:
+                continue
+            con.execute("UPDATE inventory SET sold=1, sold_at=CURRENT_TIMESTAMP WHERE id=?", (row["id"],))
+            gained += int(row["price"])
+            count += 1
+        if not count:
+            con.rollback()
+            return {"ok": False, "error": "not_found"}
+        con.execute("UPDATE users SET coins = coins + ? WHERE user_id=?", (gained, user_id))
+        result = {"ok": True, "count": count, "gained": gained, "wallet": _wallet(con, user_id)}
         con.commit()
         return result
     except Exception:

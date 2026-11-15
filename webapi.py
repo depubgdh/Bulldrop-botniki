@@ -268,9 +268,10 @@ async def api_open(request):
         case_id = int(body.get("case_id"))
     except (TypeError, ValueError):
         raise ApiError(400, "bad_request", "case_id noto‘g‘ri")
-    res = db.open_case(user_id, case_id)
+    res = db.open_case(user_id, case_id, body.get("count", 1))
     if not res["ok"]:
         errors = {
+            "bad_count": (400, "Bir vaqtda 1, 2, 3, 5 yoki 10 ta quti ochish mumkin."),
             "no_case": (404, "Quti topilmadi."),
             "no_items": (409, "Bu qutida sovg‘a yo‘q."),
             "no_funds": (402, "Coin yetarli emas."),
@@ -278,7 +279,8 @@ async def api_open(request):
         status, message = errors.get(res["error"], (400, "Xatolik"))
         raise ApiError(status, res["error"], message)
     return web.json_response(
-        {"item": inv_json(res["item"]), "free": res["free"], "wallet": wallet_json(res["wallet"])},
+        {"item": inv_json(res["item"]), "items": [inv_json(i) for i in res["items"]], "free": res["free"],
+         "free_used": res["free_used"], "cost": res["cost"], "wallet": wallet_json(res["wallet"])},
         headers=NO_STORE,
     )
 
@@ -297,6 +299,11 @@ async def api_sell(request):
     user_id, _, body, _ = await _auth(request)
     if body.get("all"):
         res = db.sell_all(user_id)
+    elif isinstance(body.get("ids"), list):
+        try:
+            res = db.sell_items(user_id, body["ids"])
+        except (TypeError, ValueError):
+            raise ApiError(400, "bad_request", "ids noto‘g‘ri")
     else:
         try:
             inv_id = int(body.get("id"))
