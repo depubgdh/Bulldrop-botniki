@@ -80,6 +80,8 @@ class AdminStates(StatesGroup):
     waiting_task_reward = State()
     waiting_task_edit_reward = State()
     waiting_ref_reward = State()
+    # Maxsus emoji
+    waiting_custom_emoji = State()
 
 
 # ------------------------------------------------------------------ yordamchilar
@@ -122,6 +124,7 @@ def admin_menu() -> InlineKeyboardMarkup:
         [b("📱 Mini App bosh sahifasi", "admin_hero")],
         [b("🎡 G‘ildirak", "admin_wheel")],
         [b("🎯 Bonus shartlari", "atk_list")],
+        [b("✨ Maxsus belgilar", "aemo_menu")],
         [b("🧩 Menyu tugmalari (rang/joy)", "admin_mbtn")],
         [b("⬅️ Asosiy menyu", "go_home")],
     )
@@ -1687,3 +1690,64 @@ async def bonus_decide(call: CallbackQuery) -> None:
     else:
         text = f"❌ «{res['title']}» bo‘yicha so‘rovingiz rad etildi. Shartni to‘liq bajarib, 💎 Bonus bo‘limidan qayta yuboring."
     await notify(call.bot, res["user_id"], text)
+
+
+
+# ------------------------------------------------------------------ ✨ Maxsus belgilar (custom emoji)
+
+def emoji_view() -> str:
+    import custom_emoji
+    m = custom_emoji.mapping()
+    return (
+        "✨ Maxsus belgilar\n\n"
+        "Bot xabarlari va tugmalaridagi oddiy emojilarni Telegram'ning maxsus (premium) emojilari bilan almashtiradi.\n\n"
+        "Qanday qo‘shiladi: «➕ Belgilar qo‘shish» ni bosing va Premium emoji paketidan kerakli maxsus emojilarni "
+        "(masalan, o‘rniga qo‘yiladigan 🎁 🪙 💎 📤) bitta xabarda yuboring. Har bir maxsus emoji o‘zining oddiy "
+        "ko‘rinishi o‘rniga ishlatiladi.\n\n"
+        "Eslatma: maxsus emojini yuborish uchun sizda, ko‘rinishi uchun esa bot egasida Telegram Premium bo‘lishi kerak "
+        "(yoki bot Fragment’da qo‘shimcha username sotib olgan bo‘lishi). Bo‘lmasa foydalanuvchi oddiy emojini ko‘radi.\n\n"
+        + (f"Hozir almashtiriladi ({len(m)} ta): " + " ".join(m) if m else "Hozircha belgilar qo‘shilmagan.")
+    )
+
+
+def emoji_keyboard() -> InlineKeyboardMarkup:
+    return kb([b("➕ Belgilar qo‘shish", "aemo_add")], [b("🗑 Hammasini tozalash", "aemo_clear")], [b("🔙 Admin panel", "menu_admin")])
+
+
+@router.callback_query(F.data == "aemo_menu")
+async def aemo_menu(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await state.clear()
+    if call.message:
+        await edit_or_send(call.message, emoji_view(), emoji_keyboard())
+
+
+@router.callback_query(F.data == "aemo_add")
+async def aemo_add(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await state.set_state(AdminStates.waiting_custom_emoji)
+    if call.message:
+        await call.message.answer("Maxsus emojilarni bitta xabarda yuboring (bekor qilish: /cancel):")
+
+
+@router.message(AdminStates.waiting_custom_emoji, not_command)
+async def aemo_value(message: Message, state: FSMContext) -> None:
+    import custom_emoji
+    found = custom_emoji.extract_from_message(message)
+    if not found:
+        await message.answer("Xabarda maxsus emoji topilmadi. Premium emoji paketidan emoji tanlab yuboring:")
+        return
+    data = dict(custom_emoji.mapping())
+    data.update(found)
+    custom_emoji.save_mapping(data)
+    await state.clear()
+    await message.answer(f"✅ {len(found)} ta belgi saqlandi.\n\n" + emoji_view(), reply_markup=emoji_keyboard())
+
+
+@router.callback_query(F.data == "aemo_clear")
+async def aemo_clear(call: CallbackQuery) -> None:
+    import custom_emoji
+    custom_emoji.save_mapping({})
+    await call.answer("Tozalandi.")
+    if call.message:
+        await edit_or_send(call.message, emoji_view(), emoji_keyboard())

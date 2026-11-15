@@ -15,6 +15,11 @@ async def main():
     await backup.restore_if_needed()
     db.init_db()
     bot = Bot(token=BOT_TOKEN)
+    try:  # admin kiritgan maxsus (premium) emojilar bilan oddiy emojilarni almashtirish
+        import custom_emoji
+        bot.session.middleware(custom_emoji.make_middleware())
+    except Exception:
+        logging.exception("Maxsus emoji middleware ulanmadi (oddiy emoji ishlatiladi)")
     backup_task = asyncio.create_task(backup.backup_loop(bot))
     dp = Dispatcher(storage=MemoryStorage())
     # Admin router birinchi bo'lishi kerak: uning holat (state) handlerlari fallback'dan oldin ishlaydi

@@ -16,6 +16,12 @@ Bu **demo/prototip**: real pul qabul qilish, pul yechish, tikish, sovrinli o‘y
 - Admin panel → «🎯 Bonus shartlari»: shart qo'shish/o'chirish/yoqish, mukofotni o'zgartirish, kutilayotgan so'rovlar.
 - Boshqa bot (masalan @nft_webot) ichidagi harakatni Telegram bot tekshira olmaydi — shuning uchun bunday shartlar qo'lda tasdiqlanadi.
 
+## Dizayn: maxsus belgilar va 60 fps
+
+- Mini App'dagi barcha emoji avtomatik ravishda shishali SVG belgilarga almashtiriladi (`index.html` ichidagi `EMO` jadvali). Yangi belgi qo'shish: `<symbol id="i-...">` qo'shing va `EMO` ga yozing.
+- **Qurilish** to'liq ekranda ishlaydi, harakat vaqtga (dt) bog'liq va faqat GPU transform'lari yangilanadi. `BD_FPS_CAP` (30 yoki 60) ekran yangilanishini cheklaydi. FPS'ni ko'rish: Mini App havolasiga `?fps=1` qo'shing.
+- **Botdagi maxsus emoji**: admin panel → «✨ Maxsus belgilar». Premium emoji'larni botga yuborsangiz, bot ularning ID sini saqlaydi va tugma/xabarlardagi oddiy emojilarni almashtiradi (`custom_emoji.py`). Telegram talabi: bot egasida Premium bo'lishi yoki bot Fragment'da qo'shimcha username sotib olgan bo'lishi kerak.
+
 ## Render sozlamalari
 
 - Web Service, Python

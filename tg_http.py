@@ -87,3 +87,40 @@ async def is_subscribed(chat, user_id: int) -> bool:
         _members.clear()
     _members[key] = (time.time(), ok)
     return ok
+
+
+async def member_status(chat, user_id: int):
+    """True — a'zo, False — a'zo emas, None — tekshirib bo'lmadi (bot kanalda admin emas va hokazo)."""
+    if not BOT_TOKEN:
+        return None
+    chat_id = int(chat) if str(chat).lstrip("-").isdigit() else str(chat)
+    timeout = aiohttp.ClientTimeout(total=10)
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(
+                f"{API}/bot{BOT_TOKEN}/getChatMember",
+                params={"chat_id": chat_id, "user_id": int(user_id)},
+            ) as resp:
+                data = await resp.json()
+    except (aiohttp.ClientError, ValueError, TimeoutError):
+        return None
+    if not data.get("ok"):
+        return None
+    return (data.get("result") or {}).get("status") in ("creator", "administrator", "member", "restricted")
+
+
+async def send_message(chat_id: int, text: str, reply_markup=None) -> bool:
+    """Oddiy matnli xabar (Mini App serveridan adminlarga bildirishnoma uchun)."""
+    if not BOT_TOKEN:
+        return False
+    payload = {"chat_id": chat_id, "text": text}
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+    timeout = aiohttp.ClientTimeout(total=10)
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(f"{API}/bot{BOT_TOKEN}/sendMessage", json=payload) as resp:
+                data = await resp.json()
+        return bool(data.get("ok"))
+    except (aiohttp.ClientError, ValueError, TimeoutError):
+        return False

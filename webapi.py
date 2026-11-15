@@ -557,6 +557,62 @@ async def api_build_cashout(request):
     return web.json_response(res, headers=NO_STORE)
 
 
+# ------------------------------------------------------------------ bonus (Mini App)
+
+def _task_json(task, status) -> dict:
+    return {"id": task["id"], "title": task["title"], "description": task["description"] or "",
+            "url": task["url"] or "", "auto": bool(task["channel"]), "reward": task["reward"], "status": status or ""}
+
+
+@api
+async def api_bonus_state(request):
+    user_id, _, _, _ = await _auth(request)
+    status = db.claim_statuses(user_id)
+    return web.json_response({
+        "ref_reward": db.ref_reward(),
+        "referrals": db.count_referrals(user_id),
+        "tasks": [_task_json(t, status.get(t["id"])) for t in db.get_tasks()],
+    }, headers=NO_STORE)
+
+
+@api
+async def api_bonus_claim(request):
+    """«Bajardim»: kanal sharti bo'lsa a'zolik avtomatik tekshiriladi, aks holda adminga tasdiqlash so'rovi ketadi."""
+    user_id, user, body, _ = await _auth(request)
+    try:
+        task = db.get_task(int(body.get("task_id")))
+    except (TypeError, ValueError):
+        raise ApiError(400, "bad_request", "task_id noto‘g‘ri")
+    if not task or not task["is_active"]:
+        raise ApiError(404, "no_task", "Bu shart topilmadi.")
+
+    if task["channel"]:
+        member = await tg_http.member_status(task["channel"], user_id)
+        if member is False:
+            raise ApiError(409, "not_member", "Siz hali kanalga a‘zo emassiz. A‘zo bo‘lib, qayta bosing.")
+        if member:
+            res = db.auto_approve(task["id"], user_id)
+            if not res["ok"]:
+                raise ApiError(409, "claimed", "Bu bonus allaqachon olingan.")
+            return web.json_response({"status": "approved", "reward": res["reward"],
+                                      "wallet": wallet_json(db.wallet(user_id))}, headers=NO_STORE)
+        # member is None: bot tekshira olmadi — qo'lda tasdiqlashga o'tamiz
+
+    res = db.submit_claim(task["id"], user_id)
+    if not res["ok"]:
+        if res["status"] == "approved":
+            raise ApiError(409, "claimed", "Bu bonus allaqachon olingan.")
+        raise ApiError(409, "pending", "So‘rovingiz allaqachon admin tasdig‘ida.")
+    name = (user.get("first_name") or "") + (f" (@{user['username']})" if user.get("username") else "")
+    note = (f"🧾 Bonus so‘rovi #{res['claim_id']}\n\nFoydalanuvchi: {name.strip() or user_id}\nID: {user_id}\n"
+            f"Shart: {task['title']}\nMukofot: {task['reward']} coin\n\nShartni bajarganini tekshirib, qaror qiling:")
+    markup = {"inline_keyboard": [[{"text": "✅ Tasdiqlash", "callback_data": f"bonus_ok_{res['claim_id']}"},
+                                    {"text": "❌ Rad etish", "callback_data": f"bonus_no_{res['claim_id']}"}]]}
+    for admin_id in ADMIN_IDS:
+        await tg_http.send_message(admin_id, note, markup)
+    return web.json_response({"status": "pending"}, headers=NO_STORE)
+
+
 @api
 async def api_wheel_daily(request):
     user_id, _, _, _ = await _auth(request)
@@ -583,6 +639,8 @@ def setup_routes(app: web.Application) -> None:
     app.router.add_post("/api/ladder/step", api_ladder_step)
     app.router.add_post("/api/ladder/cashout", api_ladder_cashout)
     app.router.add_post("/api/wheel/daily", api_wheel_daily)
+    app.router.add_post("/api/bonus/state", api_bonus_state)
+    app.router.add_post("/api/bonus/claim", api_bonus_claim)
     app.router.add_post("/api/build/state", api_build_state)
     app.router.add_post("/api/build/start", api_build_start)
     app.router.add_post("/api/build/drop", api_build_drop)
