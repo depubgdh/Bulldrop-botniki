@@ -16,6 +16,12 @@ Bu **demo/prototip**: real pul qabul qilish, pul yechish, tikish, sovrinli o‘y
 - Admin panel → «🎯 Bonus shartlari»: shart qo'shish/o'chirish/yoqish, mukofotni o'zgartirish, kutilayotgan so'rovlar.
 - Boshqa bot (masalan @nft_webot) ichidagi harakatni Telegram bot tekshira olmaydi — shuning uchun bunday shartlar qo'lda tasdiqlanadi.
 
+## O'yinlar menyusi va Narvon (yangilanish)
+
+- Mini App pastki menyusida alohida **🎮 O'yinlar** bo'limi bor (Narvon, Minora, Saper, G'ildirak, Qurilish kartalari). Bosh sahifadan o'yinlar ro'yxati olib tashlandi.
+- Har bir o'yinning chap yuqorisida **orqaga** tugmasi bor (Telegram'ning o'z «orqaga» tugmasi ham ishlaydi); u o'yinlar menyusiga qaytaradi.
+- **Narvon**: 12 pog'ona, har birida 20 yo'lak. Chiqish yo'lagini o'yinchi o'zi tanlaydi (bir marta bosish — tanlash, yana bosish yoki «Qadam tashlash» — chiqish). Server tanlangan yo'lakda tosh bor-yo'qligini tekshiradi. Koeffitsiyent = 0,95 / p^k, p = (20 − toshlar) / 20 (3 tosh: ×1,12 … ×6,68; 4 tosh: ×1,19 … ×13,82).
+
 ## Dizayn: maxsus belgilar va 60 fps
 
 - Mini App'dagi barcha emoji avtomatik ravishda shishali SVG belgilarga almashtiriladi (`index.html` ichidagi `EMO` jadvali). Yangi belgi qo'shish: `<symbol id="i-...">` qo'shing va `EMO` ga yozing.

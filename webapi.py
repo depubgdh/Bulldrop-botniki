@@ -503,9 +503,9 @@ async def api_ladder_start(request):
 
 @api
 async def api_ladder_step(request):
-    user_id, _, _, _ = await _auth(request)
+    user_id, _, body, _ = await _auth(request)
     try:
-        res = ladder.step(user_id)
+        res = ladder.step(user_id, body.get("col"))
     except ladder.LadderError as exc:
         raise _ladder_error(exc)
     return web.json_response(res, headers=NO_STORE)

@@ -1,8 +1,9 @@
 """Narvon (Ladder) — demo, faqat virtual coin.
 
-12 pog‘ona, har pog‘onada 19 ta katak va 3 yoki 4 ta tosh. Har qadamda qahramon tasodifiy katakka sakraydi:
-toshga tushsa — o‘yin tugaydi, aks holda yuqoriga chiqadi va koeffitsiyent oshadi. Istalgan payt yutuqni olish mumkin.
-Barcha toshlar va sakrash joylari o‘yin boshida SERVERDA tanlanadi va qadam bosilgunga qadar yuborilmaydi.
+12 pog‘ona, har pog‘onada 20 ta yo‘lak (katak) va 3 yoki 4 ta tosh. O‘yinchi har pog‘onada chiqish yo‘lagini O‘ZI tanlaydi:
+tanlangan yo‘lakda tosh bo‘lsa — o‘yin tugaydi, aks holda yuqoriga chiqadi va koeffitsiyent oshadi. Istalgan payt yutuqni olish mumkin.
+Toshlar joyi o‘yin boshida SERVERDA tanlanadi va o‘yin tugamaguncha mijozga yuborilmaydi.
+Koeffitsiyent = RTP / p^k, bu yerda p = (20 − toshlar) / 20 — istalgan pog‘onada kutiladigan qaytim 95%.
 """
 import json
 import random
@@ -12,13 +13,10 @@ import db
 
 MIN_BET = 500
 ROWS = 12
-COLS = 19
+COLS = 20
 MODES = (3, 4)
-RTP = 0.944
+RTP = 0.95
 REQUEST_RE = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
-
-# Aniq ma‘lum koeffitsiyentlar (3 tosh); qolganlari xuddi shu ehtimollik bo‘yicha davom ettiriladi.
-GIVEN = {3: {1: 1.12, 2: 1.33, 3: 1.60}}
 
 
 class LadderError(Exception):
@@ -29,17 +27,7 @@ class LadderError(Exception):
 
 def table(stones: int) -> list:
     p = (COLS - stones) / COLS
-    out = []
-    given = GIVEN.get(stones, {})
-    for k in range(1, ROWS + 1):
-        if k in given:
-            m = given[k]
-        elif out and given:
-            m = round(out[-1] / p + 1e-9, 2)
-        else:
-            m = round(RTP / (p ** k) + 1e-9, 2)
-        out.append(m)
-    return out
+    return [round(RTP / (p ** k) + 1e-9, 2) for k in range(1, ROWS + 1)]
 
 
 def multiplier(stones: int, k: int) -> float:
@@ -152,7 +140,7 @@ def start(user_id: int, bet, stones, request_id) -> dict:
             raise LadderError("no_funds")
         con.execute("UPDATE users SET coins = coins - ? WHERE user_id=?", (bet, user_id))
         rnd = random.SystemRandom()
-        plan = [{"stones": sorted(rnd.sample(range(COLS), stones)), "jump": rnd.randrange(COLS)} for _ in range(ROWS)]
+        plan = [{"stones": sorted(rnd.sample(range(COLS), stones)), "jump": None} for _ in range(ROWS)]
         cur = con.execute("INSERT INTO ladder_games(request_id, user_id, bet, stones, plan) VALUES (?,?,?,?,?)",
                           (request_id, user_id, bet, stones, json.dumps(plan)))
         row = con.execute("SELECT * FROM ladder_games WHERE id=?", (cur.lastrowid,)).fetchone()
@@ -168,8 +156,15 @@ def _win(con, row) -> object:
     return con.execute("SELECT * FROM ladder_games WHERE id=?", (row["id"],)).fetchone()
 
 
-def step(user_id: int) -> dict:
+def step(user_id: int, col) -> dict:
+    """O‘yinchi tanlagan yo‘lak (0..COLS-1) bo‘yicha bitta qadam."""
     _ensure_schema()
+    try:
+        col = int(col)
+    except (TypeError, ValueError):
+        raise LadderError("bad_request")
+    if not 0 <= col < COLS:
+        raise LadderError("bad_request")
 
     def run(con):
         row = _active(con, user_id)
@@ -178,11 +173,13 @@ def step(user_id: int) -> dict:
         plan = json.loads(row["plan"])
         k = row["steps"]
         cur = plan[k]
-        if cur["jump"] in cur["stones"]:
-            con.execute("UPDATE ladder_games SET status='lost', payout=0 WHERE id=?", (row["id"],))
+        cur["jump"] = col
+        plan_json = json.dumps(plan)
+        if col in cur["stones"]:
+            con.execute("UPDATE ladder_games SET status='lost', payout=0, plan=? WHERE id=?", (plan_json, row["id"]))
             row = con.execute("SELECT * FROM ladder_games WHERE id=?", (row["id"],)).fetchone()
             return {"game": _view(row, lost_row=True), "balance": _balance(con, user_id), "hit": True}
-        con.execute("UPDATE ladder_games SET steps=steps+1 WHERE id=?", (row["id"],))
+        con.execute("UPDATE ladder_games SET steps=steps+1, plan=? WHERE id=?", (plan_json, row["id"]))
         row = con.execute("SELECT * FROM ladder_games WHERE id=?", (row["id"],)).fetchone()
         if row["steps"] == ROWS:
             row = _win(con, row)
