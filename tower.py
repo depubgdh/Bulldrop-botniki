@@ -2,7 +2,7 @@
 
 8 qavat, har qavatda 2 ta katak: biri xavfsiz, biri tuzoq. Pastdan yuqoriga qarab katak tanlanadi.
 Tuzoqlar o‘yin boshida SERVERDA tanlanadi va tugamaguncha mijozga yuborilmaydi.
-Yutuq = tikish × 1.9 × 2^(qavat−1); istalgan payt yutuqni olish mumkin.
+Yutuq = tikish × 1.84 × 2^(qavat−1); istalgan payt yutuqni olish mumkin.
 """
 import json
 import random
@@ -12,7 +12,7 @@ import db
 
 MIN_BET = 500
 ROWS = 8
-BASE = 1.9
+BASE = 1.84
 REQUEST_RE = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 
 

@@ -1,5 +1,6 @@
 import os
 import random
+import re
 import sqlite3
 from pathlib import Path
 
@@ -99,6 +100,9 @@ def init_db():
             con.execute("ALTER TABLE users ADD COLUMN last_daily TEXT")
         if "ref_paid" not in cols:
             con.execute("ALTER TABLE users ADD COLUMN ref_paid INTEGER NOT NULL DEFAULT 0")
+        ccols = [row["name"] for row in con.execute("PRAGMA table_info(cases)")]
+        if "bg_color" not in ccols:
+            con.execute("ALTER TABLE cases ADD COLUMN bg_color TEXT NOT NULL DEFAULT ''")
         # G'ildirak o'yini: har bir chaqiruv bir marta yoziladi (request_id bo'yicha)
         con.execute("""
             CREATE TABLE IF NOT EXISTS wheel_spins (
@@ -365,6 +369,15 @@ def deactivate_case(case_id):
 def set_case_image(case_id, image_url):
     with connect() as con:
         con.execute("UPDATE cases SET image_url=? WHERE id=?", (image_url or "", int(case_id)))
+
+
+def set_case_bg(case_id, color):
+    """Quti orqa foni: '#rrggbb' yoki '' (rasmdan avtomatik)."""
+    color = (color or "").strip().lower()
+    if color and not re.fullmatch(r"#[0-9a-f]{6}", color):
+        raise ValueError("bad_color")
+    with connect() as con:
+        con.execute("UPDATE cases SET bg_color=? WHERE id=?", (color, int(case_id)))
 
 
 def update_case(case_id, name=None, price=None, description=None):

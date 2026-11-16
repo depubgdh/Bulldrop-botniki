@@ -15,7 +15,7 @@ MIN_BET = 500
 ROWS = 12
 COLS = 20
 MODES = (3, 4)
-RTP = 0.95
+RTP = 0.92
 REQUEST_RE = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 
 

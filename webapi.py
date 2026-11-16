@@ -138,6 +138,7 @@ def cases_payload() -> dict:
             "price": case["price"],
             "description": case["description"] or "",
             "image_url": media_url(case["image_url"]),
+            "bg_color": case["bg_color"] if "bg_color" in case.keys() else "",
             "items": [
                 {**item_json(i), "percent": round(float(i["probability"]) / total * 100, 2)}
                 for i in items

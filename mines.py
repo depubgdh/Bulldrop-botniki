@@ -13,8 +13,8 @@ import db
 
 MIN_BET = 500   # eng kam tikish; yuqori chegara yo‘q — balansdagi hamma coin
 CELLS = 25
-MODES = (3, 4)
-RTP = 0.95
+MODES = (3, 4, 5, 7)
+RTP = 0.92
 REQUEST_RE = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 
 
@@ -24,15 +24,6 @@ class MinesError(Exception):
         self.code = code
 
 
-# Admin bergan jadval (qolganlari xuddi shu formula bilan hisoblangan: 0.95 × C(25,k) / C(25−m,k)).
-GIVEN = {
-    3: {1: 1.08, 2: 1.23, 3: 1.42, 4: 1.64, 5: 1.92, 6: 2.25, 7: 2.68, 8: 3.21, 9: 3.90, 10: 4.80,
-        11: 6.00, 12: 7.64, 13: 9.93},
-    4: {8: 5.05, 9: 6.60, 10: 8.80, 11: 12.01, 12: 16.81, 13: 24.28, 14: 36.42, 15: 57.23, 16: 95.38,
-        17: 171.68, 18: 343.36, 19: 801.17, 20: 2403.50, 21: 12017.50},
-}
-
-
 def _formula(mines: int, k: int) -> float:
     return round(RTP * math.comb(CELLS, k) / math.comb(CELLS - mines, k) + 1e-9, 2)
 
@@ -40,7 +31,7 @@ def _formula(mines: int, k: int) -> float:
 def multiplier(mines: int, k: int) -> float:
     if k <= 0:
         return 1.0
-    return GIVEN.get(mines, {}).get(k) or _formula(mines, k)
+    return _formula(mines, k)
 
 
 def table(mines: int) -> list:

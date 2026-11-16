@@ -98,6 +98,15 @@
     .tcell.gok { background: rgba(60, 140, 255, .22); opacity: .85; }
     .tcell .big { font-size: 26px; }
     .tcell.flip { animation: mflip .38s cubic-bezier(.2, .9, .3, 1.2); }
+    .tcell { position: relative; overflow: hidden; background: linear-gradient(160deg, rgba(120, 150, 220, .25), rgba(26, 31, 46, .92)); border-color: rgba(170, 195, 255, .16); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -10px 16px rgba(0, 0, 0, .3), 0 4px 10px rgba(0, 0, 0, .35); }
+    .tcell::before { content: ""; position: absolute; left: 6%; right: 6%; top: 4%; height: 40%; border-radius: 14px 14px 50% 50%; background: linear-gradient(180deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0)); pointer-events: none; }
+    .tcell.cur { background: linear-gradient(160deg, rgba(150, 180, 255, .4), rgba(40, 48, 70, .95)); border-color: rgba(190, 210, 255, .85); box-shadow: 0 0 18px rgba(130, 170, 255, .35), inset 0 1px 0 rgba(255, 255, 255, .4); }
+    .tcell.ok { background: linear-gradient(160deg, rgba(110, 255, 180, .55), rgba(18, 137, 74, .75)); box-shadow: 0 0 18px rgba(53, 224, 138, .35), inset 0 1px 0 rgba(255, 255, 255, .45); }
+    .tcell.bad { background: linear-gradient(160deg, rgba(255, 130, 140, .6), rgba(200, 25, 45, .85)); }
+    .tcell.flip.ok { animation: mgem .5s cubic-bezier(.2, .9, .3, 1.3); }
+    .tcell.flip.ok::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid rgba(160, 255, 200, .9); animation: mring .6s ease-out forwards; pointer-events: none; }
+    .tcell.flip.bad { animation: mboom .6s cubic-bezier(.3, .8, .4, 1); }
+    .tcell.flip.gbad, .tcell.flip.gok { animation: mghost .35s ease-out; }
     /* ---- Narvon ---- */
     .lboard { background: #171a21; border: 1px solid var(--line); border-radius: 24px; padding: 14px 10px 10px; margin-top: 14px; }
     .lrow { display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px; height: 28px; }
@@ -110,7 +119,8 @@
     .lrow.next .lp { background: #ff4d58; box-shadow: 0 0 8px rgba(255, 77, 88, .55); }
     .lc .mk { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); width: 15px; height: 15px; line-height: 15px; font-size: 13px; text-align: center; z-index: 1; }
     .lc .mk svg { width: 100%; height: 100%; display: block; }
-    .lc .mk.flip { animation: mflip .35s cubic-bezier(.2, .9, .3, 1.2); }
+    .lc .mk.flip { animation: mpin .5s cubic-bezier(.2, .9, .3, 1.35); }
+    @keyframes mpin { 0% { transform: translateX(-50%) translateY(-14px) scale(.3); opacity: 0; } 60% { transform: translateX(-50%) translateY(2px) scale(1.3); opacity: 1; } 100% { transform: translateX(-50%); } }
     .trail { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: rgba(255, 255, 255, .55); vertical-align: middle; }
     .lchips { display: flex; gap: 8px; overflow-x: auto; margin-top: 12px; scrollbar-width: none; }
     .lchips::-webkit-scrollbar { display: none; }
@@ -126,18 +136,29 @@
     .lmode:disabled { opacity: .55; }
     /* ---- Saper ---- */
     .mgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 14px; }
-    .mcell { aspect-ratio: 1 / 1; border-radius: 16px; padding: 8%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(180deg, #3a3d44, #25272c); border: 1px solid rgba(255, 255, 255, .1);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 -10px 16px rgba(0, 0, 0, .25), 0 4px 10px rgba(0, 0, 0, .35);
-      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: transform .1s; }
-    .mcell:active:not(:disabled) { transform: scale(.94); }
-    .mcell svg { width: 100%; height: 100%; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); }
-    .mcell.gem { background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 170, 40, .75)); border-color: rgba(255, 190, 80, .55); }
-    .mcell.boom { background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(225, 29, 46, .8)); border-color: rgba(255, 90, 100, .7); box-shadow: 0 0 22px rgba(255, 40, 60, .55); }
-    .mcell.ghostgem { background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 170, 40, .32)); opacity: .62; }
-    .mcell.ghostmine { background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(225, 29, 46, .4)); opacity: .7; }
-    .mcell.flip { animation: mflip .38s cubic-bezier(.2, .9, .3, 1.2); }
-    @keyframes mflip { from { transform: scale(.55) rotateY(90deg); opacity: 0; } to { transform: none; opacity: 1; } }
+    .mcell { aspect-ratio: 1 / 1; border-radius: 18px; padding: 10%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(155deg, rgba(120, 150, 220, .28), rgba(40, 48, 70, .55) 46%, rgba(14, 18, 28, .85)); border: 1px solid rgba(170, 195, 255, .22);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -12px 18px rgba(0, 0, 0, .32), 0 6px 14px rgba(0, 0, 0, .4);
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: transform .12s, box-shadow .2s; }
+    .mcell::before { content: ""; position: absolute; left: 10%; right: 10%; top: 5%; height: 36%; border-radius: 14px 14px 60% 60%; background: linear-gradient(180deg, rgba(255, 255, 255, .26), rgba(255, 255, 255, 0)); pointer-events: none; }
+    .mcell:active:not(:disabled) { transform: scale(.93); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 0 18px rgba(130, 170, 255, .45); }
+    .mcell svg { width: 100%; height: 100%; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); position: relative; }
+    .mcell.gem { background: linear-gradient(155deg, rgba(255, 220, 120, .55), rgba(255, 150, 30, .7)); border-color: rgba(255, 215, 120, .8); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 0 20px rgba(255, 180, 50, .4); }
+    .mcell.boom { background: linear-gradient(155deg, rgba(255, 120, 130, .6), rgba(210, 25, 45, .85)); border-color: rgba(255, 120, 130, .85); box-shadow: 0 0 26px rgba(255, 40, 60, .65); }
+    .mcell.ghostgem { background: linear-gradient(155deg, rgba(255, 220, 120, .18), rgba(255, 150, 30, .3)); opacity: .6; }
+    .mcell.ghostmine { background: linear-gradient(155deg, rgba(255, 120, 130, .2), rgba(210, 25, 45, .38)); opacity: .68; }
+    .mcell.flip { animation: mflip .4s cubic-bezier(.2, .9, .3, 1.25); }
+    .mcell.flip.gem { animation: mgem .5s cubic-bezier(.2, .9, .3, 1.3); }
+    .mcell.flip.gem::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid rgba(255, 230, 150, .9); animation: mring .6s ease-out forwards; pointer-events: none; }
+    .mcell.flip.boom { animation: mboom .6s cubic-bezier(.3, .8, .4, 1); }
+    .mcell.flip.boom::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(circle, rgba(255, 255, 255, .95), rgba(255, 90, 90, .5) 45%, transparent 70%); animation: mflash .5s ease-out forwards; pointer-events: none; }
+    .mcell.flip.ghostgem, .mcell.flip.ghostmine { animation: mghost .35s ease-out; }
+    @keyframes mgem { 0% { transform: scale(.5) rotateY(180deg); opacity: 0; } 55% { transform: scale(1.14) rotateY(0); opacity: 1; } 100% { transform: none; } }
+    @keyframes mring { from { transform: scale(.8); opacity: 1; } to { transform: scale(1.45); opacity: 0; } }
+    @keyframes mboom { 0% { transform: scale(.6); } 25% { transform: scale(1.18) translateX(-4px); } 40% { transform: translateX(5px) rotate(2deg); } 55% { transform: translateX(-4px) rotate(-2deg); } 70% { transform: translateX(3px); } 100% { transform: none; } }
+    @keyframes mflash { from { opacity: 1; transform: scale(.4); } to { opacity: 0; transform: scale(1.6); } }
+    @keyframes mghost { from { transform: scale(.8); opacity: 0; } to { transform: none; } }
+    .mrand { margin-top: 10px; }
     .mrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
     .minfo { padding: 14px; }
     .minfo .iv { font-size: 20px; font-weight: 900; }
@@ -170,27 +191,39 @@
     .gtile small { color: var(--muted); padding: 0 4px; margin-top: -6px; }
     .whead .wt { margin: 0; }
     .wsnd { width: 40px; height: 40px; border-radius: 14px; font-size: 18px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
-    .wstage { position: relative; height: 290px; margin: 12px -16px 0; overflow: hidden; border-radius: 26px; background: linear-gradient(180deg, #232832, #0c0f14 70%); border: 1px solid rgba(255, 255, 255, .08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08); }
-    .wring { position: absolute; left: 50%; width: 1360px; height: 1360px; margin-left: -680px; top: -1050px; border-radius: 50%; will-change: transform;
-      background: radial-gradient(circle, #090b0f 0 56%, #3b414d 56.4%, #15181e 58%, #0e1014 70%); }
-    .wtile { position: absolute; left: calc(50% - 37px); top: calc(50% - 50px); width: 74px; height: 100px; border-radius: 16px; text-align: center; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transform-origin: 37px 50px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -14px 20px rgba(0, 0, 0, .25), 0 6px 14px rgba(0, 0, 0, .45); }
-    .wtile .wti { font-size: 34px; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .45)); }
-    .wtile .wtl { font-size: 15px; font-weight: 900; text-shadow: 0 1px 2px rgba(0, 0, 0, .5); }
-    .k-x1 { background: linear-gradient(160deg, #4d9bff, #1b4fb8); }
-    .k-x2 { background: linear-gradient(160deg, #36d983, #12894a); }
-    .k-x5 { background: linear-gradient(160deg, #ff5d73, #a8132b); }
-    .k-x10 { background: linear-gradient(160deg, #bd7bff, #6428cc); }
+    .wstage { position: relative; height: 440px; margin: 12px -16px 0; overflow: hidden; border-radius: 26px; contain: paint; isolation: isolate;
+      background: radial-gradient(90% 46% at 50% 34%, #232830, transparent 78%), repeating-linear-gradient(90deg, rgba(255, 255, 255, .022) 0 2px, transparent 2px 10px), linear-gradient(180deg, #15181e, #08090c);
+      border: 1px solid rgba(255, 255, 255, .07); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08); }
+    .wbody { position: absolute; left: 50%; width: 1400px; height: 1400px; margin-left: -700px; top: -1139px; border-radius: 50%; z-index: 0; pointer-events: none;
+      background: radial-gradient(circle closest-side, #04060a 0, #080a0e 95.2%, #b4bbc7 95.7%, #7a8290 96.5%, #3a404b 97.8%, #1d2128 99%, #0a0c10 99.6%, transparent 100%); }
+    .whoses { position: absolute; left: 0; top: 246px; width: 100%; height: 194px; z-index: 0; pointer-events: none; }
+    .wring { position: absolute; inset: 0; z-index: 1; }
+    .wtile { position: absolute; left: 0; top: 0; width: 92px; height: 88px; margin: -44px 0 0 -46px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid rgba(255, 255, 255, .14); will-change: transform; backface-visibility: hidden; visibility: hidden;
+      box-shadow: inset 0 2px 0 rgba(255, 255, 255, .38), inset 0 -12px 20px rgba(0, 0, 0, .28), 0 10px 16px rgba(0, 0, 0, .5); }
+    .wtile::before { content: ""; position: absolute; left: 7%; right: 7%; top: 4%; height: 36%; border-radius: 13px 13px 40px 40px; background: linear-gradient(180deg, rgba(255, 255, 255, .3), rgba(255, 255, 255, 0)); pointer-events: none; }
+    .wtile .wti { display: flex; position: relative; }
+    .wtile .wti svg { width: 58px; height: 58px; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .5)); }
+    .k-x1 { background: linear-gradient(160deg, #4d97f5, #2154b8); }
+    .k-x2 { background: linear-gradient(160deg, #35c97c, #0f7a45); }
+    .k-x5 { background: linear-gradient(160deg, #f4566c, #a0132b); }
+    .k-x10 { background: linear-gradient(160deg, #b878ff, #5d25c4); }
     .wtile.locked { filter: grayscale(1) brightness(.45); }
-    .wtile.hit { box-shadow: 0 0 0 2px #fff, 0 0 26px 4px rgba(255, 255, 255, .55), inset 0 1px 0 rgba(255, 255, 255, .5); z-index: 2; }
-    .wshade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(8, 10, 14, .85), transparent 22%, transparent 78%, rgba(8, 10, 14, .85)), linear-gradient(0deg, rgba(8, 10, 14, .9), transparent 28%); }
-    .wdisp { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 210px; height: 70px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(180deg, #14171c, #07090c); border: 1px solid #4a505c; box-shadow: inset 0 0 18px rgba(0, 0, 0, .8), 0 0 0 4px #20242b, 0 8px 20px rgba(0, 0, 0, .5); overflow: hidden; }
-    .wdisp::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(0, 0, 0, .55) 38%, transparent 42%); background-size: 5px 5px; pointer-events: none; }
-    .wdisp .dl { font: 700 10px/1 monospace; letter-spacing: 3px; color: #7da2ff; opacity: .8; }
-    .wdisp .db { font: 900 32px/1.1 monospace; letter-spacing: 5px; color: #eaf1ff; text-shadow: 0 0 10px rgba(130, 170, 255, .9); }
+    .wtile.hit { border-color: #fff; box-shadow: 0 0 0 2px #fff, 0 0 28px 6px rgba(255, 255, 255, .5), inset 0 2px 0 rgba(255, 255, 255, .5); z-index: 2; }
+    .wshade { position: absolute; inset: 0; pointer-events: none; z-index: 2; background: linear-gradient(90deg, rgba(8, 10, 14, .85), transparent 17%, transparent 83%, rgba(8, 10, 14, .85)); }
+    .wdhouse { position: absolute; top: 8px; left: 50%; width: 244px; height: 92px; transform: translateX(-50%); z-index: 3; border-radius: 22px 22px 34px 34px;
+      background: linear-gradient(180deg, #6a717d, #353b45 38%, #1a1d23); border: 1px solid #7d8591; box-shadow: 0 12px 24px rgba(0, 0, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .4), inset 0 -10px 16px rgba(0, 0, 0, .5); }
+    .wdhouse::before, .wdhouse::after { content: ""; position: absolute; top: 50%; width: 9px; height: 9px; margin-top: -5px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #cfd5df, #4a515d); box-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
+    .wdhouse::before { left: 7px; } .wdhouse::after { right: 7px; }
+    .wdisp { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); width: 204px; height: 56px; z-index: 4; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #0c0f13, #030405); border: 1px solid #2d333c; box-shadow: inset 0 3px 10px rgba(0, 0, 0, .9), 0 1px 0 rgba(255, 255, 255, .12); }
+    .wdisp::after { content: ""; position: absolute; inset: 0; border-radius: 12px; background-image: radial-gradient(rgba(0, 0, 0, .72) 38%, transparent 44%); background-size: 4px 4px; pointer-events: none; }
+    .wdisp .db { font: 900 36px/1 monospace; letter-spacing: 5px; color: #f4f7ff; text-shadow: 0 0 10px rgba(160, 195, 255, .95); font-variant-numeric: tabular-nums; }
     .wdisp.spin .db { color: #ffd966; text-shadow: 0 0 12px rgba(255, 200, 80, .95); }
-    .wpointer { position: absolute; top: 88px; left: 50%; width: 40px; height: 52px; transform: translateX(-50%); transform-origin: 50% 8%; z-index: 3; background: linear-gradient(180deg, #fff, #aeb6c4); clip-path: polygon(50% 100%, 0 20%, 14% 0, 86% 0, 100% 20%); filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .6)); }
-    .whist { display: flex; gap: 7px; align-items: center; margin-top: 12px; padding: 10px 12px; min-height: 44px; border-radius: 16px; background: rgba(255, 255, 255, .05); border: 1px solid var(--line); overflow: hidden; }
-    .hd { width: 22px; height: 22px; border-radius: 8px; flex: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4); }
+    .wpointer { position: absolute; top: 90px; left: 50%; width: 40px; height: 48px; transform: translateX(-50%); transform-origin: 50% 6%; z-index: 5; background: linear-gradient(180deg, #f3f5f9, #a2abba 62%, #6b7483); clip-path: polygon(50% 100%, 0 24%, 14% 0, 86% 0, 100% 24%); filter: drop-shadow(0 5px 6px rgba(0, 0, 0, .7)); }
+    .wped { position: absolute; left: 50%; bottom: -8px; width: 170px; height: 56px; margin-left: -85px; z-index: 1; border-radius: 40px 40px 0 0; background: linear-gradient(180deg, #2c313a, #101216); border: 1px solid #3a404a; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .1); }
+    .whist { display: flex; gap: 8px; align-items: center; margin-top: 12px; padding: 10px 12px; min-height: 52px; border-radius: 16px; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); overflow: hidden;
+      -webkit-mask-image: linear-gradient(90deg, #000 75%, transparent); mask-image: linear-gradient(90deg, #000 75%, transparent); }
+    .hd { width: 30px; height: 30px; border-radius: 10px; flex: none; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .4), 0 2px 4px rgba(0, 0, 0, .4); }
     .wchips { display: flex; justify-content: center; gap: 10px; margin: 12px 0; }
     .wchip { padding: 9px 16px; border-radius: 14px; font-weight: 800; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
     .wbanner { text-align: center; font-weight: 900; font-size: 18px; padding: 0; max-height: 0; overflow: hidden; border-radius: 16px; transition: max-height .25s, padding .25s; }
@@ -207,6 +240,7 @@
     .wk.sel { opacity: 1; border-color: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .15), 0 8px 20px rgba(0, 0, 0, .4); }
     .wk .kx { font-size: 28px; font-weight: 900; }
     .wk .ks { font-size: 12px; font-weight: 700; opacity: .9; margin-top: 2px; }
+    .wk .ka svg { width: 58px; height: 58px; display: block; }
     .wk .ka { position: absolute; right: 8px; bottom: -4px; font-size: 52px; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .45)); }
     .wk.locked { filter: grayscale(1) brightness(.5); }
     .wk:active { transform: scale(.97); }
@@ -274,14 +308,20 @@
     .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .case {
       padding: 10px; text-align: left; width: 100%;
-      background: var(--card); border: 1px solid var(--line); border-radius: 18px; transition: transform .12s ease;
+      background: linear-gradient(165deg, var(--t1, var(--card)), var(--t2, var(--card))); border: 1px solid var(--t3b, var(--line)); border-radius: 18px;
+      transition: transform .12s ease, background .4s ease; box-shadow: 0 10px 26px -14px var(--t3, transparent);
     }
     .case:active { transform: scale(.97); }
     .case .media {
       aspect-ratio: 1 / 1; border-radius: 14px;
-      background: radial-gradient(circle at 50% 35%, rgba(155, 104, 255, .35), rgba(255, 77, 158, .08) 70%), var(--card2);
+      background: radial-gradient(circle at 50% 35%, var(--t3, rgba(155, 104, 255, .35)), transparent 72%), var(--t2, var(--card2));
     }
     .case .media .emoji { font-size: 56px; }
+    .mbg { position: absolute; inset: -18%; background-size: cover; background-position: center; filter: blur(20px) saturate(1.6) brightness(.78); pointer-events: none; }
+    .media .mbg ~ img, .media .mbg ~ video { position: relative; z-index: 1; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .35)); }
+    .case { position: relative; overflow: hidden; }
+    .case::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 46%; background: linear-gradient(180deg, rgba(255, 255, 255, .1), transparent); pointer-events: none; border-radius: 18px 18px 0 0; }
+    .case .media { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 8px 18px -8px rgba(0, 0, 0, .6); }
     .case .name { font-weight: 800; font-size: 15px; margin: 10px 2px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .case .sub { color: var(--muted); font-size: 12px; margin: 0 2px 8px; }
     .pill {
@@ -380,7 +420,7 @@
     }
     .grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 12px; }
     .x { position: absolute; top: 12px; right: 12px; z-index: 5; width: 34px; height: 34px; border-radius: 50%; background: var(--card2); font-size: 15px; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); }
-    .hero-media { height: 170px; border-radius: 18px; background: radial-gradient(circle at 50% 40%, rgba(155, 104, 255, .4), rgba(255, 77, 158, .08) 72%), var(--card2); }
+    .hero-media { height: 170px; border-radius: 18px; background: radial-gradient(circle at 50% 40%, var(--t3, rgba(155, 104, 255, .4)), transparent 72%), linear-gradient(165deg, var(--t1, var(--card2)), var(--t2, var(--card2))); }
     .hero-media .emoji { font-size: 76px; }
     .sheet-title { font-size: 22px; font-weight: 900; margin: 14px 2px 4px; }
     .sheet .row { margin: 10px 2px 12px; }
@@ -437,7 +477,7 @@
     body.imm { overflow: hidden; padding: 0; }
     body.imm .tabbar, body.imm #top { display: none; }
     .bgame { position: fixed; inset: 0; z-index: 40; overflow: hidden; contain: layout paint; user-select: none; -webkit-user-select: none;
-      background: linear-gradient(180deg, #2c8ae0 0%, #67b9f2 36%, #b3e0fa 68%, #e6f5ff 88%); }
+      background: linear-gradient(180deg, #2a7fd9 0%, #4ea4ec 40%, #8ecbf5 72%, #cfe9fb 100%); }
     .bclouds { position: absolute; inset: 0; pointer-events: none; }
     .bclouds i { position: absolute; left: 0; width: var(--w); height: calc(var(--w) * .32); border-radius: 40px; background: #fff; opacity: .93;
       box-shadow: calc(var(--w) * .28) calc(var(--w) * -.14) 0 calc(var(--w) * .04) #fff, calc(var(--w) * -.22) calc(var(--w) * -.08) 0 calc(var(--w) * -.02) #fff;
@@ -445,7 +485,7 @@
     .bclouds.l i { animation-direction: reverse; }
     @keyframes bcloud { from { transform: translate3d(-40vw, 0, 0); } to { transform: translate3d(125vw, 0, 0); } }
     .bcityw { position: absolute; left: 0; right: 0; bottom: 0; height: 100%; pointer-events: none; will-change: transform; transition: transform .5s ease; }
-    .bcity { position: absolute; left: 0; right: 0; bottom: 13%; width: 100%; height: 36%; }
+    .bcity { position: absolute; left: 0; right: 0; bottom: 12.6%; width: 100%; height: 62%; }
     .bgusts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
     .bgust { position: absolute; width: 22vw; max-width: 110px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .9), transparent); opacity: 0; will-change: transform; }
     .bgust.l { left: 0; animation: bgL 3s linear infinite; }
@@ -472,8 +512,8 @@
     .bhud { position: absolute; left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top)); display: flex; gap: 10px; align-items: center; z-index: 10; }
     .bback { width: 46px; height: 46px; border-radius: 50%; background: rgba(255, 255, 255, .88); color: #2a7de1; display: grid; place-items: center; flex: none; box-shadow: 0 2px 8px rgba(0, 0, 0, .18); }
     .bback .ic { width: 24px; height: 24px; stroke: #2a7de1; fill: none; filter: none; stroke-width: 2.2; }
-    .bpill { flex: 1; min-width: 0; text-align: center; background: rgba(255, 255, 255, .88); color: #1d2733; border-radius: 22px; padding: 7px 10px; box-shadow: 0 2px 8px rgba(0, 0, 0, .18); }
-    .bpill .bt { display: block; font-size: 17px; font-weight: 900; line-height: 1.1; }
+    .bpill { flex: 1; min-width: 0; text-align: center; background: rgba(255, 255, 255, .88); color: #1d2733; border-radius: 22px; padding: 14px 10px; box-shadow: 0 2px 8px rgba(0, 0, 0, .18); }
+    
     .bsub { display: block; font-size: 12px; color: #5b6878; font-weight: 700; white-space: nowrap; }
     .bsub b { color: #1d2733; }
     .bsub .ic { font-size: 13px; filter: none; }
@@ -532,7 +572,7 @@
   </style>
 </head>
 <body>
-  <svg id="icon-sprite" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="g-glass" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9fc4ff"/></linearGradient><linearGradient id="g-gold" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#fff0b8"/><stop offset="1" stop-color="#e4a93a"/></linearGradient><linearGradient id="g-fire" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#ff5d2e"/></linearGradient><linearGradient id="g-green" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#c6ffe0"/><stop offset="1" stop-color="#2fd883"/></linearGradient><linearGradient id="g-red" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#ffd0d0"/><stop offset="1" stop-color="#ff4f4f"/></linearGradient><linearGradient id="g-violet" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#efe2ff"/><stop offset="1" stop-color="#8d5cff"/></linearGradient><linearGradient id="g-amber" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#fff0b8"/><stop offset="1" stop-color="#ffa21f"/></linearGradient><linearGradient id="g-sky" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#e0f6ff"/><stop offset="1" stop-color="#3f9fe8"/></linearGradient></defs><symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.6" fill="none"/><path fill="none" d="M12 8.6v6.8M10.2 10.2h2.7a1.4 1.4 0 0 1 0 2.8h-2.1"/></symbol><symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 7.5h18v3a1.8 1.8 0 0 0 0 3.6v3.4H3v-3.4a1.8 1.8 0 0 0 0-3.6z"/><path fill="none" stroke-dasharray="1.6 2.2" d="M14.5 8v8.5"/></symbol><symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2.5"/><path fill="none" d="M3 12.5h18M12 8v12"/><path fill="none" d="M12 8c-2.6 0-4.3-1-4.3-2.6S9.6 3.2 12 8c2.4-4.8 4.3-3.2 4.3-2.6S14.6 8 12 8z"/></symbol><symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path fill="none" d="M9 8V6.5a3 3 0 0 1 6 0V8"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path fill="none" d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10z"/><path fill="none" d="M10 20v-5.5h4V20"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path fill="none" d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path fill="none" d="M17 14c2.5 0 4 2 4 5"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path fill="none" d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/><path fill="none" d="M9.5 12l2 2 3.5-4"/></symbol><symbol id="i-build" viewBox="0 0 24 24"><path fill="none" d="M3 6h18M7 6v15M4 21h8M7 6L3.5 6M16 6v6.5"/><rect x="13.5" y="12.5" width="5" height="4" rx="1"/><path fill="none" d="M7 9.5l4-3.5"/></symbol><symbol id="i-mine" viewBox="0 0 24 24"><circle cx="11.5" cy="14" r="6.5"/><path fill="none" d="M15.7 9.2L18 7M18.5 3.5v2M21 6h-2M8.5 12.5a3.4 3.4 0 0 1 2-1.6"/></symbol><symbol id="i-tower" viewBox="0 0 24 24"><rect x="4.5" y="15" width="15" height="6" rx="1.2"/><rect x="7.2" y="9" width="9.6" height="6" rx="1.2"/><rect x="9.8" y="3.5" width="4.4" height="5.5" rx="1.2"/></symbol><symbol id="i-ladder" viewBox="0 0 24 24"><path fill="none" d="M8 3v18M16 3v18M8 7.5h8M8 12h8M8 16.5h8"/></symbol><symbol id="i-wheel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.2"/><path fill="none" d="M12 3v6.8M12 14.2V21M3 12h6.8M14.2 12H21M5.6 5.6l4.8 4.8M13.6 13.6l4.8 4.8M18.4 5.6l-4.8 4.8M10.4 13.6l-4.8 4.8"/></symbol><symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5.5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="18.5" r="2.6"/><path fill="none" d="M8.3 10.7l7.4-3.9M8.3 13.3l7.4 3.9"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="12" height="12" rx="2.8"/><path fill="none" d="M15.5 8.5V6.3a2.8 2.8 0 0 0-2.8-2.8H6.3a2.8 2.8 0 0 0-2.8 2.8v6.4a2.8 2.8 0 0 0 2.8 2.8h2.2"/></symbol><symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z"/><path fill="none" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol><symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z"/><path fill="none" d="M16 9.5l5 5M21 9.5l-5 5"/></symbol><symbol id="i-cash" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.8"/><circle cx="12" cy="12" r="2.8" fill="none"/><path fill="none" d="M6.5 9.5h.01M17.5 14.5h.01"/></symbol><symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path fill="none" d="M8 6H5v1.5A3 3 0 0 0 8 10.5M16 6h3v1.5a3 3 0 0 1-3 3M12 13v4M8.5 20h7M10 17h4"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3.6 5.2 5.6 5.2 10.2a5.2 5.2 0 0 1-10.4 0c0-2.1 1-3.6 2.1-4.7.1 2 1 3.1 2.2 3.3C11 8.8 10.7 6 12 3z"/></symbol><symbol id="i-wind" viewBox="0 0 24 24"><path fill="none" d="M3 9h10.5a2.5 2.5 0 1 0-2.5-2.5M3 13h14.5a2.5 2.5 0 1 1-2.5 2.5M3 17h6.5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path fill="none" d="M8 12.3l2.8 2.8 5.5-5.6"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path fill="none" d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol><symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></symbol><symbol id="i-gem" viewBox="0 0 24 24"><path d="M7 4h10l4 5-9 11L3 9z"/><path fill="none" d="M3 9h18M9 4L7.5 9 12 20M15 4l1.5 5L12 20"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path fill="none" d="M12 7v5l3 2"/></symbol><symbol id="i-mega" viewBox="0 0 24 24"><path d="M4 10v4h3l8 4V6L7 10z"/><path fill="none" d="M18 9.5a3.5 3.5 0 0 1 0 5"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2.8"/><path fill="none" d="M11 18h2"/></symbol><symbol id="i-bot" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3.2"/><path fill="none" d="M12 8V5M9.5 13h.01M14.5 13h.01M9.5 16h5"/><circle cx="12" cy="4" r="1.1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path fill="none" d="M14 7l3 3"/></symbol><symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.8"/><circle cx="9" cy="10" r="1.6"/><path fill="none" d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5"/></symbol><symbol id="i-game" viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="10" rx="5"/><path fill="none" d="M8 10.5v4M6 12.5h4M15.5 12h.01M18 13.5h.01"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path fill="none" d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path fill="none" d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6"/></symbol><symbol id="i-clover" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.3"/><circle cx="15" cy="9" r="3.3"/><circle cx="9" cy="15" r="3.3"/><circle cx="15" cy="15" r="3.3"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.8"/><path fill="none" d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol><symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 8L12 3.5 20.5 8v8L12 20.5 3.5 16z"/><path fill="none" d="M3.5 8L12 12.5 20.5 8M12 12.5v8"/></symbol><symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path fill="none" d="M12 10v4M12 17h.01"/></symbol><symbol id="i-up" viewBox="0 0 24 24"><path fill="none" d="M12 19V5M6 11l6-6 6 6"/></symbol><symbol id="i-rock" viewBox="0 0 24 24"><path d="M4 17l3-8 5-3 6 4 2 7z"/></symbol><symbol id="i-blast" viewBox="0 0 24 24"><path d="M12 2l2 5 5-2-2 5 5 2-5 2 2 5-5-2-2 5-2-5-5 2 2-5-5-2 5-2-2-5 5 2z"/></symbol><symbol id="i-back" viewBox="0 0 24 24"><path fill="none" d="M14.5 5.5L8 12l6.5 6.5"/></symbol></svg>
+  <svg id="icon-sprite" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="g-glass" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9fc4ff"/></linearGradient><linearGradient id="g-gold" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#fff0b8"/><stop offset="1" stop-color="#e4a93a"/></linearGradient><linearGradient id="g-fire" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#ff5d2e"/></linearGradient><linearGradient id="g-green" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#c6ffe0"/><stop offset="1" stop-color="#2fd883"/></linearGradient><linearGradient id="g-red" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#ffd0d0"/><stop offset="1" stop-color="#ff4f4f"/></linearGradient><linearGradient id="g-violet" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#efe2ff"/><stop offset="1" stop-color="#8d5cff"/></linearGradient><linearGradient id="g-amber" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#fff0b8"/><stop offset="1" stop-color="#ffa21f"/></linearGradient><linearGradient id="g-sky" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#e0f6ff"/><stop offset="1" stop-color="#3f9fe8"/></linearGradient></defs><symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.6" fill="none"/><path fill="none" d="M12 8.6v6.8M10.2 10.2h2.7a1.4 1.4 0 0 1 0 2.8h-2.1"/></symbol><symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 7.5h18v3a1.8 1.8 0 0 0 0 3.6v3.4H3v-3.4a1.8 1.8 0 0 0 0-3.6z"/><path fill="none" stroke-dasharray="1.6 2.2" d="M14.5 8v8.5"/></symbol><symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2.5"/><path fill="none" d="M3 12.5h18M12 8v12"/><path fill="none" d="M12 8c-2.6 0-4.3-1-4.3-2.6S9.6 3.2 12 8c2.4-4.8 4.3-3.2 4.3-2.6S14.6 8 12 8z"/></symbol><symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path fill="none" d="M9 8V6.5a3 3 0 0 1 6 0V8"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path fill="none" d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10z"/><path fill="none" d="M10 20v-5.5h4V20"/></symbol><symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path fill="none" d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path fill="none" d="M17 14c2.5 0 4 2 4 5"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path fill="none" d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/><path fill="none" d="M9.5 12l2 2 3.5-4"/></symbol><symbol id="i-build" viewBox="0 0 24 24"><path fill="none" d="M3 6h18M7 6v15M4 21h8M7 6L3.5 6M16 6v6.5"/><rect x="13.5" y="12.5" width="5" height="4" rx="1"/><path fill="none" d="M7 9.5l4-3.5"/></symbol><symbol id="i-mine" viewBox="0 0 24 24"><circle cx="11.5" cy="14" r="6.5"/><path fill="none" d="M15.7 9.2L18 7M18.5 3.5v2M21 6h-2M8.5 12.5a3.4 3.4 0 0 1 2-1.6"/></symbol><symbol id="i-tower" viewBox="0 0 24 24"><rect x="4.5" y="15" width="15" height="6" rx="1.2"/><rect x="7.2" y="9" width="9.6" height="6" rx="1.2"/><rect x="9.8" y="3.5" width="4.4" height="5.5" rx="1.2"/></symbol><symbol id="i-ladder" viewBox="0 0 24 24"><path fill="none" d="M8 3v18M16 3v18M8 7.5h8M8 12h8M8 16.5h8"/></symbol><symbol id="i-wheel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.2"/><path fill="none" d="M12 3v6.8M12 14.2V21M3 12h6.8M14.2 12H21M5.6 5.6l4.8 4.8M13.6 13.6l4.8 4.8M18.4 5.6l-4.8 4.8M10.4 13.6l-4.8 4.8"/></symbol><symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5.5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="18.5" r="2.6"/><path fill="none" d="M8.3 10.7l7.4-3.9M8.3 13.3l7.4 3.9"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="12" height="12" rx="2.8"/><path fill="none" d="M15.5 8.5V6.3a2.8 2.8 0 0 0-2.8-2.8H6.3a2.8 2.8 0 0 0-2.8 2.8v6.4a2.8 2.8 0 0 0 2.8 2.8h2.2"/></symbol><symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z"/><path fill="none" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol><symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z"/><path fill="none" d="M16 9.5l5 5M21 9.5l-5 5"/></symbol><symbol id="i-cash" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.8"/><circle cx="12" cy="12" r="2.8" fill="none"/><path fill="none" d="M6.5 9.5h.01M17.5 14.5h.01"/></symbol><symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path fill="none" d="M8 6H5v1.5A3 3 0 0 0 8 10.5M16 6h3v1.5a3 3 0 0 1-3 3M12 13v4M8.5 20h7M10 17h4"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3.6 5.2 5.6 5.2 10.2a5.2 5.2 0 0 1-10.4 0c0-2.1 1-3.6 2.1-4.7.1 2 1 3.1 2.2 3.3C11 8.8 10.7 6 12 3z"/></symbol><symbol id="i-wind" viewBox="0 0 24 24"><path fill="none" d="M3 9h10.5a2.5 2.5 0 1 0-2.5-2.5M3 13h14.5a2.5 2.5 0 1 1-2.5 2.5M3 17h6.5"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path fill="none" d="M8 12.3l2.8 2.8 5.5-5.6"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path fill="none" d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol><symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></symbol><symbol id="i-gem" viewBox="0 0 24 24"><path d="M7 4h10l4 5-9 11L3 9z"/><path fill="none" d="M3 9h18M9 4L7.5 9 12 20M15 4l1.5 5L12 20"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path fill="none" d="M12 7v5l3 2"/></symbol><symbol id="i-mega" viewBox="0 0 24 24"><path d="M4 10v4h3l8 4V6L7 10z"/><path fill="none" d="M18 9.5a3.5 3.5 0 0 1 0 5"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2.8"/><path fill="none" d="M11 18h2"/></symbol><symbol id="i-bot" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3.2"/><path fill="none" d="M12 8V5M9.5 13h.01M14.5 13h.01M9.5 16h5"/><circle cx="12" cy="4" r="1.1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path fill="none" d="M14 7l3 3"/></symbol><symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.8"/><circle cx="9" cy="10" r="1.6"/><path fill="none" d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5"/></symbol><symbol id="i-game" viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="10" rx="5"/><path fill="none" d="M8 10.5v4M6 12.5h4M15.5 12h.01M18 13.5h.01"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path fill="none" d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path fill="none" d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6"/></symbol><symbol id="i-clover" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.3"/><circle cx="15" cy="9" r="3.3"/><circle cx="9" cy="15" r="3.3"/><circle cx="15" cy="15" r="3.3"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.8"/><path fill="none" d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol><symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 8L12 3.5 20.5 8v8L12 20.5 3.5 16z"/><path fill="none" d="M3.5 8L12 12.5 20.5 8M12 12.5v8"/></symbol><symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path fill="none" d="M12 10v4M12 17h.01"/></symbol><symbol id="i-up" viewBox="0 0 24 24"><path fill="none" d="M12 19V5M6 11l6-6 6 6"/></symbol><symbol id="i-rock" viewBox="0 0 24 24"><path d="M4 17l3-8 5-3 6 4 2 7z"/></symbol><symbol id="i-blast" viewBox="0 0 24 24"><path d="M12 2l2 5 5-2-2 5 5 2-5 2 2 5-5-2-2 5-2-5-5 2 2-5-5-2 5-2-2-5 5 2z"/></symbol><symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.2" fill="none"/><circle cx="12" cy="12" r="1.7" fill="none"/><path fill="none" d="M12 12l6.5-6.5M16.2 3.8l.4 3 3 .4"/></symbol><symbol id="i-cross" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path fill="none" d="M8.8 8.8l6.4 6.4M15.2 8.8l-6.4 6.4"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8L3.5 9.7l5.9-.8z"/></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3" fill="none"/></symbol><symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-8-4.8-8-10.4A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8 2.4C20 15.2 12 20 12 20z"/></symbol><symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 2.5L5 13.5h5.5L9.5 21.5l9-11.5H13z"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path fill="none" d="M10 21h4"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/></symbol><symbol id="i-crown" viewBox="0 0 24 24"><path d="M3.5 8l4.5 4 4-6.5 4 6.5 4.5-4-1.5 11h-14z"/></symbol><symbol id="i-rocket" viewBox="0 0 24 24"><path d="M12 3c3.5 2 5 5.5 5 9l-2 3.5H9L7 12c0-3.5 1.5-7 5-9z"/><circle cx="12" cy="10" r="1.6" fill="none"/><path fill="none" d="M9 15.5L7 19l3-1M15 15.5l2 3.5-3-1"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></symbol><symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="12" r="4.2"/><path fill="none" d="M12 12h9M18 12v3M15.5 12v2.4"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path fill="none" d="M19.5 12a7.5 7.5 0 1 1-2.4-5.5M19.5 4v4.5H15"/></symbol><symbol id="i-back" viewBox="0 0 24 24"><path fill="none" d="M14.5 5.5L8 12l6.5 6.5"/></symbol></svg>
   <header id="top"></header>
   <main id="view"></main>
   <nav class="tabbar" id="tabbar"></nav>
@@ -606,7 +646,7 @@
       "🔊": "volume", "🔇": "mute", "💰": "cash gold", "💵": "cash green", "🏆": "trophy gold", "🔥": "flame fire", "💨": "wind sky", "🌬": "wind sky",
       "✅": "check green", "🔗": "link", "🎉": "sparkle gold", "✨": "sparkle gold", "💎": "gem violet", "🍀": "clover green", "📢": "mega", "📱": "phone",
       "🤖": "bot", "📝": "edit", "🖼": "image", "🎮": "game", "⚙": "gear", "📊": "chart", "🔒": "lock", "📦": "box", "⚠": "warn amber", "😕": "warn amber",
-      "⬆": "up", "🪨": "rock", "💥": "blast red"
+      "⬆": "up", "🎯": "target amber", "❌": "cross red", "✕": "cross red", "✓": "check green", "☝": "up", "⭐": "star gold", "🌟": "star gold", "📌": "pin red", "❤": "heart red", "💚": "heart green", "⚡": "bolt amber", "🔔": "bell amber", "💬": "chat sky", "👑": "crown gold", "🚀": "rocket sky", "▶": "play", "🔑": "key gold", "🔄": "refresh", "📣": "mega", "💸": "cash green", "🏅": "trophy gold", "🎰": "game", "🎲": "game", "🪨": "rock", "💥": "blast red"
     };
     var EMO_RE = new RegExp("(" + Object.keys(EMO).map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }).join("|") + ")️?", "g");
     var SVGNS = "http://www.w3.org/2000/svg", XLINK = "http://www.w3.org/1999/xlink";
@@ -839,6 +879,76 @@
       return box;
     }
 
+    /* rasmning asosiy rangini topib, qutining orqa fonini shunga moslaydi (kesh bilan) */
+    var tintCache = {};
+    function tintOf(src) {
+      if (tintCache[src]) return tintCache[src];
+      tintCache[src] = new Promise(function (resolve, reject) {
+        var im = new Image();
+        try { if (new URL(src, location.href).origin !== location.origin) im.crossOrigin = "anonymous"; } catch (e) {}
+        im.onload = function () {
+          try {
+            var c = document.createElement("canvas"); c.width = c.height = 20;
+            var x = c.getContext("2d"); x.drawImage(im, 0, 0, 20, 20);
+            var d = x.getImageData(0, 0, 20, 20).data, R = 0, G = 0, B = 0, W = 0;
+            for (var i = 0; i < d.length; i += 4) {
+              var a = d[i + 3] / 255; if (a < .2) continue;
+              var mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]);
+              var sat = mx ? (mx - mn) / mx : 0, w = a * (0.15 + sat * sat * 3) * (mx > 30 && mn < 245 ? 1 : .15);
+              R += d[i] * w; G += d[i + 1] * w; B += d[i + 2] * w; W += w;
+            }
+            if (!W) throw new Error("empty");
+            R /= W; G /= W; B /= W;
+            var mx2 = Math.max(R, G, B) / 255, mn2 = Math.min(R, G, B) / 255, hh = 0, dl = mx2 - mn2;
+            if (dl) {
+              if (mx2 === R / 255) hh = ((G - B) / 255 / dl) % 6; else if (mx2 === G / 255) hh = (B - R) / 255 / dl + 2; else hh = (R - G) / 255 / dl + 4;
+              hh = Math.round(hh * 60); if (hh < 0) hh += 360;
+            }
+            var ss = Math.round(Math.max(35, Math.min(78, (mx2 ? dl / mx2 : 0) * 100 + 12)));
+            resolve({
+              a: "hsl(" + hh + "," + ss + "%,25%)", b: "hsl(" + ((hh + 14) % 360) + "," + Math.round(ss * .8) + "%,12%)",
+              g: "hsla(" + hh + "," + Math.min(90, ss + 10) + "%,52%,.42)", l: "hsla(" + hh + "," + ss + "%,60%,.45)"
+            });
+          } catch (e) { reject(e); }
+        };
+        im.onerror = function () { reject(new Error("img")); };
+        im.src = src;
+      });
+      return tintCache[src];
+    }
+    function tint(el, url) {
+      var src = safeUrl(url);
+      if (!src || mediaKind(src) !== "image") return;
+      tintOf(src).then(function (t) {
+        el.style.setProperty("--t1", t.a); el.style.setProperty("--t2", t.b);
+        el.style.setProperty("--t3", t.g); el.style.setProperty("--t3b", t.l);
+      }).catch(function () {});
+    }
+
+    /* quti orqa foni: admin bergan rang bo'lsa shu, bo'lmasa rasmdan; ortiga rasmning xiralashtirilgan nusxasi qo'yiladi */
+    function hexTheme(hex) {
+      var m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || ""); if (!m) return null;
+      var r = parseInt(m[1], 16) / 255, g = parseInt(m[2], 16) / 255, b = parseInt(m[3], 16) / 255;
+      var mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, hh = 0;
+      if (d) { if (mx === r) hh = ((g - b) / d) % 6; else if (mx === g) hh = (b - r) / d + 2; else hh = (r - g) / d + 4; hh = Math.round(hh * 60); if (hh < 0) hh += 360; }
+      var ss = Math.round(Math.max(30, Math.min(85, (mx ? d / mx : 0) * 100)));
+      return { a: "hsl(" + hh + "," + ss + "%,26%)", b: "hsl(" + ((hh + 12) % 360) + "," + Math.round(ss * .8) + "%,11%)",
+               g: "hsla(" + hh + "," + Math.min(92, ss + 8) + "%,54%,.45)", l: "hsla(" + hh + "," + ss + "%,62%,.5)" };
+    }
+    function caseTheme(el, c, mediaEl) {
+      var t = hexTheme(c.bg_color), src = safeUrl(c.image_url);
+      if (t) {
+        el.style.setProperty("--t1", t.a); el.style.setProperty("--t2", t.b);
+        el.style.setProperty("--t3", t.g); el.style.setProperty("--t3b", t.l);
+        return;
+      }
+      tint(el, c.image_url);
+      if (mediaEl && src && mediaKind(src) === "image") {
+        var bgl = h("i", { class: "mbg" }); bgl.style.backgroundImage = "url(\"" + src.replace(/"/g, "%22") + "\")";
+        mediaEl.insertBefore(bgl, mediaEl.firstChild);
+      }
+    }
+
     function loadLottie(src, holder) {
       return ensureLottie()
         .then(function () {
@@ -939,12 +1049,15 @@
     }
 
     function caseCard(c) {
-      return h("button", { class: "case", onclick: function () { haptic(); openSheet(c); } },
-        media(c.image_url, "🎁"),
+      var med = media(c.image_url, "🎁");
+      var card = h("button", { class: "case", onclick: function () { haptic(); openSheet(c); } },
+        med,
         h("div", { class: "name" }, c.name),
         h("div", { class: "sub" }, c.items.length + " ta sovg‘a"),
         h("span", { class: "pill" }, coin(c.price))
       );
+      caseTheme(card, c, med);
+      return card;
     }
 
     function invCard(it) {
@@ -1100,9 +1213,13 @@
 
     /* ===================== G‘ILDIRAK (demo, server to‘xtovsiz aylantiradi) ===================== */
     var WK = {
-      x1: { icon: "🪙" }, x2: { icon: "💵" }, x5: { icon: "💎" }, x10: { icon: "🍀" }
+      x1: { svg: '<svg viewBox="0 0 64 64"><circle cx="32" cy="33" r="27" fill="#5b6472"/><circle cx="32" cy="32" r="26" fill="#a7b0be"/><circle cx="32" cy="32" r="26" fill="none" stroke="#f1f4fa" stroke-width="3"/><circle cx="32" cy="32" r="19" fill="#d3d9e3" stroke="#7a8493" stroke-width="2"/><path d="M32 17l5.2 10.4 11.4 1.6-8.3 8 2 11.4L32 43l-10.3 5.4 2-11.4-8.3-8 11.4-1.6z" fill="#9aa4b4" stroke="#f4f7fb" stroke-width="1.4" stroke-linejoin="round"/></svg>' },
+      x2: { svg: '<svg viewBox="0 0 64 64"><g transform="rotate(-10 32 38)"><rect x="12" y="22" width="12" height="34" rx="4" fill="#cf2a40"/><rect x="26" y="18" width="12" height="38" rx="4" fill="#ee3e56"/><rect x="40" y="22" width="12" height="34" rx="4" fill="#b81d34"/><rect x="29" y="18" width="3" height="38" fill="#ff8a98" opacity=".5"/><rect x="9" y="32" width="46" height="10" rx="3" fill="#17406a"/><rect x="9" y="32" width="46" height="3.5" rx="2" fill="#4e86c0" opacity=".7"/></g><path d="M36 17c1-7 7-7 9-12" stroke="#f6dc94" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="46" cy="5" r="3.4" fill="#ffd34d"/><circle cx="46" cy="5" r="1.6" fill="#fff6c8"/></svg>' },
+      x5: { svg: '<svg viewBox="0 0 64 64"><path d="M20 9h24l13 13v20L44 55H20L7 42V22z" fill="#b8142b" stroke="#ff9aa8" stroke-width="2.2" stroke-linejoin="round"/><path d="M20 9l7 13h10l7-13M7 22h20M37 22h20M27 22l-7 33M37 22l7 33M27 22h10M27 22L20 55M37 22l7 33" fill="none" stroke="#ff7b8d" stroke-width="1.5" stroke-linejoin="round" opacity=".85"/><path d="M27 22h10l7 33H20z" fill="#ff4d66" opacity=".55"/><path d="M13 24l5-8" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".7"/></svg>' },
+      x10: { svg: '<svg viewBox="0 0 64 64"><path d="M32 5l8 17.5 19 2.2-14 13 3.8 18.8L32 47.8 15.2 56.5 19 37.7 5 24.7l19-2.2z" fill="#ffc83f" stroke="#fff1b0" stroke-width="2.2" stroke-linejoin="round"/><path d="M32 15l5 11 12 1.4-8.8 8.2 2.4 11.8L32 41.2l-10.6 6.2 2.4-11.8L15 27.4 27 26z" fill="#ff9a1c" opacity=".8"/></svg>' }
     };
-    var WCYCLE = 18, WSPIN = 7, WBET = 11, WTURNS = 4, WRT = 540;
+    function wkIcon(type) { var el = h("span", { class: "wki" }); el.innerHTML = (WK[type] || WK.x1).svg; return el.firstChild; }
+    var WCYCLE = 18, WSPIN = 7, WBET = 11, WTURNS = 4, WRT = 620, WCY = -439;
     var WH = {
       data: null, offset: 0, bet: 500, kind: "x2", rot: 0, betBusy: false, auto: null, autoOpen: false,
       loop: 0, fetching: false, lastFetchAt: 0, refs: null, wobble: 0, lastK: null, spinning: false,
@@ -1215,7 +1332,10 @@
       WH.lastFetchAt = Date.now();
       var t0 = Date.now();
       request("/api/wheel/state", {}).then(function (d) {
-        WH.offset = d.server_ms + (Date.now() - t0) / 2 - Date.now();
+        var off = d.server_ms + (Date.now() - t0) / 2 - Date.now();
+        /* soat siljishi sekin tuzatiladi: aylanish paytida g‘ildirak sakramasligi uchun */
+        if (!WH.offsetSet || Math.abs(off - WH.offset) > 400) { WH.offset = off; WH.offsetSet = true; }
+        else WH.offset += (off - WH.offset) * 0.12;
         WH.data = d;
         WH.fetching = false;
         applyBalance(d.balance);
@@ -1320,6 +1440,21 @@
       }
     }
 
+    /* faqat ko‘rinadigan plitkalar joylanadi (transform bilan): katta qatlam aylantirilmaydi, shuning uchun silliq */
+    function wheelPlace(rot) {
+      var R = WH.refs; if (!R) return;
+      var W = R.stage.clientWidth || 390, cx = W / 2, N = R.tiles.length, STEP = 360 / N;
+      for (var i = 0; i < N; i++) {
+        var phi = (((i + 0.5) * STEP + rot) % 360 + 360) % 360;
+        if (phi > 180) phi -= 360;
+        var el = R.tiles[i], show = phi > -31 && phi < 31;
+        if (show !== R.vis[i]) { R.vis[i] = show; el.style.visibility = show ? "visible" : "hidden"; }
+        if (!show) continue;
+        var a = phi * Math.PI / 180;
+        el.style.transform = "translate3d(" + (cx - WRT * Math.sin(a)).toFixed(2) + "px," + (WCY + WRT * Math.cos(a)).toFixed(2) + "px,0) rotate(" + phi.toFixed(3) + "deg)";
+      }
+    }
+
     /* ---- har kadr: g‘ildirak burchagi, ovoz, tablo ---- */
     function wheelFrame() {
       WH.loop = requestAnimationFrame(wheelFrame);
@@ -1348,7 +1483,7 @@
         rot = d.result.deg;
       }
       WH.rot = rot;
-      R.ring.style.transform = "rotate(" + rot.toFixed(2) + "deg)";
+      wheelPlace(rot);
 
       var spinningNow = r === d.round && p >= 0 && p < 1 && WH.endedRound !== d.round;
       if (spinningNow) {
@@ -1378,17 +1513,15 @@
         R.hit = hit;
       }
 
-      /* tablo */
-      var label = "", big = "";
-      if (r === d.round && el >= WBET) { label = "SPIN"; big = ""; }
-      else if (el < 2.6 && d.history.length) { label = "NATIJA"; big = d.history[0].replace("x", "") + "x"; }
-      else { label = "TIKISH"; big = pad2(Math.max(0, Math.ceil(WBET - el))); }
-      var dk = label + "|" + big;
-      if (dk !== WH.lastDispKey) {
-        WH.lastDispKey = dk;
-        R.dispLabel.textContent = label;
-        R.dispBig.textContent = label === "SPIN" ? "SPIN" : big;
-        R.disp.classList.toggle("spin", label === "SPIN");
+      /* tablo: tikish vaqti SS:CC (soniya:yuzdan bir), aylanayotganda SPIN, natija — tushgan koeffitsiyent */
+      var big;
+      if (r === d.round && el >= WBET) big = "SPIN";
+      else if (el < 2.6 && d.history.length) big = "X" + d.history[0].replace("x", "");
+      else { var left = Math.max(0, WBET - el); big = pad2(Math.floor(left)) + ":" + pad2(Math.floor((left % 1) * 100)); }
+      if (big !== WH.lastDispKey) {
+        WH.lastDispKey = big;
+        R.dispBig.textContent = big;
+        R.disp.classList.toggle("spin", big === "SPIN");
       }
 
       /* tikish tugmasi + avto */
@@ -1516,18 +1649,21 @@
       /* ---- baraban ---- */
       var N = d.sectors.length, STEP = 360 / N;
       var ring = h("div", { class: "wring" });
-      var tiles = d.sectors.map(function (s, i) {
-        var t = h("div", { class: "wtile k-" + s.type },
-          h("div", { class: "wti" }, (WK[s.type] || {}).icon || "🎁"),
-          h("div", { class: "wtl" }, s.label));
-        t.style.transform = "rotate(" + ((i + 0.5) * STEP).toFixed(3) + "deg) translateY(" + WRT + "px)";
+      var tiles = d.sectors.map(function (s) {
+        var t = h("div", { class: "wtile k-" + s.type }, h("div", { class: "wti" }, wkIcon(s.type)));
         ring.appendChild(t);
         return t;
       });
-      var dispLabel = h("div", { class: "dl" }, "TIKISH"), dispBig = h("div", { class: "db" }, "--");
-      var disp = h("div", { class: "wdisp" }, dispLabel, dispBig);
+      var disp = h("div", { class: "wdisp" });
+      var dispBig = h("div", { class: "db" }, "00:00");
+      disp.appendChild(dispBig);
+      var dispLabel = { textContent: "" };
       var pointer = h("div", { class: "wpointer" });
-      var stage = h("div", { class: "wstage" }, ring, h("div", { class: "wshade" }), disp, pointer);
+      var hoses = h("div", { class: "whoses" });
+      hoses.innerHTML = '<svg viewBox="0 0 390 194" width="100%" height="100%" preserveAspectRatio="xMidYMin slice"><defs><pattern id="wrib" width="7" height="7" patternUnits="userSpaceOnUse"><rect width="7" height="7" fill="#101318"/><rect width="7" height="2.4" fill="#2e343d"/></pattern></defs>' +
+        '<path d="M26 -10C26 90 130 70 160 200" fill="none" stroke="#06070a" stroke-width="36" stroke-linecap="round"/><path d="M26 -10C26 90 130 70 160 200" fill="none" stroke="#1b1f26" stroke-width="30" stroke-dasharray="3 5.5"/>' +
+        '<path d="M364 -10C364 90 260 70 230 200" fill="none" stroke="#06070a" stroke-width="36" stroke-linecap="round"/><path d="M364 -10C364 90 260 70 230 200" fill="none" stroke="#1b1f26" stroke-width="30" stroke-dasharray="3 5.5"/></svg>';
+      var stage = h("div", { class: "wstage" }, h("div", { class: "wbody" }), hoses, h("div", { class: "wped" }), ring, h("div", { class: "wshade" }), h("div", { class: "wdhouse" }), disp, pointer);
       page.appendChild(stage);
 
       var hist = h("div", { class: "whist" });
@@ -1559,7 +1695,7 @@
         var b = h("button", { class: "wk k-" + t.type, onclick: function () {
           if (t.locked) { toast("Bu sektor vaqtincha qulflangan."); return; }
           WH.kind = t.type; haptic(); updatePanel();
-        } }, h("div", { class: "kx" }, t.label), sub, h("div", { class: "ka" }, (WK[t.type] || {}).icon || "🎁"));
+        } }, h("div", { class: "kx" }, t.label), sub, h("div", { class: "ka" }, wkIcon(t.type)));
         kinds[t.type] = b; kindSub[t.type] = sub;
         return b;
       }));
@@ -1590,20 +1726,20 @@
         d.types.map(function (t) { return t.label + " — " + (100 * (cnt[t.type] || 0) / N).toFixed(1) + "%"; }).join(", ") +
         ". Qaytim = tikish + tikish × koeffitsiyent."));
 
-      WH.refs = { ring: ring, tiles: tiles, hit: -1, disp: disp, dispLabel: dispLabel, dispBig: dispBig, pointer: pointer,
+      WH.refs = { stage: stage, vis: [], ring: ring, tiles: tiles, hit: -1, disp: disp, dispLabel: dispLabel, dispBig: dispBig, pointer: pointer,
         hist: hist, players: players, pool: pool, banner: banner, kinds: kinds, kindSub: kindSub, betBtn: betBtn, autoBtn: autoBtn,
         autoRow: autoRow, recent: recent, sndBtn: sndBtn };
       WH.lastDispKey = ""; WH.lastBtnKey = "";
       buildTilesState();
       updatePanel();
       paintBanner();
-      ring.style.transform = "rotate(" + WH.rot.toFixed(2) + "deg)";
+      wheelPlace(WH.rot);
       return page;
     }
 
     /* ===================== SAPER (Mines, demo) ===================== */
-    var MG = { data: null, mode: 3, bet: 500, busy: false, revealing: false, game: null, hit: -1, banner: null, refs: null, timers: [] };
-    var SVG_DIAL = '<svg viewBox="0 0 64 64"><g fill="#262a31" stroke="#4d535e" stroke-width="2"><rect x="29" y="5" width="6" height="26" rx="3"/><rect x="29" y="5" width="6" height="26" rx="3" transform="rotate(120 32 32)"/><rect x="29" y="5" width="6" height="26" rx="3" transform="rotate(240 32 32)"/></g><circle cx="32" cy="32" r="12" fill="#15171b" stroke="#5a606c" stroke-width="3"/><circle cx="32" cy="32" r="4.5" fill="#30343c"/></svg>';
+    var MG = { lastCell: -1, data: null, mode: 3, bet: 500, busy: false, revealing: false, game: null, hit: -1, banner: null, refs: null, timers: [] };
+    var SVG_DIAL = '<svg viewBox="0 0 64 64"><path d="M32 12l15 8.5v17L32 46 17 37.5v-17z" fill="rgba(255,255,255,.05)" stroke="rgba(190,210,255,.32)" stroke-width="2" stroke-linejoin="round"/><path d="M17 20.5L32 29l15-8.5M32 29v17" fill="none" stroke="rgba(190,210,255,.22)" stroke-width="1.6" stroke-linejoin="round"/><circle cx="32" cy="29" r="3" fill="rgba(210,225,255,.4)"/></svg>';
     var SVG_COIN = '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="25" fill="#e0a22f" stroke="#ffd166" stroke-width="3"/><circle cx="32" cy="32" r="18" fill="#efb33f" stroke="#b9801a" stroke-width="2"/><path d="M32 19l4.3 8.8 9.7 1.4-7 6.8 1.6 9.6L32 41l-8.6 4.6 1.6-9.6-7-6.8 9.7-1.4z" fill="#b9801a"/><ellipse cx="24" cy="21" rx="8" ry="4" fill="#fff" opacity=".28" transform="rotate(-30 24 21)"/></svg>';
     var SVG_MINE = (function () {
       var sp = "";
@@ -1661,15 +1797,17 @@
       MG.revealing = true; mgControls();
       var rest = [], i;
       for (i = 0; i < 25; i++) if (game.opened.indexOf(i) < 0 && i !== MG.hit) rest.push(i);
-      for (i = rest.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = rest[i]; rest[i] = rest[j]; rest[j] = t; }
-      var step = rest.length ? 1800 / rest.length : 0;
+      /* ochilish to'lqini: oxirgi bosilgan katakdan tashqariga qarab yoyiladi */
+      var org = MG.hit >= 0 ? MG.hit : (MG.lastCell >= 0 ? MG.lastCell : 12), ox = org % 5, oy = Math.floor(org / 5);
+      rest.sort(function (a, b) { return Math.hypot(a % 5 - ox, Math.floor(a / 5) - oy) - Math.hypot(b % 5 - ox, Math.floor(b / 5) - oy); });
+      var step = rest.length ? Math.min(70, 1400 / rest.length) : 0;
       rest.forEach(function (cell, n) {
         MG.timers.push(setTimeout(function () {
           mgSetCell(cell, game.mine_cells.indexOf(cell) >= 0 ? "ghostmine" : "ghostgem", true);
-          if (n % 2 === 0) mineSound("flip");
-        }, 150 + n * step));
+          if (n % 3 === 0) mineSound("flip");
+        }, 120 + n * step));
       });
-      MG.timers.push(setTimeout(function () { MG.revealing = false; mgControls(); }, 150 + 1800 + 250));
+      MG.timers.push(setTimeout(function () { MG.revealing = false; mgControls(); }, 120 + rest.length * step + 380));
     }
 
     function mgControls() {
@@ -1681,6 +1819,7 @@
       R.prev.disabled = active || MG.revealing || MG.mode === MG.data.modes[0];
       R.next.disabled = active || MG.revealing || MG.mode === MG.data.modes[MG.data.modes.length - 1];
       R.modeVal.textContent = MG.mode;
+      R.rand.style.display = active ? "" : "none"; R.rand.disabled = MG.busy || MG.revealing;
       if (active) {
         R.infoLabel.textContent = "Hozirgi yutuq · ×" + g.mult.toFixed(2);
         R.infoVal.innerHTML = fmtNum(g.cash) + " 🪙";
@@ -1729,7 +1868,7 @@
       var g = MG.game;
       if (!mgActive()) { if (!MG.revealing) toast("Avval «O‘ynash» ni bosing"); return; }
       if (MG.busy || MG.revealing || g.opened.indexOf(i) >= 0) return;
-      MG.busy = true; mgControls();
+      MG.busy = true; MG.lastCell = i; mgControls();
       request("/api/mines/open", { cell: i }).then(function (res) {
         MG.busy = false; MG.game = res.game; applyBalance(res.balance);
         if (res.hit) {
@@ -1808,10 +1947,16 @@
       page.appendChild(h("div", { class: "mbet" }, input, half, dbl));
       var main = h("button", { class: "btn primary big", style: "margin-top:12px", onclick: function () { snd.unlock(); if (mgActive()) mgCash(); else mgStart(); } }, "O‘ynash");
       page.appendChild(main);
-      page.appendChild(h("p", { class: "note" }, "Demo o‘yin: faqat virtual coin. Maydonda 25 ta seyf, ichida 3 yoki 4 ta mina bor. Xavfsiz katakni ochgan sari koeffitsiyent oshadi; istalgan payt yutuqni oling. Mina chiqsa — tikish yo‘qoladi. Minalar joyi o‘yin boshida serverda belgilanadi."));
+      var rand = h("button", { class: "btn big mrand", style: "display:none", onclick: function () {
+        if (!mgActive() || MG.busy || MG.revealing) return;
+        var free = []; for (var q = 0; q < 25; q++) if (MG.game.opened.indexOf(q) < 0) free.push(q);
+        if (free.length) { haptic(); mgOpen(free[Math.floor(Math.random() * free.length)]); }
+      } }, "🎲 Tasodifiy katak");
+      page.appendChild(rand);
+      page.appendChild(h("p", { class: "note" }, "Demo o‘yin: faqat virtual coin. Maydonda 25 ta seyf, ichida 3, 4, 5 yoki 7 ta mina bor. Xavfsiz katakni ochgan sari koeffitsiyent oshadi; istalgan payt yutuqni oling. Mina chiqsa — tikish yo‘qoladi. Minalar joyi o‘yin boshida serverda belgilanadi."));
 
       MG.refs = { cells: cells, input: input, half: half, dbl: dbl, prev: prev, next: next, modeVal: modeVal, infoLabel: infoLabel, infoVal: infoVal,
-        next_: next_, main: main, ladder: ladder, banner: banner };
+        next_: next_, main: main, rand: rand, ladder: ladder, banner: banner };
       /* mavjud o‘yinni chizish */
       var g = MG.game;
       for (var j = 0; j < 25; j++) {
@@ -1886,8 +2031,7 @@
       TW.revealing = true; twControls();
       var start = game.picks.length + (TW.hit ? 1 : 0), items = [], lv, i;
       for (lv = start; lv < 8; lv++) items.push(lv);
-      for (i = items.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = items[i]; items[i] = items[j]; items[j] = t; }
-      var step = items.length ? 1700 / items.length : 0;
+      var step = items.length ? Math.min(130, 1400 / items.length) : 0;   /* pastdan yuqoriga ketma-ket ochiladi */
       items.forEach(function (level, n) {
         TW.timers.push(setTimeout(function () {
           var trap = game.traps[level];
@@ -1896,7 +2040,7 @@
           if (n % 2 === 0) mineSound("flip");
         }, 150 + n * step));
       });
-      TW.timers.push(setTimeout(function () { TW.revealing = false; twControls(); }, 150 + 1700 + 250));
+      TW.timers.push(setTimeout(function () { TW.revealing = false; twControls(); }, 150 + items.length * step + 380));
     }
 
     function twStart() {
@@ -1987,7 +2131,7 @@
       page.appendChild(br.el);
       var main = h("button", { class: "btn primary big", style: "margin-top:12px", onclick: function () { snd.unlock(); if (twActive()) twCash(); else twStart(); } }, "Boshlash");
       page.appendChild(main);
-      page.appendChild(h("p", { class: "note" }, "Demo o‘yin: faqat virtual coin. 8 qavat, har qavatda 2 katak: biri xavfsiz, biri tuzoq. Pastdan yuqoriga o‘ting; har qavatda yutuq ikki baravar oshadi (×1.9, ×3.8, ×7.6 …). Istalgan payt yutuqni oling. Eng kam tikish — 500 coin. Tuzoqlar o‘yin boshida serverda belgilanadi."));
+      page.appendChild(h("p", { class: "note" }, "Demo o‘yin: faqat virtual coin. 8 qavat, har qavatda 2 katak: biri xavfsiz, biri tuzoq. Pastdan yuqoriga o‘ting; har qavatda yutuq ikki baravar oshadi (×1.84, ×3.68, ×7.36 …). Istalgan payt yutuqni oling. Eng kam tikish — 500 coin. Tuzoqlar o‘yin boshida serverda belgilanadi."));
       TW.refs = { cells: cells, input: br.input, half: br.half, dbl: br.dbl, max: br.max, main: main, banner: banner };
       twPaint();
       /* tugagan o‘yinning ochilgan qismi qayta chizilganda */
@@ -1998,8 +2142,7 @@
     var BD = { data: null, bet: 500, busy: false, dropping: false, game: null, banner: null, refs: null, timers: [], raf: 0, last: 0, tt: 0,
                theta: 0, tx: 0, shift: 0, collapsed: false, geo: null, hangKey: "", fc: 0, f0: 0, resizeBound: false };
     var BD_FPS_CAP = 60;      /* 30 yoki 60: ekran yangilanishi shundan oshmaydi; harakat vaqtga (dt) bog'liq, shuning uchun tezlik o'zgarmaydi */
-    var BD_ROWS = 12;
-    var BLK_PAL = [
+        var BLK_PAL = [
       { wall: "#c4573c", line: "#b44a31", trim: "#f1e7d3", glass: "#7cc4ee", shut: null, base: "#9c3b25" },
       { wall: "#e8b84a", line: "#d7a63a", trim: "#fff3d0", glass: "#a5dcf7", shut: "#3f8f4a", base: "#b78822" },
       { wall: "#ecdcc0", line: "#dccaa6", trim: "#c4573c", glass: "#8fcff0", shut: "#c4573c", base: "#b7a07a" }
@@ -2015,7 +2158,7 @@
     function bdBlkSvg(v) { return '<svg viewBox="0 0 96 44" width="100%" height="100%" preserveAspectRatio="none">' + bdBlkInner(v) + '</svg>'; }
     var SVG_BASE = '<svg viewBox="0 0 120 40" width="100%" height="100%" preserveAspectRatio="none"><rect width="120" height="40" rx="3" fill="#cfc4ad"/><rect width="120" height="6" fill="#eee6d3"/><path d="M0 14h120M0 26h120" stroke="#bfb298" stroke-width="1"/><rect x="42" y="14" width="36" height="26" rx="2" fill="#7c8088"/><path d="M42 24h36M42 32h36" stroke="#9aa0a8" stroke-width="2"/><rect x="8" y="14" width="22" height="9" rx="2" fill="#2e3440"/><rect x="90" y="14" width="22" height="9" rx="2" fill="#2e3440"/></svg>';
     var SVG_BULL = '<svg viewBox="0 0 64 80"><ellipse cx="32" cy="77" rx="18" ry="3" fill="rgba(0,0,0,.18)"/><rect x="18" y="44" width="28" height="28" rx="8" fill="#f28c1b"/><rect x="18" y="52" width="28" height="4" fill="#fff3c4"/><rect x="22" y="70" width="8" height="8" rx="3" fill="#3b4a6b"/><rect x="34" y="70" width="8" height="8" rx="3" fill="#3b4a6b"/><path d="M12 24c-6-2-8-9-6-13 3 4 7 6 11 6z" fill="#f4ead2"/><path d="M52 24c6-2 8-9 6-13-3 4-7 6-11 6z" fill="#f4ead2"/><ellipse cx="32" cy="32" rx="18" ry="16" fill="#8a5a3b"/><ellipse cx="32" cy="40" rx="11" ry="8" fill="#e8b9a0"/><circle cx="29" cy="40" r="1.4" fill="#5a3a28"/><circle cx="35" cy="40" r="1.4" fill="#5a3a28"/><circle cx="24" cy="30" r="2.6" fill="#fff"/><circle cx="40" cy="30" r="2.6" fill="#fff"/><circle cx="24.6" cy="30.4" r="1.3" fill="#222"/><circle cx="40.6" cy="30.4" r="1.3" fill="#222"/><path d="M15 22a17 12 0 0 1 34 0z" fill="#ffc414"/><rect x="12" y="21" width="40" height="4" rx="2" fill="#f0a800"/><rect x="28" y="12" width="8" height="10" rx="2" fill="#f0a800"/></svg>';
-    var SVG_CITY = "<svg class=\"bcity\" viewBox=\"0 0 280 170\" preserveAspectRatio=\"xMidYMax slice\"><rect x=\"4\" y=\"84\" width=\"16\" height=\"44\" fill=\"#9cc2e2\" opacity=\".55\"/><rect x=\"24\" y=\"70\" width=\"14\" height=\"58\" fill=\"#9cc2e2\" opacity=\".55\"/><rect x=\"40\" y=\"88\" width=\"18\" height=\"40\" fill=\"#9cc2e2\" opacity=\".55\"/><rect x=\"68\" y=\"74\" width=\"12\" height=\"54\" fill=\"#9cc2e2\" opacity=\".55\"/><rect x=\"124\" y=\"80\" width=\"14\" height=\"48\" fill=\"#9cc2e2\" opacity=\".55\"/><rect x=\"144\" y=\"66\" width=\"17\" height=\"62\" fill=\"#9cc2e2\" opacity=\".55\"/><rect x=\"164\" y=\"82\" width=\"13\" height=\"46\" fill=\"#9cc2e2\" opacity=\".55\"/><rect x=\"184\" y=\"76\" width=\"18\" height=\"52\" fill=\"#9cc2e2\" opacity=\".55\"/><rect x=\"231\" y=\"72\" width=\"14\" height=\"56\" fill=\"#9cc2e2\" opacity=\".55\"/><rect x=\"250\" y=\"84\" width=\"18\" height=\"44\" fill=\"#9cc2e2\" opacity=\".55\"/><path d=\"M0 126Q42 104 84 120T175 116T280 110V170H0z\" fill=\"#8fc98c\" opacity=\".75\"/><rect x=\"0\" y=\"120\" width=\"280\" height=\"34\" fill=\"#dcbc84\"/><path d=\"M0 120v-7h6v7M12 120v-7h6v7M24 120v-7h6v7M36 120v-7h6v7M48 120v-7h6v7M60 120v-7h6v7M72 120v-7h6v7M84 120v-7h6v7M96 120v-7h6v7M108 120v-7h6v7M120 120v-7h6v7M132 120v-7h6v7M144 120v-7h6v7M156 120v-7h6v7M168 120v-7h6v7M180 120v-7h6v7M192 120v-7h6v7M204 120v-7h6v7M216 120v-7h6v7M228 120v-7h6v7M240 120v-7h6v7M252 120v-7h6v7M264 120v-7h6v7M276 120v-7h6v7\" fill=\"#dcbc84\" stroke=\"#dcbc84\" stroke-width=\"1\"/><rect x=\"0\" y=\"136\" width=\"280\" height=\"3\" fill=\"#c9a66d\" opacity=\".6\"/><rect x=\"207\" y=\"92\" width=\"40\" height=\"62\" fill=\"#e6cb94\"/><rect x=\"207\" y=\"92\" width=\"40\" height=\"8\" fill=\"#2aa7a7\"/><path d=\"M215 154V124a12 12 0 0 1 24 0V154z\" fill=\"#6b4a2c\"/><path d=\"M218 154V125a9 9 0 0 1 18 0V154z\" fill=\"#8a6038\"/><path d=\"M203 92h48l-3-8h-42z\" fill=\"#d1ae72\"/><path d=\"M20 154L24 62h28l4 92z\" fill=\"#e8d3a3\"/><rect x=\"24.00\" y=\"68\" width=\"28.00\" height=\"7\" fill=\"#1f8fb0\"/><rect x=\"23.60\" y=\"79\" width=\"28.80\" height=\"7\" fill=\"#f1e7d3\"/><rect x=\"23.20\" y=\"90\" width=\"29.60\" height=\"7\" fill=\"#2aa7a7\"/><rect x=\"22.80\" y=\"101\" width=\"30.40\" height=\"7\" fill=\"#f1e7d3\"/><rect x=\"22.40\" y=\"112\" width=\"31.20\" height=\"7\" fill=\"#1f8fb0\"/><rect x=\"22.00\" y=\"123\" width=\"32.00\" height=\"7\" fill=\"#f1e7d3\"/><rect x=\"21.60\" y=\"134\" width=\"32.80\" height=\"7\" fill=\"#2aa7a7\"/><rect x=\"21.20\" y=\"145\" width=\"33.60\" height=\"7\" fill=\"#f1e7d3\"/><rect x=\"22\" y=\"58\" width=\"32\" height=\"7\" rx=\"2\" fill=\"#2aa7a7\"/><rect x=\"25\" y=\"52\" width=\"26\" height=\"6\" rx=\"2\" fill=\"#1f8fb0\"/><path d=\"M84 154V134a15 15 0 0 1 30 0V154z\" fill=\"#e8d3a3\"/><path d=\"M86.5 134a12.5 12.5 0 0 1 25 0z\" fill=\"#2aa7a7\"/><path d=\"M99 118v-8\" stroke=\"#c9a66d\" stroke-width=\"2\"/><path d=\"M148 154V140a11 11 0 0 1 22 0V154z\" fill=\"#e8d3a3\"/><path d=\"M150 140a9 9 0 0 1 18 0z\" fill=\"#1f8fb0\"/><circle cx=\"10\" cy=\"140\" r=\"12\" fill=\"#3d8d4a\"/><circle cx=\"6.4\" cy=\"136.4\" r=\"6.6\" fill=\"#58a85f\" opacity=\".8\"/><circle cx=\"68\" cy=\"143\" r=\"10\" fill=\"#3d8d4a\"/><circle cx=\"65.0\" cy=\"140.0\" r=\"5.5\" fill=\"#58a85f\" opacity=\".8\"/><circle cx=\"131\" cy=\"142\" r=\"12\" fill=\"#3d8d4a\"/><circle cx=\"127.4\" cy=\"138.4\" r=\"6.6\" fill=\"#58a85f\" opacity=\".8\"/><circle cx=\"186\" cy=\"143\" r=\"11\" fill=\"#3d8d4a\"/><circle cx=\"182.7\" cy=\"139.7\" r=\"6.1\" fill=\"#58a85f\" opacity=\".8\"/><circle cx=\"262\" cy=\"139\" r=\"14\" fill=\"#3d8d4a\"/><circle cx=\"257.8\" cy=\"134.8\" r=\"7.7\" fill=\"#58a85f\" opacity=\".8\"/><circle cx=\"120\" cy=\"148\" r=\"8\" fill=\"#3d8d4a\"/><circle cx=\"117.6\" cy=\"145.6\" r=\"4.4\" fill=\"#58a85f\" opacity=\".8\"/><rect x=\"0\" y=\"154\" width=\"280\" height=\"16\" fill=\"#4f9d4b\"/><circle cx=\"4\" cy=\"158\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"11\" cy=\"161\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"18\" cy=\"164\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"25\" cy=\"158\" r=\"2.2\" fill=\"#ffd24a\"/><circle cx=\"32\" cy=\"161\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"39\" cy=\"164\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"46\" cy=\"158\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"53\" cy=\"161\" r=\"2.2\" fill=\"#ffd24a\"/><circle cx=\"60\" cy=\"164\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"67\" cy=\"158\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"74\" cy=\"161\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"81\" cy=\"164\" r=\"2.2\" fill=\"#ffd24a\"/><circle cx=\"88\" cy=\"158\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"95\" cy=\"161\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"102\" cy=\"164\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"109\" cy=\"158\" r=\"2.2\" fill=\"#ffd24a\"/><circle cx=\"116\" cy=\"161\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"123\" cy=\"164\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"130\" cy=\"158\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"137\" cy=\"161\" r=\"2.2\" fill=\"#ffd24a\"/><circle cx=\"144\" cy=\"164\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"151\" cy=\"158\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"158\" cy=\"161\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"165\" cy=\"164\" r=\"2.2\" fill=\"#ffd24a\"/><circle cx=\"172\" cy=\"158\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"179\" cy=\"161\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"186\" cy=\"164\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"193\" cy=\"158\" r=\"2.2\" fill=\"#ffd24a\"/><circle cx=\"200\" cy=\"161\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"207\" cy=\"164\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"214\" cy=\"158\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"221\" cy=\"161\" r=\"2.2\" fill=\"#ffd24a\"/><circle cx=\"228\" cy=\"164\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"235\" cy=\"158\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"242\" cy=\"161\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"249\" cy=\"164\" r=\"2.2\" fill=\"#ffd24a\"/><circle cx=\"256\" cy=\"158\" r=\"2.2\" fill=\"#e8453c\"/><circle cx=\"263\" cy=\"161\" r=\"2.2\" fill=\"#ff7fa8\"/><circle cx=\"270\" cy=\"164\" r=\"2.2\" fill=\"#ffffff\"/><circle cx=\"277\" cy=\"158\" r=\"2.2\" fill=\"#ffd24a\"/></svg>";
+    var SVG_CITY = "<svg class=\"bcity\" viewBox=\"0 0 360 520\" preserveAspectRatio=\"xMidYMax slice\"><defs><linearGradient id=\"cwg1\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#5aa6ee\"/><stop offset=\"1\" stop-color=\"#2b6bc4\"/></linearGradient><linearGradient id=\"cwg2\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#7cbbf2\"/><stop offset=\"1\" stop-color=\"#3f84d6\"/></linearGradient><pattern id=\"cwp1\" width=\"9\" height=\"11\" patternUnits=\"userSpaceOnUse\"><rect width=\"9\" height=\"11\" fill=\"none\"/><rect x=\"1.5\" y=\"2\" width=\"6\" height=\"7\" rx=\"1\" fill=\"#bfe0ff\" opacity=\".55\"/></pattern><pattern id=\"cwp2\" width=\"10\" height=\"13\" patternUnits=\"userSpaceOnUse\"><rect x=\"1.5\" y=\"2.5\" width=\"7\" height=\"8\" rx=\"1\" fill=\"#e8f4ff\" opacity=\".75\"/><path d=\"M5 2.5v8\" stroke=\"#8ab4d8\" stroke-width=\".8\"/></pattern></defs><rect x=\"-6\" y=\"232\" width=\"32\" height=\"288\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"28\" y=\"252\" width=\"23\" height=\"268\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"55\" y=\"177\" width=\"25\" height=\"343\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"85\" y=\"141\" width=\"23\" height=\"379\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"107\" y=\"248\" width=\"23\" height=\"272\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"132\" y=\"253\" width=\"35\" height=\"267\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"166\" y=\"129\" width=\"24\" height=\"391\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"192\" y=\"126\" width=\"23\" height=\"394\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"212\" y=\"109\" width=\"29\" height=\"411\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"247\" y=\"255\" width=\"40\" height=\"265\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"292\" y=\"169\" width=\"40\" height=\"351\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"328\" y=\"259\" width=\"29\" height=\"261\" fill=\"#9fcdf2\" opacity=\".5\"/><rect x=\"14\" y=\"140\" width=\"52\" height=\"380\" fill=\"url(#cwg1)\"/><rect x=\"14\" y=\"140\" width=\"52\" height=\"380\" fill=\"url(#cwp1)\"/><rect x=\"12\" y=\"136\" width=\"56\" height=\"5\" fill=\"#e9f3ff\"/><rect x=\"63\" y=\"140\" width=\"3\" height=\"380\" fill=\"#e9f3ff\" opacity=\".85\"/><rect x=\"31\" y=\"126\" width=\"18\" height=\"10\" fill=\"#d9eafb\"/><rect x=\"39\" y=\"100\" width=\"2\" height=\"26\" fill=\"#d9eafb\"/><rect x=\"78\" y=\"220\" width=\"40\" height=\"300\" fill=\"url(#cwg2)\"/><rect x=\"78\" y=\"220\" width=\"40\" height=\"300\" fill=\"url(#cwp1)\"/><rect x=\"76\" y=\"216\" width=\"44\" height=\"5\" fill=\"#e9f3ff\"/><rect x=\"115\" y=\"220\" width=\"3\" height=\"300\" fill=\"#e9f3ff\" opacity=\".85\"/><rect x=\"130\" y=\"110\" width=\"56\" height=\"410\" fill=\"url(#cwg1)\"/><rect x=\"130\" y=\"110\" width=\"56\" height=\"410\" fill=\"url(#cwp1)\"/><rect x=\"128\" y=\"106\" width=\"60\" height=\"5\" fill=\"#e9f3ff\"/><rect x=\"183\" y=\"110\" width=\"3\" height=\"410\" fill=\"#e9f3ff\" opacity=\".85\"/><rect x=\"149\" y=\"96\" width=\"18\" height=\"10\" fill=\"#d9eafb\"/><rect x=\"157\" y=\"70\" width=\"2\" height=\"26\" fill=\"#d9eafb\"/><rect x=\"196\" y=\"190\" width=\"44\" height=\"330\" fill=\"url(#cwg2)\"/><rect x=\"196\" y=\"190\" width=\"44\" height=\"330\" fill=\"url(#cwp1)\"/><rect x=\"194\" y=\"186\" width=\"48\" height=\"5\" fill=\"#e9f3ff\"/><rect x=\"237\" y=\"190\" width=\"3\" height=\"330\" fill=\"#e9f3ff\" opacity=\".85\"/><path d=\"M196 186 l22 -22 l22 22z\" fill=\"#d9eafb\"/><rect x=\"246\" y=\"80\" width=\"60\" height=\"440\" fill=\"url(#cwg1)\"/><rect x=\"246\" y=\"80\" width=\"60\" height=\"440\" fill=\"url(#cwp1)\"/><rect x=\"244\" y=\"76\" width=\"64\" height=\"5\" fill=\"#e9f3ff\"/><rect x=\"303\" y=\"80\" width=\"3\" height=\"440\" fill=\"#e9f3ff\" opacity=\".85\"/><rect x=\"267\" y=\"66\" width=\"18\" height=\"10\" fill=\"#d9eafb\"/><rect x=\"275\" y=\"40\" width=\"2\" height=\"26\" fill=\"#d9eafb\"/><rect x=\"312\" y=\"170\" width=\"46\" height=\"350\" fill=\"url(#cwg2)\"/><rect x=\"312\" y=\"170\" width=\"46\" height=\"350\" fill=\"url(#cwp1)\"/><rect x=\"310\" y=\"166\" width=\"50\" height=\"5\" fill=\"#e9f3ff\"/><rect x=\"355\" y=\"170\" width=\"3\" height=\"350\" fill=\"#e9f3ff\" opacity=\".85\"/><rect x=\"0\" y=\"370\" width=\"70\" height=\"150\" fill=\"#c8a9b8\"/><rect x=\"3\" y=\"378\" width=\"64\" height=\"142\" fill=\"url(#cwp2)\"/><rect x=\"-2\" y=\"368\" width=\"74\" height=\"7\" fill=\"#f4ecdd\"/><rect x=\"64\" y=\"402\" width=\"58\" height=\"118\" fill=\"#d9b99a\"/><rect x=\"67\" y=\"410\" width=\"52\" height=\"110\" fill=\"url(#cwp2)\"/><rect x=\"62\" y=\"400\" width=\"62\" height=\"7\" fill=\"#f4ecdd\"/><rect x=\"118\" y=\"356\" width=\"76\" height=\"164\" fill=\"#a9bfdc\"/><rect x=\"121\" y=\"364\" width=\"70\" height=\"156\" fill=\"url(#cwp2)\"/><rect x=\"116\" y=\"354\" width=\"80\" height=\"7\" fill=\"#f4ecdd\"/><rect x=\"190\" y=\"392\" width=\"64\" height=\"128\" fill=\"#d6c0a0\"/><rect x=\"193\" y=\"400\" width=\"58\" height=\"120\" fill=\"url(#cwp2)\"/><rect x=\"188\" y=\"390\" width=\"68\" height=\"7\" fill=\"#f4ecdd\"/><rect x=\"248\" y=\"344\" width=\"70\" height=\"176\" fill=\"#b7a6cf\"/><rect x=\"251\" y=\"352\" width=\"64\" height=\"168\" fill=\"url(#cwp2)\"/><rect x=\"246\" y=\"342\" width=\"74\" height=\"7\" fill=\"#f4ecdd\"/><rect x=\"312\" y=\"398\" width=\"56\" height=\"122\" fill=\"#c9b0a0\"/><rect x=\"315\" y=\"406\" width=\"50\" height=\"114\" fill=\"url(#cwp2)\"/><rect x=\"310\" y=\"396\" width=\"60\" height=\"7\" fill=\"#f4ecdd\"/><circle cx=\"8\" cy=\"506\" r=\"20\" fill=\"#3f9a4a\"/><circle cx=\"2.0\" cy=\"500.0\" r=\"11.0\" fill=\"#62b868\" opacity=\".8\"/><circle cx=\"100\" cy=\"511\" r=\"15\" fill=\"#3f9a4a\"/><circle cx=\"95.5\" cy=\"506.5\" r=\"8.2\" fill=\"#62b868\" opacity=\".8\"/><circle cx=\"176\" cy=\"509\" r=\"17\" fill=\"#3f9a4a\"/><circle cx=\"170.9\" cy=\"503.9\" r=\"9.4\" fill=\"#62b868\" opacity=\".8\"/><circle cx=\"268\" cy=\"511\" r=\"15\" fill=\"#3f9a4a\"/><circle cx=\"263.5\" cy=\"506.5\" r=\"8.2\" fill=\"#62b868\" opacity=\".8\"/><circle cx=\"350\" cy=\"504\" r=\"22\" fill=\"#3f9a4a\"/><circle cx=\"343.4\" cy=\"497.4\" r=\"12.1\" fill=\"#62b868\" opacity=\".8\"/></svg>";
     var SVG_RAIL = '<svg width="100%" height="34" preserveAspectRatio="none"><defs><pattern id="trs" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M0 29L17 5L34 29" fill="none" stroke="#d99a00" stroke-width="3"/></pattern></defs><rect width="100%" height="6" fill="#ffc61a"/><rect y="28" width="100%" height="6" fill="#f0a800"/><rect y="6" width="100%" height="22" fill="url(#trs)"/><rect width="100%" height="2" fill="#ffe27a"/></svg>';
 
     function loadBuild() {
@@ -2033,7 +2176,7 @@
     function bdWind() {
       var d = BD.data, g = BD.game, k = bdActive() ? g.floors : 0;
       if (g && g.winds && g.winds[k]) return g.winds[k];
-      return { speed: d ? d.base_winds[Math.min(k, BD_ROWS - 1)] : 1, dir: -1 };
+      return { speed: 1.2, dir: -1 };
     }
     function bdFmtM(m) { return String(m).replace(".", ","); }
 
@@ -2094,13 +2237,12 @@
       }
       BD.shift = bdShiftFor(n);
       R.world.style.transform = "translate3d(0," + BD.shift + "px,0)";
-      R.city.style.transform = "translate3d(0," + Math.round(BD.shift * 0.18) + "px,0)";
+      R.city.style.transform = "translate3d(0," + Math.min(70, Math.round(BD.shift * 0.12)) + "px,0)";
       var key = geo.W + "x" + geo.H + ":" + (n % 3);
       if (BD.hangKey !== key) { R.hang.innerHTML = bdHangSvg(geo, n); BD.hangKey = key; }
       R.hang.style.display = (active && !BD.dropping) ? "block" : "none";
       var w = bdWind();
-      R.title.textContent = "Xiva";
-      R.sub.innerHTML = "Qavat: <b>" + n + "</b> / " + BD_ROWS + " <i class=\"bsep\"></i>💨 " + bdFmtM(w.speed) + " m/s " + (w.dir < 0 ? "←" : "→");
+      R.sub.innerHTML = "Qavat: <b>" + n + "</b> <i class=\"bsep\"></i>💨 " + bdFmtM(w.speed) + " m/s " + (w.dir < 0 ? "←" : "→");
       R.mult.innerHTML = "🔥 <b>×" + bdFmtM(g && n ? g.mult : 1) + "</b>";
       R.win.textContent = "";
       R.win.innerHTML = "<small>YUTUQ</small><b>" + fmtNum(g && active ? g.cash : (g && g.status === "won" ? g.payout : 0)) + " 🪙</b>";
@@ -2111,7 +2253,12 @@
       });
       R.cloudBox.style.setProperty("--cs", Math.max(28, 120 - w.speed * 9) + "s");
       R.cloudBox.className = "bclouds" + (w.dir < 0 ? " l" : "");
-      R.chips.forEach(function (c, k) { c.className = "bchip" + (k < n ? " done" : "") + (active && k === n ? " next" : ""); });
+      var c0 = n > 0 ? n : 1;
+      R.chips.forEach(function (c, k) {
+        var f = c0 + k;
+        c.textContent = "×" + bdFmtM((1 + f / 10).toFixed(1));
+        c.className = "bchip" + (f <= n ? " done" : "") + (active && f === n + 1 ? " next" : "");
+      });
       bdControls();
     }
 
@@ -2208,7 +2355,7 @@
             bdPaint();
             if (res.game.status === "won") {
               mineSound("cash");
-              BD.banner = { win: true, text: "🏆 12 qavat! +" + coin(res.game.payout - res.game.bet) };
+              BD.banner = { win: true, text: "🏆 Rekord! +" + coin(res.game.payout - res.game.bet) };
               bdControls();
             }
             return;
@@ -2277,11 +2424,11 @@
 
       var back = h("button", { class: "bback", onclick: function () { document.body.classList.remove("imm"); go(state.lastTab || "home"); } });
       back.innerHTML = icoHtml("back");
-      var title = h("b", { class: "bt" }, "Xiva"), sub = h("span", { class: "bsub" });
+      var sub = h("span", { class: "bsub" });
       var mult = h("div", { class: "bmult" });
-      var hud = h("div", { class: "bhud" }, back, h("div", { class: "bpill" }, title, sub), mult);
+      var hud = h("div", { class: "bhud" }, back, h("div", { class: "bpill" }, sub), mult);
 
-      var chips = d.mults.map(function (m) { return h("div", { class: "bchip" }, bdFmtM(m)); });
+      var chips = []; for (var ci = 0; ci < 9; ci++) chips.push(h("div", { class: "bchip" }, "×1,1"));
       var meter = h("div", { class: "bmeter" }, chips);
       var win = h("div", { class: "bwin" });
       var snd2 = h("button", { class: "bsndb", onclick: function () { WH.mute = !WH.mute; try { localStorage.setItem("wmute", WH.mute ? "1" : "0"); } catch (e) {} if (!WH.mute) snd.unlock(); bdControls(); } });
@@ -2298,7 +2445,7 @@
 
       var stage = h("div", { class: "bgame" }, cloudBox, cityEl, gustBox, world, rail, cabin, trolley, hang, hud, meter, win, snd2, banner, bottom, fps);
       BD.refs = { stage: stage, world: world, floors: floors, city: cityEl, cloudBox: cloudBox, hang: hang, rail: rail, cabin: cabin, trolley: trolley, ground: ground,
-                  base: base, bull: bull, title: title, sub: sub, mult: mult, win: win, gusts: gusts, chips: chips, input: br.input, half: br.half, dbl: br.dbl,
+                  base: base, bull: bull, sub: sub, mult: mult, win: win, gusts: gusts, chips: chips, input: br.input, half: br.half, dbl: br.dbl,
                   max: br.max, bet: bet, bal: bal, go: go2, cash: cash, snd: snd2, banner: banner, fps: fps };
       BD.geo = null; BD.hangKey = ""; BD.last = 0;
       setTimeout(bdLayout, 0);
@@ -2398,15 +2545,14 @@
       LD.revealing = true; ldControls();
       var from = game.rows.length + 1, items = [], r, i;
       for (r = from; r <= 12; r++) items.push(r);
-      for (i = items.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = items[i]; items[i] = items[j]; items[j] = t; }
-      var step = items.length ? 1700 / items.length : 0;
+      var step = items.length ? Math.min(130, 1400 / items.length) : 0;
       items.forEach(function (row, n) {
         LD.timers.push(setTimeout(function () {
           var saved = LD.game; ldPaintRow(row, "reveal"); LD.game = saved;
           if (n % 2 === 0) mineSound("flip");
         }, 150 + n * step));
       });
-      LD.timers.push(setTimeout(function () { LD.revealing = false; ldControls(); }, 150 + 1700 + 250));
+      LD.timers.push(setTimeout(function () { LD.revealing = false; ldControls(); }, 150 + items.length * step + 380));
     }
 
     function ldStart() {
@@ -2647,7 +2793,7 @@
       }
 
       var page = h("div", null, h("h1", { class: "page-title" }, "💎 Bonus"), hero);
-      page.appendChild(h("h3", { class: "sec" }, "🎯 Shartlar"));
+      page.appendChild(h("h3", { class: "sec" }, ico("target", "amber"), " Shartlar"));
       if (!inTG) { page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Shartlarni ko‘rish uchun Telegram ichida oching."))); return page; }
       if (!d) { page.appendChild(h("div", { class: "skeleton", style: "height:120px" })); return page; }
       if (!d.tasks.length) { page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Hozircha shartlar yo‘q."))); return page; }
@@ -2889,7 +3035,7 @@
       var sheet = h("div", { class: "sheet", onclick: function (e) { e.stopPropagation(); } },
         h("div", { class: "grab" }),
         h("button", { class: "x", "aria-label": "Yopish", onclick: closeSheet }, "✕"),
-        media(c.image_url, "🎁", "hero-media"),
+        (function () { var m = media(c.image_url, "🎁", "hero-media"); caseTheme(m, c, m); return m; })(),
         h("h2", { class: "sheet-title" }, c.name),
         c.description ? h("p", { class: "muted" }, c.description) : null,
         h("div", { class: "row between" },

@@ -1,4 +1,5 @@
 """Admin panel (faqat ADMIN_IDS dagi foydalanuvchilar uchun)."""
+import re
 import asyncio
 
 from aiogram import F, Router
@@ -165,7 +166,7 @@ def case_keyboard(case_id: int) -> InlineKeyboardMarkup:
         [b("🎁 Sovg‘a qo‘shish", f"admin_item_{case_id}")],
         [b("🖼 Quti rasmi / GIF", f"admin_cimg_{case_id}")],
         [b("✏️ Nomi", f"admin_ed_c_name_{case_id}"), b("💰 Narxi", f"admin_ed_c_price_{case_id}")],
-        [b("📝 Tavsifi", f"admin_ed_c_desc_{case_id}")],
+        [b("📝 Tavsifi", f"admin_ed_c_desc_{case_id}"), b("🎨 Orqa fon rangi", f"admin_ed_c_bg_{case_id}")],
     ]
     for item in db.get_case_items(case_id):
         rows.append([b(f"✏️ {item['name']}", f"admin_it_{item['id']}")])
@@ -184,6 +185,7 @@ def case_text(case_id: int) -> str:
     if case["description"]:
         lines.append(case["description"])
     lines.append("🖼 Rasm: " + ("bor" if case["image_url"] else "yo‘q"))
+    lines.append("🎨 Orqa fon: " + (case["bg_color"] if case["bg_color"] else "rasmdan avtomatik"))
     lines.append("")
     if items:
         total = sum(float(i["probability"]) for i in items)
@@ -339,6 +341,7 @@ EDIT_PROMPTS = {
     "price": f"Yangi narxni {COIN} coin bilan, son qilib yozing (0 — tekin):",
     "desc": "Yangi tavsifni yozing («-» — tavsifni o‘chirish):",
     "prob": "Yangi tushish foizini yozing (masalan 12.5):",
+    "bg": "Quti orqa fon rangini HEX ko‘rinishida yozing (masalan #7b3fe4).\n«-» yozsangiz — rasmdan avtomatik tanlanadi:",
 }
 
 
@@ -412,6 +415,10 @@ async def admin_edit_value(message: Message, state: FSMContext) -> None:
             value = raw[:80]
         elif field == "desc":
             value = "" if raw == "-" else raw[:500]
+        elif field == "bg":
+            value = "" if raw == "-" else raw.lower()
+            if value and not re.fullmatch(r"#[0-9a-f]{6}", value):
+                raise ValueError
         elif field == "price":
             value = int(raw.replace(" ", ""))
             if value < 0:
@@ -423,7 +430,9 @@ async def admin_edit_value(message: Message, state: FSMContext) -> None:
     except ValueError:
         await message.answer("Noto‘g‘ri qiymat. Qayta yozing (yoki /cancel):")
         return
-    if kind == "c":
+    if kind == "c" and field == "bg":
+        db.set_case_bg(target, value)
+    elif kind == "c":
         column = {"name": "name", "desc": "description", "price": "price"}[field]
         db.update_case(target, **{column: value})
     else:
