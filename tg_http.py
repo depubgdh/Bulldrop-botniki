@@ -124,3 +124,37 @@ async def send_message(chat_id: int, text: str, reply_markup=None) -> bool:
         return bool(data.get("ok"))
     except (aiohttp.ClientError, ValueError, TimeoutError):
         return False
+
+
+async def upload_media(chat_id: int, data: bytes, filename: str, content_type: str):
+    """Mini App'dan yuklangan rasm/GIF/videoni Telegram'ga yuborib, file_id ni oladi.
+    Qaytaradi: 'tg:img:<file_id>' / 'tg:vid:<file_id>' yoki None."""
+    if not BOT_TOKEN or not data:
+        return None
+    ctype = (content_type or "").lower()
+    if ctype in ("image/gif", "video/mp4", "video/webm"):
+        method, field, kind = "sendAnimation", "animation", "vid"
+    elif ctype.startswith("image/"):
+        method, field, kind = "sendPhoto", "photo", "img"
+    else:
+        return None
+    form = aiohttp.FormData()
+    form.add_field("chat_id", str(chat_id))
+    form.add_field("disable_notification", "true")
+    form.add_field(field, data, filename=filename or "file", content_type=ctype)
+    timeout = aiohttp.ClientTimeout(total=60)
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(f"{API}/bot{BOT_TOKEN}/{method}", data=form) as resp:
+                res = await resp.json()
+    except (aiohttp.ClientError, ValueError, TimeoutError):
+        return None
+    if not res.get("ok"):
+        return None
+    msg = res["result"]
+    if kind == "img":
+        file_id = msg["photo"][-1]["file_id"]
+    else:
+        media = msg.get("animation") or msg.get("video") or msg.get("document") or {}
+        file_id = media.get("file_id")
+    return f"tg:{kind}:{file_id}" if file_id else None

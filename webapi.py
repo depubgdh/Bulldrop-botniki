@@ -9,11 +9,13 @@ from urllib.parse import parse_qsl
 
 from aiohttp import web
 
+import bulk
 import db
 import tg_http
 import crane
 import ladder
 import mines
+import signals
 import tower
 import wheel
 from config import ADMIN_IDS, BOT_TOKEN, BOT_USERNAME
@@ -631,6 +633,298 @@ async def api_wheel_daily(request):
     return web.json_response(res, headers=NO_STORE)
 
 
+# ------------------------------------------------------------------ Signal (coin evaziga, tasodifiy tavsiya)
+
+SIGNAL_ERRORS = {
+    "bad_game": (400, "Noto‘g‘ri o‘yin."),
+    "bad_ref": (400, "O‘yin ID raqamini kiriting (harf, raqam, - _ # . belgilari, 32 tagacha)."),
+    "off": (409, "Bu signal vaqtincha o‘chirilgan."),
+    "no_funds": (402, "Coin yetarli emas."),
+    "bad_result": (400, "Noto‘g‘ri natija."),
+    "not_found": (404, "Signal topilmadi."),
+    "bad_price": (400, "Narx noto‘g‘ri."),
+}
+
+
+def _signal_error(exc) -> ApiError:
+    status, message = SIGNAL_ERRORS.get(exc.code, (400, "Xatolik"))
+    return ApiError(status, exc.code, message)
+
+
+@api
+async def api_signal_state(request):
+    user_id, _, _, _ = await _auth(request)
+    return web.json_response({**signals.state_for(user_id), "coins": db.wallet(user_id)["coins"]}, headers=NO_STORE)
+
+
+@api
+async def api_signal_buy(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        res = signals.buy(user_id, str(body.get("game", "")), str(body.get("ref", "")))
+    except signals.SignalError as exc:
+        raise _signal_error(exc)
+    return web.json_response(res, headers=NO_STORE)
+
+
+@api
+async def api_signal_mark(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        signals.mark(user_id, int(body.get("id", 0)), str(body.get("result", "")))
+    except (signals.SignalError, ValueError) as exc:
+        raise _signal_error(exc) if isinstance(exc, signals.SignalError) else ApiError(400, "bad_request", "Noto‘g‘ri so‘rov.")
+    return web.json_response({"ok": True}, headers=NO_STORE)
+
+
+# ------------------------------------------------------------------ Admin (Mini App ichida)
+
+async def _admin(request):
+    user_id, _, body, _ = await _auth(request)
+    if user_id not in ADMIN_IDS:
+        raise ApiError(403, "forbidden", "Bu bo‘lim faqat admin uchun.")
+    return user_id, body
+
+
+def _admin_cases() -> list:
+    out = []
+    for case in db.get_cases():
+        items = db.get_case_items(case["id"])
+        total = sum(float(i["probability"]) for i in items) or 1.0
+        out.append({
+            "id": case["id"], "name": case["name"], "price": case["price"],
+            "description": case["description"] or "", "image": media_url(case["image_url"]),
+            "bg_color": case["bg_color"] if "bg_color" in case.keys() else "",
+            "ev": round(db.case_ev(case["id"])) if items else 0,
+            "items": [{**item_json(i), "probability": float(i["probability"]),
+                       "percent": round(float(i["probability"]) / total * 100, 2)} for i in items],
+        })
+    return out
+
+
+def _int(value, default=None, minimum=None, maximum=None):
+    try:
+        n = int(str(value).replace(" ", ""))
+    except (TypeError, ValueError):
+        if default is not None:
+            return default
+        raise ApiError(400, "bad_request", "Son kerak.")
+    if (minimum is not None and n < minimum) or (maximum is not None and n > maximum):
+        raise ApiError(400, "bad_request", "Qiymat ruxsat etilgan oraliqdan tashqarida.")
+    return n
+
+
+@api
+async def api_admin_cases(request):
+    await _admin(request)
+    return web.json_response({"cases": _admin_cases(), "rarities": bulk.RARITIES}, headers=NO_STORE)
+
+
+@api
+async def api_admin_case_save(request):
+    _, body = await _admin(request)
+    name = str(body.get("name", "")).strip()[:80]
+    if not name:
+        raise ApiError(400, "bad_request", "Quti nomini kiriting.")
+    price = _int(body.get("price"), minimum=0, maximum=100_000_000)
+    desc = str(body.get("description", "")).strip()[:300]
+    bg = str(body.get("bg_color", "")).strip().lower()
+    if bg and not re.fullmatch(r"#[0-9a-f]{6}", bg):
+        raise ApiError(400, "bad_request", "Rang #rrggbb ko‘rinishida bo‘lsin.")
+    case_id = body.get("id")
+    if case_id:
+        case_id = _int(case_id)
+        if not db.get_case(case_id):
+            raise ApiError(404, "not_found", "Quti topilmadi.")
+        db.update_case(case_id, name=name, price=price, description=desc)
+    else:
+        db.add_case(name, price, desc, "")
+        case_id = max(c["id"] for c in db.get_cases())
+    db.set_case_bg(case_id, bg)
+    if body.get("image_url") is not None and str(body["image_url"]).strip().lower().startswith("https://"):
+        db.set_case_image(case_id, str(body["image_url"]).strip())
+    elif body.get("image_url") == "":
+        db.set_case_image(case_id, "")
+    return web.json_response({"ok": True, "id": case_id, "cases": _admin_cases()}, headers=NO_STORE)
+
+
+@api
+async def api_admin_case_delete(request):
+    _, body = await _admin(request)
+    db.deactivate_case(_int(body.get("id")))
+    return web.json_response({"ok": True, "cases": _admin_cases()}, headers=NO_STORE)
+
+
+@api
+async def api_admin_items_bulk(request):
+    """Ro'yxat bilan tez qo'shish: har qator «Nomi | qiymat | foiz | daraja | havola»."""
+    _, body = await _admin(request)
+    case_id = _int(body.get("case_id"))
+    if not db.get_case(case_id):
+        raise ApiError(404, "not_found", "Quti topilmadi.")
+    added, bad = 0, []
+    for line in str(body.get("text", "")).splitlines():
+        if not line.strip():
+            continue
+        item = bulk.parse_item_line(line)
+        if not item:
+            bad.append(line.strip()[:80])
+            continue
+        db.add_case_item(case_id, item["name"], item["price"], item["image"], item["prob"], item["rarity"])
+        added += 1
+    return web.json_response({"ok": True, "added": added, "bad": bad[:10], "cases": _admin_cases()}, headers=NO_STORE)
+
+
+@api
+async def api_admin_item_save(request):
+    _, body = await _admin(request)
+    item_id = _int(body.get("id"))
+    if not db.get_case_item(item_id):
+        raise ApiError(404, "not_found", "Sovg‘a topilmadi.")
+    rarity = str(body.get("rarity", "")) or None
+    if rarity and rarity not in bulk.RARITIES:
+        raise ApiError(400, "bad_request", "Noto‘g‘ri daraja.")
+    try:
+        prob = float(str(body.get("probability")).replace(",", ".")) if body.get("probability") not in (None, "") else None
+    except ValueError:
+        raise ApiError(400, "bad_request", "Foiz son bo‘lishi kerak.")
+    if prob is not None and prob <= 0:
+        raise ApiError(400, "bad_request", "Foiz 0 dan katta bo‘lsin.")
+    price = _int(body.get("price"), minimum=0) if body.get("price") not in (None, "") else None
+    name = str(body.get("name", "")).strip()[:80] or None
+    db.update_item(item_id, name=name, price=price, rarity=rarity, probability=prob)
+    return web.json_response({"ok": True, "cases": _admin_cases()}, headers=NO_STORE)
+
+
+@api
+async def api_admin_item_delete(request):
+    _, body = await _admin(request)
+    db.deactivate_item(_int(body.get("id")))
+    return web.json_response({"ok": True, "cases": _admin_cases()}, headers=NO_STORE)
+
+
+@api
+async def api_admin_ads(request):
+    await _admin(request)
+    free_limit = db.free_limit()
+    hero = hero_payload(free_limit)
+    return web.json_response({
+        "hero": {**hero, "text_raw": db.get_setting(HERO_KEYS["text"]) or HERO_DEFAULTS["text"]},
+        "banner": banner_payload() or {"image": "", "link": ""},
+        "free_limit": free_limit,
+    }, headers=NO_STORE)
+
+
+@api
+async def api_admin_ads_save(request):
+    _, body = await _admin(request)
+    for field in ("title", "text", "btn_text", "btn_target"):
+        if field in body:
+            value = str(body[field]).strip()[:400]
+            db.set_setting(HERO_KEYS[field], value or None)
+    if "hero_image" in body:
+        img = str(body["hero_image"]).strip()
+        if img == "" or img.lower().startswith("https://"):
+            db.set_setting(HERO_KEYS["image"], img or None)
+    if "banner_link" in body:
+        db.set_setting("banner_link", str(body["banner_link"]).strip()[:300] or None)
+    if "banner_image" in body:
+        img = str(body["banner_image"]).strip()
+        if img == "" or img.lower().startswith("https://"):
+            db.set_setting("banner_image", img or None)
+    return web.json_response({"ok": True}, headers=NO_STORE)
+
+
+@api
+async def api_admin_upload(request):
+    """multipart: init_data, target (case|hero|banner), id (quti uchun), file. Rasm Telegram'ga yuklanib, file_id saqlanadi."""
+    reader = await request.multipart()
+    fields, blob, fname, ctype = {}, b"", "file", ""
+    async for part in reader:
+        if part.name == "file":
+            fname, ctype = part.filename or "file", part.headers.get("Content-Type", "")
+            blob = await part.read(decode=False)
+        else:
+            fields[part.name] = (await part.text())[:4096]
+    user = validate_init_data(fields.get("init_data", ""), BOT_TOKEN)
+    if not user or int(user["id"]) not in ADMIN_IDS:
+        raise ApiError(403, "forbidden", "Bu bo‘lim faqat admin uchun.")
+    if not blob or len(blob) > 10 * 1024 * 1024:
+        raise ApiError(400, "bad_request", "Fayl bo‘sh yoki 10 MB dan katta.")
+    ref = await tg_http.upload_media(int(user["id"]), blob, fname, ctype)
+    if not ref:
+        raise ApiError(502, "upload", "Yuklab bo‘lmadi. Rasm/GIF/MP4 yuboring (botda /start bosgan bo‘lishingiz kerak).")
+    target = fields.get("target")
+    if target == "case":
+        case_id = _int(fields.get("id"))
+        if not db.get_case(case_id):
+            raise ApiError(404, "not_found", "Quti topilmadi.")
+        db.set_case_image(case_id, ref)
+    elif target == "hero":
+        db.set_setting(HERO_KEYS["image"], ref)
+    elif target == "banner":
+        db.set_setting("banner_image", ref)
+    elif target == "item":
+        item_id = _int(fields.get("id"))
+        if not db.get_case_item(item_id):
+            raise ApiError(404, "not_found", "Sovg‘a topilmadi.")
+        db.set_item_image(item_id, ref)
+    else:
+        raise ApiError(400, "bad_request", "Noto‘g‘ri nishon.")
+    return web.json_response({"ok": True, "url": media_url(ref)}, headers=NO_STORE)
+
+
+@api
+async def api_admin_signals(request):
+    await _admin(request)
+    return web.json_response({"config": signals.config(), "stats": signals.admin_stats()}, headers=NO_STORE)
+
+
+@api
+async def api_admin_signals_save(request):
+    _, body = await _admin(request)
+    try:
+        signals.set_config(str(body.get("game", "")),
+                           price=body.get("price") if body.get("price") not in (None, "") else None,
+                           on=body.get("on") if "on" in body else None)
+    except signals.SignalError as exc:
+        raise _signal_error(exc)
+    except (TypeError, ValueError):
+        raise ApiError(400, "bad_request", "Narx son bo‘lishi kerak.")
+    return web.json_response({"ok": True, "config": signals.config()}, headers=NO_STORE)
+
+
+def _user_json(card) -> dict:
+    user = card["user"]
+    return {
+        "id": user["user_id"], "username": user["username"] or "", "phone": user["phone"] or "",
+        "coins": card["wallet"]["coins"], "opens": card["wallet"]["opens"],
+        "inventory": card["inventory"], "referrals": card["referrals"],
+    }
+
+
+@api
+async def api_admin_user(request):
+    _, body = await _admin(request)
+    row = db.find_user(str(body.get("query", "")))
+    if not row:
+        raise ApiError(404, "not_found", "Foydalanuvchi topilmadi.")
+    return web.json_response({"user": _user_json(db.user_card(row["user_id"]))}, headers=NO_STORE)
+
+
+@api
+async def api_admin_coins(request):
+    """Foydalanuvchi coinini qo'shish/ayirish (musbat yoki manfiy son)."""
+    admin_id, body = await _admin(request)
+    target = _int(body.get("user_id"))
+    delta = _int(body.get("delta"), minimum=-1_000_000_000, maximum=1_000_000_000)
+    if not db.get_user(target):
+        raise ApiError(404, "not_found", "Foydalanuvchi topilmadi.")
+    db.add_coins(target, delta)
+    logging.info("admin %s coin %+d -> user %s", admin_id, delta, target)
+    return web.json_response({"user": _user_json(db.user_card(target))}, headers=NO_STORE)
+
+
 def setup_routes(app: web.Application) -> None:
     app.router.add_post("/api/wheel/state", api_wheel_state)
     app.router.add_post("/api/wheel/bet", api_wheel_bet)
@@ -656,6 +950,22 @@ def setup_routes(app: web.Application) -> None:
 
 
     app.router.add_post("/api/admin/overview", api_admin_overview)
+    app.router.add_post("/api/signal/state", api_signal_state)
+    app.router.add_post("/api/signal/buy", api_signal_buy)
+    app.router.add_post("/api/signal/mark", api_signal_mark)
+    app.router.add_post("/api/admin/cases", api_admin_cases)
+    app.router.add_post("/api/admin/case/save", api_admin_case_save)
+    app.router.add_post("/api/admin/case/delete", api_admin_case_delete)
+    app.router.add_post("/api/admin/items/bulk", api_admin_items_bulk)
+    app.router.add_post("/api/admin/item/save", api_admin_item_save)
+    app.router.add_post("/api/admin/item/delete", api_admin_item_delete)
+    app.router.add_post("/api/admin/ads", api_admin_ads)
+    app.router.add_post("/api/admin/ads/save", api_admin_ads_save)
+    app.router.add_post("/api/admin/upload", api_admin_upload)
+    app.router.add_post("/api/admin/signals", api_admin_signals)
+    app.router.add_post("/api/admin/signals/save", api_admin_signals_save)
+    app.router.add_post("/api/admin/user", api_admin_user)
+    app.router.add_post("/api/admin/coins", api_admin_coins)
     app.router.add_get("/api/cases", api_cases)
     app.router.add_post("/api/me", api_me)
     app.router.add_post("/api/open", api_open)

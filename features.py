@@ -93,6 +93,11 @@ def phone_keyboard() -> ReplyKeyboardMarkup:
 
 
 def signal_keyboard() -> InlineKeyboardMarkup:
+    if WEBAPP_URL.startswith("https://"):
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [_game_button("📡 Signal olish (Mini App)", "signal", "signal_crash")],
+            [InlineKeyboardButton(text="↩️ Bosh menyu", callback_data="go_home")],
+        ])
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Crash — demo", callback_data="signal_crash")],
         [InlineKeyboardButton(text="Saper — demo", callback_data="signal_saper")],
@@ -273,7 +278,8 @@ async def open_signals(call: CallbackQuery) -> None:
     if call.message:
         await edit_or_send(
             call.message,
-            "📡 Bulldrop Signal\n\nSinov rejimi: demo qiymatlar haqiqiy o‘yin natijalarini bashorat qilmaydi.",
+            "📡 Bulldrop Signal\n\nSignallar endi Mini App ichida, coin evaziga beriladi. "
+            "Eslatma: signal tasodifiy tavsiya — haqiqiy o‘yin natijasini bashorat qilmaydi va yutuqni kafolatlamaydi.",
             signal_keyboard(),
         )
 

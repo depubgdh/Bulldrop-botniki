@@ -28,13 +28,7 @@ router.message.filter(F.from_user.id.in_(ADMIN_IDS))
 router.callback_query.filter(F.from_user.id.in_(ADMIN_IDS))
 
 ADMIN_TITLE = "👑 Admin panel"
-RARITIES = {
-    "common": "Oddiy",
-    "rare": "Noyob",
-    "epic": "Epik",
-    "legendary": "Afsonaviy",
-    "mythic": "Mifik",
-}
+from bulk import RARITIES, parse_case_line, parse_item_line
 MEDIA_HINT = "rasm, GIF, stiker yuboring yoki https:// havola yozing. O‘tkazib yuborish uchun «-» yozing"
 
 
@@ -50,6 +44,8 @@ class AdminStates(StatesGroup):
     waiting_item_image = State()
     waiting_item_prob = State()
     waiting_item_rarity = State()
+    waiting_bulk_items = State()
+    waiting_bulk_case = State()
     # boshqa bo'limlar
     waiting_user_query = State()
     waiting_card_coins = State()
@@ -154,7 +150,7 @@ async def menu_admin(call: CallbackQuery, state: FSMContext) -> None:
 # ------------------------------------------------------------------ 📦 Qutilar
 
 def boxes_keyboard() -> InlineKeyboardMarkup:
-    rows = [[b("➕ Quti yaratish", "admin_add_case")]]
+    rows = [[b("➕ Quti yaratish", "admin_add_case"), b("⚡ Tez quti", "admin_bulkcase")]]
     for case in db.get_cases():
         rows.append([b(f"📦 {case['name']} — {fmt_num(case['price'])} {COIN}", f"admin_case_{case['id']}")])
     rows.append([b("🔙 Admin panel", "menu_admin")])
@@ -163,7 +159,7 @@ def boxes_keyboard() -> InlineKeyboardMarkup:
 
 def case_keyboard(case_id: int) -> InlineKeyboardMarkup:
     rows = [
-        [b("🎁 Sovg‘a qo‘shish", f"admin_item_{case_id}")],
+        [b("🎁 Sovg‘a qo‘shish", f"admin_item_{case_id}"), b("⚡ Tez qo‘shish", f"admin_bulk_{case_id}")],
         [b("🖼 Quti rasmi / GIF", f"admin_cimg_{case_id}")],
         [b("✏️ Nomi", f"admin_ed_c_name_{case_id}"), b("💰 Narxi", f"admin_ed_c_price_{case_id}")],
         [b("📝 Tavsifi", f"admin_ed_c_desc_{case_id}"), b("🎨 Orqa fon rangi", f"admin_ed_c_bg_{case_id}")],
@@ -565,6 +561,101 @@ async def admin_item_rarity(call: CallbackQuery, state: FSMContext) -> None:
     case_id = data["item_case_id"]
     if call.message:
         await edit_or_send(call.message, "✅ Sovg‘a qo‘shildi!\n\n" + case_text(case_id), case_keyboard(case_id))
+
+
+# ------------------------------------------------------------------ ⚡ Tez qo'shish
+BULK_HELP = (
+    "⚡ Tez qo‘shish\n\n"
+    "Har qatorga bitta sovg‘a yozing (istalgancha qator):\n"
+    "<code>Nomi | qiymat | foiz | daraja</code>\n\n"
+    "Misol:\n"
+    "<code>Tyrannosaurus | 350000 | 0.1 | m\n"
+    "Kuchuk | 4000 | 12.5\n"
+    "Mushuk 2500 20</code>\n\n"
+    "• Daraja ixtiyoriy: c=oddiy, r=noyob, e=epik, l=afsonaviy, m=mifik. Yozmasangiz foizga qarab o‘zi tanlanadi.\n"
+    "• Oxirida https:// havola qo‘shsangiz rasm ham ulanadi.\n"
+    "• Rasm yuborib, izohiga («caption») shu formatda bitta qator yozsangiz — sovg‘a rasmi bilan qo‘shiladi.\n"
+    "• Tugatish: /cancel"
+)
+
+
+async def _bulk_add(message: Message, case_id: int, lines, image=None) -> tuple[int, list[str]]:
+    added, bad = 0, []
+    for line in lines:
+        item = parse_item_line(line)
+        if not item:
+            if line.strip():
+                bad.append(line.strip())
+            continue
+        db.add_case_item(case_id, item["name"], item["price"], image or item["image"], item["prob"], item["rarity"])
+        added += 1
+    return added, bad
+
+
+@router.callback_query(F.data.startswith("admin_bulk_"))
+async def admin_bulk_start(call: CallbackQuery, state: FSMContext) -> None:
+    case_id = int(call.data.replace("admin_bulk_", ""))
+    if not db.get_case(case_id):
+        await call.answer("Quti topilmadi.", show_alert=True)
+        return
+    await call.answer()
+    await state.update_data(bulk_case_id=case_id)
+    await state.set_state(AdminStates.waiting_bulk_items)
+    if call.message:
+        await call.message.answer(BULK_HELP, parse_mode="HTML",
+                                  reply_markup=kb([b("✅ Tayyor", f"admin_case_{case_id}")]))
+
+
+@router.message(AdminStates.waiting_bulk_items, not_command)
+async def admin_bulk_items(message: Message, state: FSMContext) -> None:
+    data = await state.get_data()
+    case_id = data["bulk_case_id"]
+    text = message.text or message.caption or ""
+    image = None
+    if message.photo or message.animation or message.sticker or message.video:
+        image = extract_media(message)
+    added, bad = await _bulk_add(message, case_id, text.splitlines(), image=image)
+    items = db.get_case_items(case_id)
+    total = round(sum(i["probability"] for i in items), 2)
+    out = f"✅ Qo‘shildi: {added} ta."
+    if bad:
+        out += "\n⚠️ Tushunilmagan qatorlar:\n" + "\n".join(f"• {x}" for x in bad[:10])
+    out += f"\n\nQutida jami {len(items)} ta sovg‘a, foizlar yig‘indisi: {total}%"
+    if abs(total - 100) > 0.01:
+        out += " (100% bo‘lishi shart emas — tushish ehtimoli nisbatan hisoblanadi)"
+    out += "\n\nYana qator yuborishingiz mumkin yoki «✅ Tayyor» ni bosing."
+    await message.answer(out, reply_markup=kb([b("✅ Tayyor", f"admin_case_{case_id}")]))
+
+
+@router.callback_query(F.data == "admin_bulkcase")
+async def admin_bulkcase_start(call: CallbackQuery, state: FSMContext) -> None:
+    await call.answer()
+    await state.set_state(AdminStates.waiting_bulk_case)
+    if call.message:
+        await call.message.answer(
+            "⚡ Tez quti\n\nHar qatorga bitta quti: <code>Nomi | narx</code>\n"
+            "Misol:\n<code>Jonivorlar olami | 17500\nDinozavrlar | 30000</code>\n\n"
+            "Keyin har qutiga «⚡ Tez qo‘shish» orqali sovg‘alarni ro‘yxat qilib qo‘shasiz.",
+            parse_mode="HTML", reply_markup=kb([b("🔙 Qutilar", "admin_boxes")]))
+
+
+@router.message(AdminStates.waiting_bulk_case, not_command)
+async def admin_bulkcase_items(message: Message, state: FSMContext) -> None:
+    made, bad = 0, []
+    for line in (message.text or "").splitlines():
+        if not line.strip():
+            continue
+        parsed = parse_case_line(line)
+        if not parsed:
+            bad.append(line.strip())
+            continue
+        db.add_case(parsed[0], parsed[1], "", "")
+        made += 1
+    await state.clear()
+    out = f"✅ Yaratildi: {made} ta quti."
+    if bad:
+        out += "\n⚠️ Tushunilmagan:\n" + "\n".join(f"• {x}" for x in bad[:10])
+    await message.answer(out, reply_markup=boxes_keyboard())
 
 
 # ------------------------------------------------------------------ 👤 Foydalanuvchi kartochkasi

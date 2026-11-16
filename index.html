@@ -569,6 +569,52 @@
     .tstat.approved { color: #7bf5b3; border-color: rgba(60, 230, 140, .45); }
     .tstat.pending { color: #ffd88a; border-color: rgba(255, 190, 70, .45); }
     .tstat.rejected { color: #ff9a9a; border-color: rgba(255, 90, 90, .45); }
+    /* admin va signal */
+    .atabs { display: flex; gap: 6px; overflow-x: auto; margin: 4px 0 12px; padding-bottom: 4px; scrollbar-width: none; }
+    .atabs::-webkit-scrollbar { display: none; }
+    .atab { flex: none; padding: 9px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); color: var(--muted); font-weight: 700; font-size: 14px; }
+    .atab.sel { background: #e9ecf2; color: #111; }
+    .apad { padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    .afld { display: flex; flex-direction: column; gap: 5px; font-size: 13px; }
+    .afld > span { color: var(--muted); }
+    .ain { text-align: left; font-size: 15px; margin: 0; }
+    textarea.ain { resize: vertical; font-family: inherit; }
+    .arow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .arow > input, .arow > .afld { flex: 1; min-width: 0; }
+    .arow3 { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 8px; }
+    .btn.small { padding: 9px 12px; font-size: 13px; border-radius: 12px; }
+    .btn.danger { background: linear-gradient(180deg, rgba(255, 90, 90, .55), rgba(190, 40, 60, .55)); border-color: rgba(255, 120, 120, .45); }
+    .acase { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin-bottom: 8px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); color: var(--text); text-align: left; }
+    .acase.open { border-color: rgba(255, 255, 255, .3); margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+    .acase img, .acase .noimg, .athumb { width: 46px; height: 46px; border-radius: 12px; object-fit: cover; background: #15171b; display: flex; align-items: center; justify-content: center; flex: none; }
+    .acn { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .acn small { color: var(--muted); }
+    .aed { border-top-left-radius: 0; border-top-right-radius: 0; margin-top: 0; }
+    .acolor { width: 46px; height: 36px; border: 0; background: none; padding: 0; }
+    .aitem { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); }
+    .aprev { width: 100%; max-height: 150px; object-fit: cover; border-radius: 14px; }
+    .aswitch { padding: 9px 14px; border-radius: 12px; background: #3a3d44; color: #aaa; font-weight: 800; }
+    .aswitch.on { background: #1f8a4c; color: #fff; }
+    .sgnote { padding: 12px 14px; font-size: 13px; color: #ffd98a; background: rgba(255, 190, 60, .08); border: 1px solid rgba(255, 190, 60, .3); margin-bottom: 12px; }
+    .sgchips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+    .sgchip { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); color: var(--text); }
+    .sgchip small { color: var(--muted); font-size: 11px; }
+    .sgchip.sel { background: #e9ecf2; color: #111; } .sgchip.sel small { color: #555; }
+    .sgchip.off { opacity: .45; }
+    .sgres { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 0; }
+    .sgbig { font-size: 40px; font-weight: 900; background: linear-gradient(180deg, #fff, #9ec2ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .sggrid { display: grid; grid-template-columns: repeat(5, 36px); gap: 6px; }
+    .sgc { width: 36px; height: 36px; border-radius: 10px; background: #1b1e24; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-weight: 900; }
+    .sgc.on { background: linear-gradient(160deg, #35c97c, #0f7a45); color: #fff; border-color: rgba(255, 255, 255, .5); }
+    .sglanes { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; width: 100%; }
+    .sgl { text-align: center; padding: 6px 0; border-radius: 8px; background: #1b1e24; font-size: 12px; color: var(--muted); }
+    .sgl.on { background: #35c97c; color: #fff; font-weight: 900; }
+    .sgtower { display: flex; flex-direction: column; gap: 5px; }
+    .sgrow { display: grid; grid-template-columns: 70px 70px; gap: 6px; }
+    .sgrow .sgc { width: 100%; height: 26px; border-radius: 8px; }
+    .kv2 { display: flex; justify-content: space-between; gap: 8px; }
+    .sgmark { flex: 1; padding: 9px; border-radius: 12px; background: #1b1e24; color: var(--muted); font-weight: 800; border: 1px solid var(--line); }
+    .sgmark.sel.win { background: #1f8a4c; color: #fff; } .sgmark.sel.lose { background: #a02a3a; color: #fff; }
   </style>
 </head>
 <body>
@@ -1175,38 +1221,6 @@
     }
 
     /* Faqat adminlarga ko'rinadi: sozlamalar holati va statistika (o'zgartirish botda: /admin) */
-    function viewAdmin() {
-      if (!(state.me && state.me.is_admin)) return viewHome();
-      var page = h("div", null, h("h1", { class: "page-title" }, "⚙️ Admin"));
-      var d = state.adminData;
-      if (!d) {
-        page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Yuklanmoqda...")));
-        return page;
-      }
-      var hero = d.hero || {};
-      page.appendChild(h("h3", { class: "sec" }, "📱 Bosh sahifa (hozirgi holat)"));
-      page.appendChild(h("div", { class: "card" },
-        h("div", { class: "kv" }, h("span", null, "Sarlavha"), h("b", null, hero.title || "—")),
-        h("div", { class: "kv" }, h("span", null, "Matn"), h("b", null, hero.text || "—")),
-        h("div", { class: "kv" }, h("span", null, "Fon rasmi"), h("b", null, hero.image ? "bor" : "yo‘q")),
-        h("div", { class: "kv" }, h("span", null, "Tugma matni"), h("b", null, hero.btn_text || "—")),
-        h("div", { class: "kv" }, h("span", null, "Tugma yo‘nalishi"), h("b", null, hero.btn_target || "—"))
-      ));
-      var s = d.stats || {};
-      page.appendChild(h("h3", { class: "sec" }, "📊 Statistika"));
-      page.appendChild(h("div", { class: "card" },
-        h("div", { class: "kv" }, h("span", null, "Foydalanuvchilar"), h("b", null, String(s.users || 0))),
-        h("div", { class: "kv" }, h("span", null, "Ro‘yxatdan o‘tgan"), h("b", null, String(s.registered || 0))),
-        h("div", { class: "kv" }, h("span", null, "Qutilar"), h("b", null, String(s.cases || 0))),
-        h("div", { class: "kv" }, h("span", null, "Jami ochilgan"), h("b", null, String(s.opens || 0))),
-        h("div", { class: "kv" }, h("span", null, "Foydalanuvchilardagi buyumlar"), h("b", null, String(s.held || 0))),
-        h("div", { class: "kv" }, h("span", null, "Sotilgan buyumlar"), h("b", null, String(s.sold || 0))),
-        h("div", { class: "kv" }, h("span", null, "Jami coin balanslari"), h("b", null, coin(s.coins || 0)))
-      ));
-      page.appendChild(h("p", { class: "note" }, "Sozlamalarni o‘zgartirish: botda /admin → 📱 Mini App bosh sahifasi."));
-      return page;
-    }
-
     /* ---------- G‘ildirak ---------- */
     function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
     function randomId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
@@ -1587,7 +1601,7 @@
       WH.lastBtnKey = "";
     }
 
-    var GAME_TABS = ["wheel", "mines", "tower", "ladder", "build"];
+    var GAME_TABS = ["wheel", "mines", "tower", "ladder", "build", "signal"];
     function gameHead(title, extra) {
       var back = h("button", { class: "gback", "aria-label": "Orqaga", onclick: function () { document.body.classList.remove("imm"); go(state.lastTab || "home"); } });
       back.innerHTML = icoHtml("back");
@@ -1595,12 +1609,14 @@
     }
 
     var ART_BUILD = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1b45"/><stop offset=".55" stop-color="#1f5fbf"/><stop offset="1" stop-color="#ffb259"/></linearGradient><radialGradient id="glow" cx=".5" cy="1" r=".8"><stop offset="0" stop-color="#ffe3a1" stop-opacity=".9"/><stop offset="1" stop-color="#ffe3a1" stop-opacity="0"/></radialGradient><linearGradient id="yel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#f09a00"/></linearGradient><linearGradient id="brick" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a5c"/><stop offset="1" stop-color="#c43a1e"/></linearGradient><linearGradient id="win" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6f7ff"/><stop offset="1" stop-color="#6cc1f2"/></linearGradient><linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d5dbe3"/><stop offset="1" stop-color="#8a94a3"/></linearGradient></defs><rect width="200" height="200" fill="url(#bg)"/><rect width="200" height="200" fill="url(#glow)"/><g fill="#fff" opacity=".9"><circle cx="30" cy="30" r="1.2"/><circle cx="170" cy="22" r="1.5"/><circle cx="150" cy="60" r="1"/><circle cx="58" cy="14" r="1"/></g><ellipse cx="40" cy="58" rx="24" ry="7" fill="#fff" opacity=".28"/><ellipse cx="160" cy="84" rx="20" ry="6" fill="#fff" opacity=".22"/><!-- fon shahar --><g fill="#143a86" opacity=".8"><rect x="6" y="128" width="22" height="50"/><rect x="30" y="116" width="18" height="62"/><rect x="152" y="122" width="20" height="56"/><rect x="174" y="136" width="22" height="42"/></g><!-- kran --><rect x="112" y="26" width="12" height="150" rx="2" fill="url(#yel)"/><g stroke="#a86a00" stroke-width="2" opacity=".7"><path d="M112 40l12 14M124 40l-12 14M112 64l12 14M124 64l-12 14M112 88l12 14M124 88l-12 14M112 112l12 14M124 112l-12 14M112 136l12 14M124 136l-12 14"/></g><rect x="16" y="22" width="150" height="11" rx="3" fill="url(#yel)"/><g stroke="#a86a00" stroke-width="2" opacity=".7"><path d="M24 33l8-11M40 33l8-11M56 33l8-11M72 33l8-11M88 33l8-11M104 33l8-11M130 33l8-11M146 33l8-11"/></g><path d="M118 26L70 8M118 26l36-14" stroke="#ffcf4a" stroke-width="3" stroke-linecap="round"/><rect x="20" y="30" width="16" height="14" rx="2" fill="#555"/><!-- tros va blok --><rect x="60" y="33" width="3" height="20" fill="#2a2a2a"/><rect x="52" y="52" width="18" height="9" rx="2" fill="#2a2a2a"/><path d="M61 52L36 84M61 52L96 84" stroke="#222" stroke-width="2.4" fill="none"/><g transform="rotate(-6 66 108)"><rect x="30" y="82" width="72" height="52" rx="5" fill="url(#brick)"/><rect x="30" y="82" width="72" height="9" rx="4" fill="#f6ead2"/><g fill="url(#win)" stroke="#fff3d6" stroke-width="2"><rect x="40" y="98" width="18" height="22" rx="2"/><rect x="74" y="98" width="18" height="22" rx="2"/></g><path d="M30 134l72 0" stroke="#7a1f0e" stroke-width="3" opacity=".5"/><rect x="33" y="85" width="66" height="4" rx="2" fill="#fff" opacity=".28"/></g><!-- qurilayotgan minora --><rect x="84" y="150" width="56" height="26" rx="3" fill="url(#gr)"/><rect x="88" y="158" width="10" height="9" rx="1" fill="#6c7683"/><rect x="126" y="158" width="10" height="9" rx="1" fill="#6c7683"/><rect x="90" y="132" width="44" height="20" rx="3" fill="url(#brick)"/><rect x="90" y="132" width="44" height="5" rx="2" fill="#f6ead2"/><rect x="97" y="141" width="9" height="8" rx="1" fill="url(#win)"/><rect x="118" y="141" width="9" height="8" rx="1" fill="url(#win)"/><rect x="0" y="176" width="200" height="24" fill="#2e7d32"/><rect x="0" y="176" width="200" height="5" fill="#4caf50"/><!-- uchib yurgan bloklar --><g opacity=".85"><rect x="150" y="48" width="14" height="12" rx="2" fill="#ffd27a" transform="rotate(18 157 54)"/><rect x="14" y="92" width="10" height="9" rx="2" fill="#ffd27a" transform="rotate(-20 19 96)"/></g></svg>');
+    var ART_SIGNAL = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b1147"/><stop offset="1" stop-color="#6a2fd6"/></linearGradient><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#f09a00"/></linearGradient></defs><rect width="200" height="200" fill="url(#b)"/><g fill="none" stroke="#9ec2ff" stroke-width="7" stroke-linecap="round" opacity=".9"><path d="M52 92a62 62 0 0 1 96 0"/><path d="M70 110a36 36 0 0 1 60 0"/></g><circle cx="100" cy="128" r="13" fill="url(#g)"/><path d="M100 140v38" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M84 178h32" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg>');
     var GAMES = [
       { id: "ladder", name: "Narvon", sub: "Yo‘lakni o‘zingiz tanlang", img: ART.ladder },
       { id: "tower", name: "Minora", sub: "Qavatma-qavat", img: ART.tower },
       { id: "mines", name: "Saper", sub: "Seyflarni oching", img: ART.mines },
       { id: "wheel", name: "G‘ildirak", sub: "To‘xtovsiz aylanadi", img: ART.wheel },
-      { id: "build", name: "Qurilish", sub: "Shamolga qarshi quring", img: ART_BUILD }
+      { id: "build", name: "Qurilish", sub: "Shamolga qarshi quring", img: ART_BUILD },
+      { id: "signal", name: "Signal", sub: "Coin evaziga tavsiya", img: ART_SIGNAL }
     ];
     function closeGames() {
       var a = document.getElementById("gpop"), b = document.getElementById("gpop-bg");
@@ -2651,13 +2667,351 @@
       return page;
     }
 
-    function loadAdmin() {
+    /* ===================== ADMIN (Mini App ichida) ===================== */
+    var ADM = { tab: "stat", cases: null, rarities: {}, openCase: 0, ads: null, sig: null, user: null, q: "" };
+    var ADM_TABS = [["stat", "Statistika"], ["cases", "Qutilar"], ["ads", "Reklama"], ["sig", "Signal"], ["user", "Foydalanuvchi"]];
+
+    function admLoad() {
       if (!(state.me && state.me.is_admin)) return;
-      request("/api/admin/overview", {}).then(function (d) {
-        state.adminData = d;
-        render();
-      }).catch(function (e) { toast(e.message); });
+      if (ADM.tab === "stat") request("/api/admin/overview", {}).then(function (d) { state.adminData = d; render(); }).catch(function (e) { toast(e.message); });
+      if (ADM.tab === "cases") request("/api/admin/cases", {}).then(function (d) { ADM.cases = d.cases; ADM.rarities = d.rarities; render(); }).catch(function (e) { toast(e.message); });
+      if (ADM.tab === "ads") request("/api/admin/ads", {}).then(function (d) { ADM.ads = d; render(); }).catch(function (e) { toast(e.message); });
+      if (ADM.tab === "sig") request("/api/admin/signals", {}).then(function (d) { ADM.sig = d; render(); }).catch(function (e) { toast(e.message); });
     }
+    function admInp(val, ph, type) {
+      var i = h("input", { class: "betinput ain", type: type || "text", placeholder: ph || "" });
+      i.value = val === null || val === undefined ? "" : val;
+      return i;
+    }
+    function admFld(label, input) { return h("label", { class: "afld" }, h("span", null, label), input); }
+    function admBtn(text, cls, fn) { return h("button", { class: "btn " + (cls || ""), onclick: fn }, text); }
+    function admUpload(target, id, file, done) {
+      if (!file) return;
+      var fd = new FormData();
+      fd.append("init_data", tg ? tg.initData : "");
+      fd.append("target", target);
+      if (id) fd.append("id", String(id));
+      fd.append("file", file, file.name || "file");
+      toast("Yuklanmoqda…");
+      fetch("/api/admin/upload", { method: "POST", body: fd }).then(function (r) {
+        return r.text().then(function (t) {
+          var d = null; try { d = JSON.parse(t); } catch (e) {}
+          if (!r.ok) throw new Error((d && d.message) || "Yuklab bo‘lmadi");
+          return d;
+        });
+      }).then(function (d) { toast("Yuklandi ✓"); if (done) done(d); }).catch(function (e) { toast(e.message); });
+    }
+    function admFile(label, onfile) {
+      var inp = h("input", { type: "file", accept: "image/*,video/mp4", style: "display:none" });
+      inp.addEventListener("change", function () { onfile(inp.files && inp.files[0]); inp.value = ""; });
+      return h("span", null, admBtn(label, "small", function () { inp.click(); }), inp);
+    }
+    function admRefresh() { admLoad(); }
+
+    function viewAdmin() {
+      if (!(state.me && state.me.is_admin)) return viewHome();
+      var page = h("div", { class: "apage" }, h("h1", { class: "page-title" }, h("span", { class: "ic-slot" }, ico("shield", "")), " Admin"));
+      var tabs = h("div", { class: "atabs" }, ADM_TABS.map(function (t) {
+        return h("button", { class: "atab" + (ADM.tab === t[0] ? " sel" : ""), onclick: function () { ADM.tab = t[0]; admLoad(); render(); } }, t[1]);
+      }));
+      page.appendChild(tabs);
+      var body;
+      if (ADM.tab === "cases") body = admCases();
+      else if (ADM.tab === "ads") body = admAds();
+      else if (ADM.tab === "sig") body = admSignals();
+      else if (ADM.tab === "user") body = admUsers();
+      else body = admStats();
+      page.appendChild(body);
+      return page;
+    }
+
+    function admStats() {
+      var d = state.adminData, box = h("div");
+      if (!d) { box.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Yuklanmoqda..."))); return box; }
+      var s = d.stats || {};
+      box.appendChild(h("div", { class: "card" },
+        h("div", { class: "kv" }, h("span", null, "Foydalanuvchilar"), h("b", null, String(s.users || 0))),
+        h("div", { class: "kv" }, h("span", null, "Ro‘yxatdan o‘tgan"), h("b", null, String(s.registered || 0))),
+        h("div", { class: "kv" }, h("span", null, "Qutilar"), h("b", null, String(s.cases || 0))),
+        h("div", { class: "kv" }, h("span", null, "Jami ochilgan"), h("b", null, String(s.opens || 0))),
+        h("div", { class: "kv" }, h("span", null, "Foydalanuvchilardagi buyumlar"), h("b", null, String(s.held || 0))),
+        h("div", { class: "kv" }, h("span", null, "Sotilgan buyumlar"), h("b", null, String(s.sold || 0))),
+        h("div", { class: "kv" }, h("span", null, "Jami coin balanslari"), h("b", null, coin(s.coins || 0)))
+      ));
+      box.appendChild(h("p", { class: "note" }, "Boshqa sozlamalar (bonus shartlari, majburiy kanal, bot menyusi, maxsus belgilar) hozircha botdagi /admin da."));
+      return box;
+    }
+
+    /* ---- Qutilar ---- */
+    function admCases() {
+      var box = h("div");
+      if (!ADM.cases) { box.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Yuklanmoqda..."))); return box; }
+
+      var nn = admInp("", "Quti nomi"), np = admInp("", "Narxi", "number");
+      var many = h("textarea", { class: "betinput ain", rows: "3", placeholder: "Bir nechta quti: har qatorga «Nomi | narx»" });
+      box.appendChild(h("div", { class: "card apad" },
+        h("b", null, "➕ Yangi quti"),
+        h("div", { class: "arow" }, nn, np),
+        admBtn("Yaratish", "primary", function () {
+          if (!nn.value.trim()) { toast("Nomini kiriting"); return; }
+          request("/api/admin/case/save", { name: nn.value, price: np.value || 0 }).then(function (d) { ADM.cases = d.cases; ADM.openCase = d.id; toast("Quti yaratildi ✓"); render(); }).catch(function (e) { toast(e.message); });
+        }),
+        many,
+        admBtn("⚡ Ro‘yxatdan yaratish", "", function () {
+          var lines = many.value.split("\n").map(function (x) { return x.trim(); }).filter(Boolean), chain = Promise.resolve(), made = 0;
+          lines.forEach(function (ln) {
+            var p = ln.split(/[|;\t]/), name, price;
+            if (p.length >= 2) { name = p[0].trim(); price = p[1].trim(); } else { var m = /^(.+?)\s+(\d+)$/.exec(ln); if (!m) return; name = m[1]; price = m[2]; }
+            chain = chain.then(function () { return request("/api/admin/case/save", { name: name, price: price }).then(function (d) { ADM.cases = d.cases; made++; }); });
+          });
+          chain.then(function () { toast("Yaratildi: " + made + " ta"); render(); }).catch(function (e) { toast(e.message); });
+        })
+      ));
+
+      ADM.cases.forEach(function (c) {
+        var open = ADM.openCase === c.id;
+        var head = h("button", { class: "acase" + (open ? " open" : ""), onclick: function () { ADM.openCase = open ? 0 : c.id; render(); } },
+          c.image ? h("img", { src: c.image, alt: "" }) : h("span", { class: "noimg" }, ico("gift", "")),
+          h("span", { class: "acn" }, h("b", null, c.name), h("small", null, coin(c.price) + " · " + c.items.length + " ta sovg‘a")),
+          h("span", { class: "chev" }, open ? "▲" : "▼"));
+        box.appendChild(head);
+        if (open) box.appendChild(admCaseEditor(c));
+      });
+      return box;
+    }
+
+    function admCaseEditor(c) {
+      var ed = h("div", { class: "card apad aed" });
+      var name = admInp(c.name, "Nomi"), price = admInp(c.price, "Narxi", "number"), desc = admInp(c.description, "Tavsif");
+      var bg = c.bg_color || "";
+      var color = h("input", { type: "color", class: "acolor" }); color.value = bg || "#4a3fa0";
+      var autoLbl = h("span", { class: "muted" }, bg ? bg : "rasmdan avtomatik");
+      color.addEventListener("input", function () { bg = color.value; autoLbl.textContent = bg; });
+      var url = admInp("", "Rasm havolasi https://… (ixtiyoriy)");
+      ed.appendChild(admFld("Nomi", name));
+      ed.appendChild(admFld("Narxi (coin)", price));
+      ed.appendChild(admFld("Tavsif", desc));
+      ed.appendChild(h("div", { class: "afld" }, h("span", null, "Orqa fon rangi"), h("div", { class: "arow" }, color, autoLbl, admBtn("Avto", "small", function () { bg = ""; autoLbl.textContent = "rasmdan avtomatik"; }))));
+      ed.appendChild(admFld("Rasm havolasi", url));
+      ed.appendChild(h("div", { class: "arow" },
+        admFile("🖼 Rasm / GIF yuklash", function (f) { admUpload("case", c.id, f, function () { admLoad(); }); }),
+        admBtn("Saqlash", "primary", function () {
+          var body = { id: c.id, name: name.value, price: price.value || 0, description: desc.value, bg_color: bg };
+          if (url.value.trim()) body.image_url = url.value.trim();
+          request("/api/admin/case/save", body).then(function (d) { ADM.cases = d.cases; toast("Saqlandi ✓"); render(); }).catch(function (e) { toast(e.message); });
+        })
+      ));
+
+      ed.appendChild(h("h3", { class: "sec" }, "Sovg‘alar"));
+      var total = 0; c.items.forEach(function (i) { total += i.probability; });
+      ed.appendChild(h("p", { class: "note" }, "Foizlar yig‘indisi: " + (Math.round(total * 100) / 100) + "% (100 bo‘lishi shart emas — nisbatan hisoblanadi). Kutilgan qaytim: " + coin(c.ev) + "."));
+      c.items.forEach(function (it) { ed.appendChild(admItemRow(it)); });
+
+      var ta = h("textarea", { class: "betinput ain", rows: "5", placeholder: "Har qatorga bitta sovg‘a:\nNomi | qiymat | foiz | daraja\nTyrannosaurus | 350000 | 0.1 | m\nKuchuk | 4000 | 12.5\nMushuk 2500 20\n\nDaraja: c oddiy, r noyob, e epik, l afsonaviy, m mifik (yozilmasa foizdan aniqlanadi)" });
+      ed.appendChild(h("b", null, "⚡ Tez qo‘shish"));
+      ed.appendChild(ta);
+      ed.appendChild(admBtn("Qo‘shish", "primary", function () {
+        request("/api/admin/items/bulk", { case_id: c.id, text: ta.value }).then(function (d) {
+          ADM.cases = d.cases;
+          toast("Qo‘shildi: " + d.added + (d.bad.length ? " · tushunilmadi: " + d.bad.length : ""));
+          if (d.bad.length) ta.value = d.bad.join("\n"); else ta.value = "";
+          render();
+        }).catch(function (e) { toast(e.message); });
+      }));
+      ed.appendChild(admBtn("🗑 Qutini o‘chirish", "danger", function () {
+        if (!confirm("«" + c.name + "» qutisi o‘chirilsinmi?")) return;
+        request("/api/admin/case/delete", { id: c.id }).then(function (d) { ADM.cases = d.cases; ADM.openCase = 0; toast("O‘chirildi"); render(); }).catch(function (e) { toast(e.message); });
+      }));
+      return ed;
+    }
+
+    function admItemRow(it) {
+      var name = admInp(it.name, "Nomi"), price = admInp(it.price, "Qiymat", "number"), prob = admInp(it.probability, "Foiz", "number");
+      prob.step = "any";
+      var rar = h("select", { class: "betinput ain" }, Object.keys(ADM.rarities).map(function (k) { return h("option", { value: k }, ADM.rarities[k]); }));
+      rar.value = it.rarity;
+      return h("div", { class: "aitem" },
+        h("div", { class: "arow" }, it.image_url ? h("img", { class: "athumb", src: it.image_url, alt: "" }) : h("span", { class: "athumb noimg" }, ico("gift", "")), name),
+        h("div", { class: "arow3" }, admFld("Qiymat", price), admFld("Foiz", prob), admFld("Daraja", rar)),
+        h("div", { class: "arow" },
+          admFile("🖼 Rasm", function (f) { admUpload("item", it.id, f, function () { admLoad(); }); }),
+          admBtn("Saqlash", "small", function () {
+            request("/api/admin/item/save", { id: it.id, name: name.value, price: price.value, probability: prob.value, rarity: rar.value })
+              .then(function (d) { ADM.cases = d.cases; toast("Saqlandi ✓"); render(); }).catch(function (e) { toast(e.message); });
+          }),
+          admBtn("🗑", "small danger", function () {
+            if (!confirm("«" + it.name + "» o‘chirilsinmi?")) return;
+            request("/api/admin/item/delete", { id: it.id }).then(function (d) { ADM.cases = d.cases; render(); }).catch(function (e) { toast(e.message); });
+          })
+        ));
+    }
+
+    /* ---- Reklama ---- */
+    function admAds() {
+      var box = h("div");
+      if (!ADM.ads) { box.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Yuklanmoqda..."))); return box; }
+      var hero = ADM.ads.hero, ban = ADM.ads.banner;
+      var title = admInp(hero.title, "Sarlavha"), text = h("textarea", { class: "betinput ain", rows: "3" }), btn = admInp(hero.btn_text, "Tugma matni");
+      text.value = hero.text_raw || "";
+      var tgt = h("select", { class: "betinput ain" }, [["tab:case", "Qutilar"], ["tab:inv", "Buyumlar"], ["tab:friends", "Bonus"]].map(function (o) { return h("option", { value: o[0] }, o[1]); }));
+      tgt.value = hero.btn_target || "tab:case";
+      var himg = admInp("", "Fon rasm havolasi https://…");
+      box.appendChild(h("div", { class: "card apad" },
+        h("b", null, "🏠 Bosh sahifa bloki"),
+        hero.image ? h("img", { class: "aprev", src: hero.image, alt: "" }) : null,
+        admFld("Sarlavha", title), admFld("Matn ({free} — bepul ochishlar soni)", text), admFld("Tugma matni", btn), admFld("Tugma yo‘nalishi", tgt), admFld("Fon rasmi (havola)", himg),
+        h("div", { class: "arow" },
+          admFile("🖼 Fon yuklash", function (f) { admUpload("hero", 0, f, function () { admLoad(); }); }),
+          admBtn("Fonni olib tashlash", "small", function () { request("/api/admin/ads/save", { hero_image: "" }).then(function () { toast("Olib tashlandi"); admLoad(); }).catch(function (e) { toast(e.message); }); })),
+        admBtn("Saqlash", "primary", function () {
+          var body = { title: title.value, text: text.value, btn_text: btn.value, btn_target: tgt.value };
+          if (himg.value.trim()) body.hero_image = himg.value.trim();
+          request("/api/admin/ads/save", body).then(function () { toast("Saqlandi ✓"); admLoad(); }).catch(function (e) { toast(e.message); });
+        })));
+      var blink = admInp(ban.link, "Bosilganda ochiladigan havola"), bimg = admInp("", "Reklama rasmi havolasi https://…");
+      box.appendChild(h("div", { class: "card apad" },
+        h("b", null, "📣 Reklama banneri (bosh sahifada)"),
+        ban.image ? h("img", { class: "aprev", src: ban.image, alt: "" }) : h("p", { class: "muted" }, "Banner yo‘q"),
+        admFld("Havola", blink), admFld("Rasm (havola)", bimg),
+        h("div", { class: "arow" },
+          admFile("🖼 Rasm / GIF yuklash", function (f) { admUpload("banner", 0, f, function () { admLoad(); }); }),
+          admBtn("🗑 O‘chirish", "small danger", function () { request("/api/admin/ads/save", { banner_image: "" }).then(function () { toast("Banner o‘chirildi"); admLoad(); }).catch(function (e) { toast(e.message); }); })),
+        admBtn("Saqlash", "primary", function () {
+          var body = { banner_link: blink.value };
+          if (bimg.value.trim()) body.banner_image = bimg.value.trim();
+          request("/api/admin/ads/save", body).then(function () { toast("Saqlandi ✓"); admLoad(); }).catch(function (e) { toast(e.message); });
+        })));
+      return box;
+    }
+
+    /* ---- Signal sozlamalari ---- */
+    function admSignals() {
+      var box = h("div");
+      if (!ADM.sig) { box.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Yuklanmoqda..."))); return box; }
+      box.appendChild(h("p", { class: "note" }, "Signal — tasodifiy tavsiya, natijani bashorat qilmaydi. Foydalanuvchiga shu matn har safar ko‘rsatiladi."));
+      ADM.sig.config.forEach(function (g) {
+        var st = ADM.sig.stats[g.game] || {};
+        var price = admInp(g.price, "Narx", "number");
+        var on = g.on;
+        var sw = h("button", { class: "aswitch" + (on ? " on" : ""), onclick: function () { on = !on; sw.classList.toggle("on", on); sw.textContent = on ? "Yoqilgan" : "O‘chirilgan"; } }, on ? "Yoqilgan" : "O‘chirilgan");
+        box.appendChild(h("div", { class: "card apad" },
+          h("b", null, g.title + " signali"),
+          h("p", { class: "muted" }, "Sotilgan: " + (st.count || 0) + " ta · " + coin(st.coins || 0) + " · foydalanuvchi belgilagan: " + (st.win || 0) + " yutdi / " + (st.lose || 0) + " yutqazdi"),
+          admFld("Narxi (coin)", price),
+          h("div", { class: "arow" }, sw, admBtn("Saqlash", "primary", function () {
+            request("/api/admin/signals/save", { game: g.game, price: price.value, on: on }).then(function (d) { ADM.sig.config = d.config; toast("Saqlandi ✓"); }).catch(function (e) { toast(e.message); });
+          }))));
+      });
+      return box;
+    }
+
+    /* ---- Foydalanuvchi ---- */
+    function admUsers() {
+      var box = h("div");
+      var q = admInp(ADM.q, "ID yoki @username");
+      box.appendChild(h("div", { class: "card apad" },
+        admFld("Qidirish", q),
+        admBtn("Topish", "primary", function () {
+          ADM.q = q.value;
+          request("/api/admin/user", { query: q.value }).then(function (d) { ADM.user = d.user; render(); }).catch(function (e) { ADM.user = null; toast(e.message); render(); });
+        })));
+      var u = ADM.user;
+      if (u) {
+        var delta = admInp("", "Masalan 5000 yoki -2000", "number");
+        function change(sign) {
+          var n = Math.abs(parseInt(delta.value, 10) || 0) * sign;
+          if (!n) { toast("Miqdorni kiriting"); return; }
+          request("/api/admin/coins", { user_id: u.id, delta: n }).then(function (d) { ADM.user = d.user; toast("Bajarildi ✓"); render(); }).catch(function (e) { toast(e.message); });
+        }
+        box.appendChild(h("div", { class: "card" },
+          h("div", { class: "kv" }, h("span", null, "ID"), h("b", null, String(u.id))),
+          h("div", { class: "kv" }, h("span", null, "Username"), h("b", null, u.username ? "@" + u.username : "—")),
+          h("div", { class: "kv" }, h("span", null, "Telefon"), h("b", null, u.phone || "—")),
+          h("div", { class: "kv" }, h("span", null, "Balans"), h("b", null, coin(u.coins))),
+          h("div", { class: "kv" }, h("span", null, "Ochilgan qutilar"), h("b", null, String(u.opens))),
+          h("div", { class: "kv" }, h("span", null, "Buyumlar"), h("b", null, u.inventory.count + " ta · " + coin(u.inventory.value))),
+          h("div", { class: "kv" }, h("span", null, "Takliflar"), h("b", null, String(u.referrals)))));
+        box.appendChild(h("div", { class: "card apad" }, admFld("Coin miqdori", delta),
+          h("div", { class: "arow" }, admBtn("➕ Qo‘shish", "primary", function () { change(1); }), admBtn("➖ Ayirish", "danger", function () { change(-1); }))));
+      }
+      return box;
+    }
+
+    /* ===================== SIGNAL (coin evaziga, tasodifiy tavsiya) ===================== */
+    var SG = { data: null, game: "crash", ref: "", busy: false, result: null };
+    function loadSignal() {
+      if (!inTG) return;
+      request("/api/signal/state", {}).then(function (d) { SG.data = d; applyBalance(d.coins); render(); }).catch(function (e) { toast(e.message); });
+    }
+    function sgResultView(sig) {
+      var p = sig.payload, box = h("div", { class: "sgres" });
+      if (p.kind === "crash") {
+        box.appendChild(h("div", { class: "sgbig" }, "x" + p.cashout.toFixed(2)));
+        box.appendChild(h("div", { class: "muted" }, "Tavsiya: shu koeffitsiyentda yechib oling"));
+      } else if (p.kind === "saper") {
+        var g = h("div", { class: "sggrid" });
+        for (var i = 0; i < 25; i++) g.appendChild(h("span", { class: "sgc" + (p.cells.indexOf(i) >= 0 ? " on" : "") }, p.cells.indexOf(i) >= 0 ? "✓" : ""));
+        box.appendChild(g);
+        box.appendChild(h("div", { class: "muted" }, "Tavsiya etilgan kataklar (yashil)"));
+      } else if (p.kind === "ladder") {
+        box.appendChild(h("div", { class: "sgbig" }, p.lane + "-yo‘lak"));
+        var lanes = h("div", { class: "sglanes" });
+        for (var l = 1; l <= 20; l++) lanes.appendChild(h("span", { class: "sgl" + (l === p.lane ? " on" : "") }, String(l)));
+        box.appendChild(lanes);
+      } else if (p.kind === "tower") {
+        var t = h("div", { class: "sgtower" });
+        for (var r = p.rows.length - 1; r >= 0; r--) {
+          t.appendChild(h("div", { class: "sgrow" }, h("span", { class: "sgc" + (p.rows[r] === "L" ? " on" : "") }, p.rows[r] === "L" ? "✓" : ""), h("span", { class: "sgc" + (p.rows[r] === "R" ? " on" : "") }, p.rows[r] === "R" ? "✓" : "")));
+        }
+        box.appendChild(t);
+        box.appendChild(h("div", { class: "muted" }, "Pastdan yuqoriga: har qavatda tavsiya etilgan tomon"));
+      }
+      return box;
+    }
+    function viewSignal() {
+      var page = h("div", { class: "sgpage" });
+      page.appendChild(gameHead("Signal"));
+      if (!inTG) { page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Signalni ochish uchun Telegram ichida oching."))); return page; }
+      var d = SG.data;
+      if (!d) { page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Yuklanmoqda..."))); return page; }
+      page.appendChild(h("div", { class: "card sgnote" }, "⚠️ " + d.note));
+      var chips = h("div", { class: "sgchips" }, d.games.map(function (g) {
+        return h("button", { class: "sgchip" + (SG.game === g.game ? " sel" : "") + (g.on ? "" : " off"), onclick: function () { if (!g.on) { toast("Bu signal vaqtincha o‘chirilgan"); return; } SG.game = g.game; render(); } },
+          h("b", null, g.title), h("small", null, g.on ? coin(g.price) : "o‘chiq"));
+      }));
+      page.appendChild(chips);
+      var cur = d.games.filter(function (g) { return g.game === SG.game; })[0] || d.games[0];
+      var ref = admInp(SG.ref, "O‘yin ID raqami");
+      ref.addEventListener("input", function () { SG.ref = ref.value; });
+      var buy = admBtn(SG.busy ? "..." : "Signal olish · " + coin(cur.price), "primary big", function () {
+        if (SG.busy) return;
+        if (!SG.ref.trim()) { toast("O‘yin ID raqamini kiriting"); return; }
+        SG.busy = true; render();
+        request("/api/signal/buy", { game: cur.game, ref: SG.ref.trim() }).then(function (r) {
+          SG.busy = false; SG.result = r.signal; applyBalance(r.coins); haptic(); loadSignal();
+        }).catch(function (e) { SG.busy = false; toast(e.message); render(); });
+      });
+      page.appendChild(h("div", { class: "card apad" }, admFld("O‘yin ID", ref), buy));
+      if (SG.result) {
+        page.appendChild(h("div", { class: "card apad" }, h("b", null, SG.result.title + " · ID " + SG.result.ref), sgResultView(SG.result), h("p", { class: "note" }, d.note)));
+      }
+      page.appendChild(h("h3", { class: "sec" }, "Tarix"));
+      var mk = d.marked || { win: 0, lose: 0 };
+      page.appendChild(h("p", { class: "note" }, "Sizning belgilaringiz: " + mk.win + " ta yutdi, " + mk.lose + " ta yutqazdi. Natijani tizim tekshira olmaydi — o‘zingiz belgilaysiz."));
+      if (!d.history.length) page.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Hali signal olinmagan.")));
+      d.history.forEach(function (s) {
+        var row = h("div", { class: "card apad sghist" },
+          h("div", { class: "kv2" }, h("b", null, s.title + " · " + s.ref), h("span", { class: "muted" }, s.at.slice(5, 16))),
+          sgResultView(s));
+        var mkb = function (res, txt) { return h("button", { class: "sgmark" + (s.result === res ? " sel " + res : ""), onclick: function () {
+          request("/api/signal/mark", { id: s.id, result: s.result === res ? "" : res }).then(function () { loadSignal(); }).catch(function (e) { toast(e.message); }); } }, txt); };
+        row.appendChild(h("div", { class: "arow" }, mkb("win", "Yutdim"), mkb("lose", "Yutqazdim")));
+        page.appendChild(row);
+      });
+      return page;
+    }
+
+    function loadAdmin() { admLoad(); }
 
     function viewCases() {
       var page = h("div", null, h("h1", { class: "page-title" }, "🎁 Qutilar"));
@@ -3100,6 +3454,7 @@
       if (tab === "tower") loadTower();
       if (tab === "ladder") loadLadder();
       if (tab === "build") loadBuild();
+      if (tab === "signal") loadSignal();
       if (tab === "friends" && inTG) loadBonus();
       render();
       window.scrollTo(0, 0);
@@ -3122,6 +3477,7 @@
         else if (state.tab === "tower") view.appendChild(viewTower());
         else if (state.tab === "ladder") view.appendChild(viewLadder());
         else if (state.tab === "build") view.appendChild(viewBuild());
+        else if (state.tab === "signal") view.appendChild(viewSignal());
         else view.appendChild(viewHome());
       } catch (e) {
         view.appendChild(h("div", { class: "card empty" }, h("p", null, "Xatolik: " + e.message)));
@@ -3176,7 +3532,7 @@
     load();
     try {
       var gm = new URLSearchParams(location.search).get("game");
-      if (gm === "wheel" || gm === "mines" || gm === "tower" || gm === "ladder" || gm === "build") go(gm);
+      if (gm === "wheel" || gm === "mines" || gm === "tower" || gm === "ladder" || gm === "build" || gm === "signal") go(gm);
     } catch (e) {}
   })();
   </script>

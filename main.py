@@ -27,7 +27,7 @@ async def miniapp(request: web.Request) -> web.FileResponse:
 
 
 async def start_web_server() -> web.AppRunner:
-    app = web.Application()
+    app = web.Application(client_max_size=12 * 1024 * 1024)
     app.router.add_get("/", miniapp)
     app.router.add_get("/miniapp", miniapp)
     app.router.add_get("/healthz", health)
