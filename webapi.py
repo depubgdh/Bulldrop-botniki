@@ -16,6 +16,7 @@ import crane
 import ladder
 import mines
 import signals
+import vgames
 import tower
 import wheel
 from config import ADMIN_IDS, BOT_TOKEN, BOT_USERNAME
@@ -147,7 +148,8 @@ def cases_payload() -> dict:
             ],
         })
     free_limit = db.free_limit()
-    return {"cases": cases, "banner": banner_payload(), "free_limit": free_limit, "hero": hero_payload(free_limit)}
+    return {"cases": cases, "banner": banner_payload(), "free_limit": free_limit, "hero": hero_payload(free_limit),
+            "free_case": db.free_case_id()}
 
 
 HERO_DEFAULTS = {
@@ -925,6 +927,180 @@ async def api_admin_coins(request):
     return web.json_response({"user": _user_json(db.user_card(target))}, headers=NO_STORE)
 
 
+# ------------------------------------------------------------------ Virtual o'yinlar (reyting)
+
+@api
+async def api_vgame_top(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        return web.json_response(vgames.top(str(body.get("game", "")), user_id), headers=NO_STORE)
+    except ValueError:
+        raise ApiError(400, "bad_game", "Noto‘g‘ri o‘yin.")
+
+
+@api
+async def api_vgame_score(request):
+    user_id, tg_user, body, _ = await _auth(request)
+    try:
+        score = int(body.get("score", 0))
+        name = (tg_user.get("first_name") if isinstance(tg_user, dict) else "") or "Bull"
+        vgames.submit(user_id, name, str(body.get("game", "")), score)
+        return web.json_response(vgames.top(str(body.get("game", "")), user_id), headers=NO_STORE)
+    except (ValueError, TypeError):
+        raise ApiError(400, "bad_request", "Noto‘g‘ri so‘rov.")
+
+
+# ------------------------------------------------------------------ Admin: kirish sovg'asi, bonus, kanal, xabar
+
+@api
+async def api_admin_welcome(request):
+    await _admin(request)
+    return web.json_response({
+        "case_id": db.free_case_id(),
+        "chosen": int(db.get_setting("free_case_id") or 0),
+        "free_limit": db.free_limit(),
+        "cases": [{"id": c["id"], "name": c["name"], "price": c["price"]} for c in db.get_cases()],
+    }, headers=NO_STORE)
+
+
+@api
+async def api_admin_welcome_save(request):
+    _, body = await _admin(request)
+    case_id = _int(body.get("case_id", 0), default=0, minimum=0)
+    if case_id and not db.get_case(case_id):
+        raise ApiError(404, "not_found", "Quti topilmadi.")
+    db.set_free_case(case_id)
+    if body.get("free_limit") not in (None, ""):
+        db.set_setting("free_opens", _int(body.get("free_limit"), minimum=0, maximum=1000))
+    return await api_admin_welcome(request)
+
+
+def _task_json(t) -> dict:
+    return {"id": t["id"], "title": t["title"], "description": t["description"] or "", "url": t["url"] or "",
+            "channel": t["channel"] or "", "reward": t["reward"], "active": bool(t["is_active"])}
+
+
+def _bonus_payload() -> dict:
+    return {
+        "ref_reward": db.ref_reward(),
+        "tasks": [_task_json(t) for t in db.get_tasks(active_only=False)],
+        "pending": [{"id": c["id"], "user_id": c["user_id"], "username": c["username"] or "", "title": c["title"] or "",
+                     "reward": c["reward"] or 0, "at": c["created_at"]} for c in db.pending_claims(30)],
+    }
+
+
+@api
+async def api_admin_bonus(request):
+    await _admin(request)
+    return web.json_response(_bonus_payload(), headers=NO_STORE)
+
+
+@api
+async def api_admin_bonus_save(request):
+    _, body = await _admin(request)
+    db.set_setting("ref_reward", _int(body.get("ref_reward"), minimum=0, maximum=100_000_000))
+    return web.json_response(_bonus_payload(), headers=NO_STORE)
+
+
+@api
+async def api_admin_task_save(request):
+    _, body = await _admin(request)
+    title = str(body.get("title", "")).strip()[:100]
+    if not title:
+        raise ApiError(400, "bad_request", "Shart nomini kiriting.")
+    desc = str(body.get("description", "")).strip()[:500]
+    url = str(body.get("url", "")).strip()[:300]
+    channel = str(body.get("channel", "")).strip()[:100]
+    reward = _int(body.get("reward"), minimum=0, maximum=100_000_000)
+    if body.get("id"):
+        tid = _int(body.get("id"))
+        if not db.get_task(tid):
+            raise ApiError(404, "not_found", "Shart topilmadi.")
+        db.update_task(tid, title=title, description=desc, url=url, channel=channel, reward=reward,
+                       is_active=1 if body.get("active", True) else 0)
+    else:
+        db.add_task(title, desc, url, channel, reward)
+    return web.json_response(_bonus_payload(), headers=NO_STORE)
+
+
+@api
+async def api_admin_task_delete(request):
+    _, body = await _admin(request)
+    db.delete_task(_int(body.get("id")))
+    return web.json_response(_bonus_payload(), headers=NO_STORE)
+
+
+@api
+async def api_admin_claim(request):
+    _, body = await _admin(request)
+    approve = bool(body.get("approve"))
+    res = db.resolve_claim(_int(body.get("id")), approve)
+    if res:
+        if approve:
+            text = f"🎉 «{res['title']}» sharti tasdiqlandi! Sizga +{res['reward']} coin berildi."
+        else:
+            text = f"❌ «{res['title']}» bo‘yicha so‘rovingiz rad etildi. Shartni to‘liq bajarib, qayta yuboring."
+        await tg_http.send_message(res["user_id"], text)
+    return web.json_response(_bonus_payload(), headers=NO_STORE)
+
+
+@api
+async def api_admin_coins_all(request):
+    """Ro'yxatdan o'tgan hammaga coin bonus."""
+    admin_id, body = await _admin(request)
+    amount = _int(body.get("amount"), minimum=1, maximum=100_000_000)
+    n = db.add_coins_all(amount)
+    logging.info("admin %s coins_all +%d -> %d users", admin_id, amount, n)
+    return web.json_response({"ok": True, "users": n}, headers=NO_STORE)
+
+
+@api
+async def api_admin_channel(request):
+    admin_id, body = await _admin(request)
+    if "channel" in body:
+        raw = str(body.get("channel", "")).strip()
+        if not raw:
+            db.set_setting("required_channel", None)
+        else:
+            ref = raw if raw.lstrip("-").isdigit() or raw.startswith("@") else "@" + raw.rsplit("/", 1)[-1]
+            if ref.lstrip("-").isdigit():
+                ref = int(ref)
+            ok = await tg_http.member_status(ref, admin_id)
+            if ok is None:
+                raise ApiError(400, "channel", "Kanal topilmadi yoki bot u yerda admin emas. Botni kanalga admin qiling.")
+            db.set_setting("required_channel", str(ref))
+    return web.json_response({"channel": db.get_setting("required_channel") or ""}, headers=NO_STORE)
+
+
+_BROADCAST = {"running": False}
+
+
+async def _broadcast_task(text: str, ids: list) -> None:
+    import asyncio
+    try:
+        for uid in ids:
+            await tg_http.send_message(uid, text)
+            await asyncio.sleep(0.05)
+    finally:
+        _BROADCAST["running"] = False
+
+
+@api
+async def api_admin_broadcast(request):
+    """Matnli xabarni hammaga yuboradi (rasm/GIF/video uchun botdagi /admin dan foydalaning)."""
+    import asyncio
+    _, body = await _admin(request)
+    text = str(body.get("text", "")).strip()[:3500]
+    if not text:
+        raise ApiError(400, "bad_request", "Xabar matnini kiriting.")
+    if _BROADCAST["running"]:
+        raise ApiError(409, "busy", "Oldingi yuborish hali tugamagan.")
+    ids = db.all_user_ids()
+    _BROADCAST["running"] = True
+    asyncio.get_event_loop().create_task(_broadcast_task(text, ids))
+    return web.json_response({"ok": True, "total": len(ids)}, headers=NO_STORE)
+
+
 def setup_routes(app: web.Application) -> None:
     app.router.add_post("/api/wheel/state", api_wheel_state)
     app.router.add_post("/api/wheel/bet", api_wheel_bet)
@@ -950,6 +1126,18 @@ def setup_routes(app: web.Application) -> None:
 
 
     app.router.add_post("/api/admin/overview", api_admin_overview)
+    app.router.add_post("/api/vgame/top", api_vgame_top)
+    app.router.add_post("/api/vgame/score", api_vgame_score)
+    app.router.add_post("/api/admin/welcome", api_admin_welcome)
+    app.router.add_post("/api/admin/welcome/save", api_admin_welcome_save)
+    app.router.add_post("/api/admin/bonus", api_admin_bonus)
+    app.router.add_post("/api/admin/bonus/save", api_admin_bonus_save)
+    app.router.add_post("/api/admin/task/save", api_admin_task_save)
+    app.router.add_post("/api/admin/task/delete", api_admin_task_delete)
+    app.router.add_post("/api/admin/claim", api_admin_claim)
+    app.router.add_post("/api/admin/coins_all", api_admin_coins_all)
+    app.router.add_post("/api/admin/channel", api_admin_channel)
+    app.router.add_post("/api/admin/broadcast", api_admin_broadcast)
     app.router.add_post("/api/signal/state", api_signal_state)
     app.router.add_post("/api/signal/buy", api_signal_buy)
     app.router.add_post("/api/signal/mark", api_signal_mark)

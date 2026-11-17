@@ -615,6 +615,47 @@
     .kv2 { display: flex; justify-content: space-between; gap: 8px; }
     .sgmark { flex: 1; padding: 9px; border-radius: 12px; background: #1b1e24; color: var(--muted); font-weight: 800; border: 1px solid var(--line); }
     .sgmark.sel.win { background: #1f8a4c; color: #fff; } .sgmark.sel.lose { background: #a02a3a; color: #fff; }
+
+    /* O'yinlar markazi */
+    .hub h3.hsec { margin: 18px 2px 10px; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .hub h3.hsec small { color: var(--muted); font-weight: 600; font-size: 12px; }
+    .hgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .htile { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 10px 6px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: var(--text, #fff); }
+    .htile img { width: 100%; aspect-ratio: 1; border-radius: 14px; object-fit: cover; pointer-events: none; }
+    .htile:active { transform: scale(.96); }
+    .htile.virt { border-color: rgba(79, 141, 247, .45); }
+    .htile.sig { border-color: rgba(255, 200, 80, .4); }
+    .htile .tag { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 8px; background: rgba(53, 199, 122, .2); color: #5fe3a0; }
+    .htile .sgico { width: 100%; aspect-ratio: 1; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 30px; background: linear-gradient(135deg, #2a1d63, #5b2fc9); }
+    .freetag { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 8px; background: #35c77a; color: #08331d; vertical-align: middle; }
+    /* Bull paper.io */
+    .pio { position: fixed; inset: 0; z-index: 40; background: #7f8cab; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+    .pio-cv { position: absolute; inset: 0; display: block; touch-action: none; }
+    .pio-back { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); left: 12px; width: 42px; height: 42px; border-radius: 14px; background: rgba(15, 20, 35, .55); color: #fff; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, .25); z-index: 3; }
+    .pio-back .ic { width: 22px; height: 22px; }
+    .pio-hud { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); left: 64px; z-index: 2; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
+    .pio-score { font-size: 26px; font-weight: 900; color: #fff; text-shadow: 0 1px 0 #fff, 0 0 6px #fff; color: #2b3350; line-height: 1; padding-top: 4px; }
+    .pio-best { font-size: 12px; font-weight: 700; color: #4a5578; text-shadow: 0 0 5px #fff; }
+    .pio-board { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 10px; z-index: 2; min-width: 118px; padding: 6px 8px; border-radius: 12px; background: rgba(15, 20, 35, .45); pointer-events: none; }
+    .pio-lr { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #fff; padding: 2px 0; }
+    .pio-lr i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+    .pio-lr span { flex: 1; }
+    .pio-lr.me { font-weight: 900; }
+    .pio-ov { position: absolute; inset: 0; z-index: 4; display: none; align-items: center; justify-content: center; background: rgba(20, 28, 50, .55); padding: 20px; }
+    .pio.menu .pio-menu, .pio.over .pio-over { display: flex; }
+    .pio-card { width: min(100%, 340px); padding: 20px; border-radius: 26px; background: rgba(24, 30, 48, .94); border: 1px solid rgba(255, 255, 255, .15); display: flex; flex-direction: column; gap: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, .5); }
+    .pio-logo { font-size: 30px; font-weight: 900; letter-spacing: .5px; }
+    .pio-logo span { background: linear-gradient(90deg, #4f8df7, #35c77a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .pio-t { font-size: 20px; font-weight: 800; }
+    .pio-big { font-size: 48px; font-weight: 900; background: linear-gradient(180deg, #fff, #9ec2ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .pio-s { color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .pio-th { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 13px; color: var(--muted); }
+    .pio-thb { padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 13px; border: 2px solid transparent; }
+    .pio-thb.white { background: #fff; color: #223; } .pio-thb.green { background: #cdf3dc; color: #14532d; }
+    .pio-thb.sel { border-color: #4f8df7; }
+    .pio-top { display: flex; flex-direction: column; gap: 4px; font-size: 13px; text-align: left; }
+    .pio-row { display: flex; justify-content: space-between; padding: 4px 8px; border-radius: 8px; }
+    .pio-row.me { background: rgba(79, 141, 247, .2); }
   </style>
 </head>
 <body>
@@ -1601,7 +1642,7 @@
       WH.lastBtnKey = "";
     }
 
-    var GAME_TABS = ["wheel", "mines", "tower", "ladder", "build", "signal"];
+    var GAME_TABS = ["wheel", "mines", "tower", "ladder", "build", "signal", "paperio"];
     function gameHead(title, extra) {
       var back = h("button", { class: "gback", "aria-label": "Orqaga", onclick: function () { document.body.classList.remove("imm"); go(state.lastTab || "home"); } });
       back.innerHTML = icoHtml("back");
@@ -1618,6 +1659,25 @@
       { id: "build", name: "Qurilish", sub: "Shamolga qarshi quring", img: ART_BUILD },
       { id: "signal", name: "Signal", sub: "Coin evaziga tavsiya", img: ART_SIGNAL }
     ];
+    var ART_PIO = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#edf1f8"/><g stroke="#3c5078" stroke-opacity=".12"><path d="M0 40h200M0 80h200M0 120h200M0 160h200M40 0v200M80 0v200M120 0v200M160 0v200"/></g><rect x="20" y="60" width="90" height="90" fill="#4f8df7"/><rect x="20" y="150" width="90" height="8" fill="#2f64c9"/><rect x="110" y="60" width="50" height="40" fill="#f2555d" opacity=".55"/><rect x="110" y="100" width="40" height="40" fill="#4f8df7" opacity=".5"/><rect x="92" y="92" width="36" height="36" fill="#4f8df7"/><rect x="92" y="120" width="36" height="8" fill="#2f64c9"/><rect x="100" y="98" width="8" height="10" fill="#fff"/><rect x="113" y="98" width="8" height="10" fill="#fff"/><rect x="103" y="101" width="4" height="4" fill="#111"/><rect x="116" y="101" width="4" height="4" fill="#111"/><rect x="140" y="20" width="36" height="36" fill="#f2555d"/><rect x="140" y="48" width="36" height="8" fill="#c23a42"/></svg>');
+    var GAMES_BOT = ["ladder", "tower", "mines", "wheel", "build"];
+    var SIG_TILES = [["crash", "Crash", "📈"], ["mines", "Saper", "💣"], ["ladder", "Narvon", "🪜"], ["tower", "Minora", "🗼"]];
+    function viewGames() {
+      var page = h("div", { class: "hub" }, h("h1", { class: "page-title" }, "O‘yinlar"));
+      function byId(id) { return GAMES.filter(function (g) { return g.id === id; })[0]; }
+      function tile(g, cls) {
+        return h("button", { class: "htile " + (cls || ""), onclick: function () { go(g.id); } }, h("img", { src: g.img, alt: g.name, decoding: "async", draggable: "false" }), h("span", null, g.name));
+      }
+      page.appendChild(h("h3", { class: "hsec" }, "🎮 Botdagi o‘yinlar"));
+      page.appendChild(h("div", { class: "hgrid" }, GAMES_BOT.map(function (id) { return tile(byId(id)); })));
+      page.appendChild(h("h3", { class: "hsec" }, "🕹 Virtual o‘yinlar ", h("small", null, "(coinsiz)")));
+      page.appendChild(h("div", { class: "hgrid" }, tile({ id: "paperio", name: "Bull paper.io", img: ART_PIO }, "virt")));
+      page.appendChild(h("h3", { class: "hsec" }, "📡 Signallar ", h("small", null, "(coin evaziga)")));
+      page.appendChild(h("div", { class: "hgrid" }, SIG_TILES.map(function (t) {
+        return h("button", { class: "htile sig", onclick: function () { SG.game = t[0]; go("signal"); } }, h("div", { class: "sgico" }, t[2]), h("span", null, t[1]));
+      })));
+      return page;
+    }
     function closeGames() {
       var a = document.getElementById("gpop"), b = document.getElementById("gpop-bg");
       if (a) a.remove();
@@ -1628,7 +1688,7 @@
       Array.prototype.forEach.call(tabbar.children, function (b) {
         var t = b.getAttribute("data-tab");
         var inGame = GAME_TABS.indexOf(state.tab) >= 0;
-        b.classList.toggle("active", t === "games" ? (state.gamesOpen || inGame) : (t === state.tab && !state.gamesOpen));
+        b.classList.toggle("active", t === "games" ? (state.tab === "games" || inGame) : t === state.tab);
       });
     }
     function toggleGames() {
@@ -1644,6 +1704,384 @@
       pop.style.bottom = Math.round(window.innerHeight - r.top + 10) + "px";
       document.body.appendChild(bg); document.body.appendChild(pop);
       paintTabs();
+    }
+
+    /* ===================== BULL PAPER.IO (virtual o‘yin) =====================
+       Qoidalar (paper.io 2 kabi): o‘z hududingizdan chiqing — orqangizda iz qoladi. Izni yopib, hududingizga
+       qaytsangiz, o‘rab olingan maydon sizniki bo‘ladi. Kimdir izingizga tegsa — siz yutqazasiz; o‘z izingizga
+       yoki devorga tegsangiz ham. Raqiblar (botlar) ham shunday o‘ynaydi. Dizayn va chizmalar original. */
+    var PIO_GW = 64, PIO_GH = 64, PIO_CS = 22;
+    var PIO_HUES = [212, 352, 148, 32, 272, 188, 322, 52, 100, 242, 12, 168, 292, 72, 202, 332, 122, 22, 262, 182];
+    var PIO_COL = [null];
+    (function () { for (var i = 0; i < 20; i++) { var hu = PIO_HUES[i]; PIO_COL.push({ b: "hsl(" + hu + ",78%,58%)", d: "hsl(" + hu + ",70%,40%)", l: "hsl(" + hu + ",85%,72%)", t: "hsl(" + hu + ",80%,50%)" }); } })();
+    var PIO_NAMES = ["Siz", "Zebra", "Kobra", "Burgut", "Qoplon", "Tulpor", "Bahor", "Sherxon", "Mirzo", "Laylo", "Dilya", "Aziz", "Rustam", "Nilufar", "Sardor", "Madina", "Jasur", "Gulnoz", "Bobur", "Ozoda"];
+    var PIO_BOTS = 8, PIO_THEME = "white";
+    try { PIO_THEME = localStorage.getItem("pio_theme") || "white"; } catch (e) {}
+    var PIO_IMG = {};
+    var PIO_DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    var PIO = null;
+
+    function pioRnd(n) { return Math.floor(Math.random() * n); }
+    function pioIdx(x, y) { return y * PIO_GW + x; }
+    function pioIn(x, y) { return x >= 0 && y >= 0 && x < PIO_GW && y < PIO_GH; }
+
+    function pioNew() {
+      var P = { owner: new Uint8Array(PIO_GW * PIO_GH), trail: new Uint8Array(PIO_GW * PIO_GH), ents: [], fx: [], state: "menu", best: 0,
+        cam: { x: PIO_GW / 2, y: PIO_GH / 2 }, w: 0, h: 0, ctx: null, root: null, last: 0, hudT: 0, shake: 0, score: 0, top: [], mine: { best: 0, plays: 0 }, over: null };
+      var me0 = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
+      P.photo = me0.photo_url || "";
+      var botNames = PIO_NAMES.slice(1).sort(function () { return Math.random() - 0.5; });
+      for (var id = 1; id <= 1 + PIO_BOTS; id++) {
+        P.ents.push({ id: id, name: id === 1 ? (me0.first_name || "Siz") : botNames[id - 2], bot: id > 1, x: 0, y: 0, dx: 1, dy: 0, pdx: 0, pdy: 0, t: 0, trail: [], alive: false, area: 0,
+          respawn: 0, mode: "wander", leg: 0, legLeft: 0, d0: [1, 0], L1: 4, L2: 4, side: 1, homeSteps: 0, speed: id === 1 ? 6.6 : 5.5 + Math.random() * 0.5 });
+      }
+      return P;
+    }
+
+    function pioSpawn(P, e) {
+      var best = null;
+      for (var tries = 0; tries < 60; tries++) {
+        var cx = 4 + pioRnd(PIO_GW - 8), cy = 4 + pioRnd(PIO_GH - 8), ok = true;
+        for (var yy = -3; yy <= 3 && ok; yy++) for (var xx = -3; xx <= 3; xx++) if (P.owner[pioIdx(cx + xx, cy + yy)] || P.trail[pioIdx(cx + xx, cy + yy)]) { ok = false; break; }
+        if (ok) for (var k = 0; k < P.ents.length; k++) { var o = P.ents[k]; if (o.alive && o !== e && Math.abs(o.x - cx) + Math.abs(o.y - cy) < 10) { ok = false; break; } }
+        if (ok) { best = [cx, cy]; break; }
+      }
+      if (!best) best = [4 + pioRnd(PIO_GW - 8), 4 + pioRnd(PIO_GH - 8)];
+      for (var y = -1; y <= 1; y++) for (var x = -1; x <= 1; x++) P.owner[pioIdx(best[0] + x, best[1] + y)] = e.id;
+      var d = PIO_DIRS[pioRnd(4)];
+      e.x = best[0]; e.y = best[1]; e.dx = d[0]; e.dy = d[1]; e.pdx = 0; e.pdy = 0; e.t = 0; e.trail = []; e.alive = true;
+      e.mode = "wander"; e.homeSteps = 0;
+      pioCount(P);
+    }
+
+    function pioCount(P) {
+      var cnt = new Array(22).fill(0), o = P.owner;
+      for (var i = 0; i < o.length; i++) if (o[i]) cnt[o[i]]++;
+      P.ents.forEach(function (e) { e.area = cnt[e.id]; });
+    }
+
+    function pioKill(P, e) {
+      if (!e.alive) return;
+      e.alive = false;
+      var col = PIO_COL[e.id];
+      for (var k = 0; k < 18; k++) P.fx.push({ x: e.x + 0.5 + e.dx * e.t, y: e.y + 0.5 + e.dy * e.t, vx: (Math.random() - 0.5) * 9, vy: (Math.random() - 0.5) * 9, life: 0.7, c: col.b });
+      e.trail.forEach(function (i) { P.trail[i] = 0; });
+      e.trail = [];
+      for (var i = 0; i < P.owner.length; i++) if (P.owner[i] === e.id) P.owner[i] = 0;
+      pioCount(P);
+      if (e.id === 1) { P.state = "over"; P.shake = 0.4; pioOver(P); }
+      else e.respawn = performance.now() / 1000 + 2.2 + Math.random() * 1.5;
+    }
+
+    function pioCapture(P, e) {
+      var own = P.owner, tr = e.trail, N = PIO_GW * PIO_GH;
+      for (var k = 0; k < tr.length; k++) { own[tr[k]] = e.id; P.trail[tr[k]] = 0; }
+      e.trail = [];
+      var seen = new Uint8Array(N), stack = [];
+      function push(i) { if (!seen[i] && own[i] !== e.id) { seen[i] = 1; stack.push(i); } }
+      for (var x = 0; x < PIO_GW; x++) { push(x); push((PIO_GH - 1) * PIO_GW + x); }
+      for (var y = 0; y < PIO_GH; y++) { push(y * PIO_GW); push(y * PIO_GW + PIO_GW - 1); }
+      while (stack.length) {
+        var i = stack.pop(), cx = i % PIO_GW, cy = (i / PIO_GW) | 0;
+        if (cx > 0) push(i - 1);
+        if (cx < PIO_GW - 1) push(i + 1);
+        if (cy > 0) push(i - PIO_GW);
+        if (cy < PIO_GH - 1) push(i + PIO_GW);
+      }
+      for (var j = 0; j < N; j++) if (!seen[j] && own[j] !== e.id) own[j] = e.id;
+      pioCount(P);
+      P.ents.forEach(function (o) { if (o !== e && o.alive && o.area === 0) pioKill(P, o); });
+    }
+
+    function pioArrive(P, e) {
+      var nx = e.x + e.dx, ny = e.y + e.dy;
+      if (!pioIn(nx, ny)) { pioKill(P, e); return; }
+      e.x = nx; e.y = ny;
+      var i = pioIdx(nx, ny), tr = P.trail[i];
+      if (tr === e.id) { pioKill(P, e); return; }
+      if (tr && tr !== e.id) { var v = P.ents[tr - 1]; if (v) pioKill(P, v); }
+      if (!e.alive) return;
+      if (P.owner[i] === e.id) {
+        if (e.trail.length) pioCapture(P, e);
+      } else {
+        P.trail[i] = e.id; e.trail.push(i);
+      }
+      if (e.pdx || e.pdy) {
+        if (!(e.pdx === -e.dx && e.pdy === -e.dy) && (e.pdx !== 0 || e.pdy !== 0)) { e.dx = e.pdx; e.dy = e.pdy; }
+        e.pdx = 0; e.pdy = 0;
+      }
+    }
+
+    function pioSafe(P, e, d) {
+      if (d[0] === -e.dx && d[1] === -e.dy) return false;
+      var nx = e.x + d[0], ny = e.y + d[1];
+      if (!pioIn(nx, ny)) return false;
+      if (P.trail[pioIdx(nx, ny)] === e.id) return false;
+      return true;
+    }
+    function pioBot(P, e) {
+      var i = pioIdx(e.x, e.y), inside = P.owner[i] === e.id, want = [e.dx, e.dy];
+      if (inside) {
+        e.homeSteps++;
+        if (e.mode === "out") { e.mode = "wander"; e.homeSteps = 0; }
+        if (e.mode === "wander" && e.homeSteps > 3 && Math.random() < 0.09 + Math.min(0.2, e.homeSteps * 0.004)) {
+          e.mode = "go"; e.d0 = PIO_DIRS[pioRnd(4)]; e.L1 = 3 + pioRnd(5); e.L2 = 3 + pioRnd(5); e.side = Math.random() < 0.5 ? 1 : -1;
+        }
+        if (e.mode === "go") want = e.d0;
+        else if (Math.random() < 0.18) want = PIO_DIRS[pioRnd(4)];
+      } else {
+        if (e.mode !== "out") { e.mode = "out"; e.leg = 1; e.legLeft = e.L1; }
+        e.legLeft--;
+        var perp = [-e.d0[1] * e.side, e.d0[0] * e.side];
+        if (e.leg === 1) { want = e.d0; if (e.legLeft <= 0) { e.leg = 2; e.legLeft = e.L2; } }
+        else if (e.leg === 2) { want = perp; if (e.legLeft <= 0) { e.leg = 3; e.legLeft = e.L1 + 5; } }
+        else if (e.leg === 3) { want = [-e.d0[0], -e.d0[1]]; if (e.legLeft <= 0) e.leg = 4; }
+        if (e.leg === 4 || e.trail.length > 30) {
+          var home = e.trail[0], hx = home % PIO_GW, hy = (home / PIO_GW) | 0;
+          want = Math.abs(hx - e.x) > Math.abs(hy - e.y) ? [Math.sign(hx - e.x), 0] : [0, Math.sign(hy - e.y)];
+          if (want[0] === 0 && want[1] === 0) want = [e.dx, e.dy];
+        }
+        // oyoqlarni kesib qo'ymaslik: dushman izi yaqinida qochish
+      }
+      if (!pioSafe(P, e, want)) {
+        var alts = PIO_DIRS.filter(function (d) { return pioSafe(P, e, d); });
+        // devorga yaqin bo'lsa — maydon markaziga qarab burilish
+        if (alts.length) {
+          var cx = PIO_GW / 2, cy = PIO_GH / 2;
+          alts.sort(function (a, b) { return (Math.abs(e.x + a[0] - cx) + Math.abs(e.y + a[1] - cy)) - (Math.abs(e.x + b[0] - cx) + Math.abs(e.y + b[1] - cy)); });
+          want = alts[0];
+        } else want = [e.dx, e.dy];
+        if (e.mode === "go") e.mode = "wander";
+      }
+      // devorga 2 katak qolsa — oldindan burilish
+      var fx = e.x + want[0] * 2, fy = e.y + want[1] * 2;
+      if (!pioIn(fx, fy)) {
+        var alts2 = PIO_DIRS.filter(function (d) { return pioSafe(P, e, d) && pioIn(e.x + d[0] * 2, e.y + d[1] * 2); });
+        if (alts2.length) want = alts2[pioRnd(alts2.length)];
+      }
+      e.pdx = want[0]; e.pdy = want[1];
+    }
+
+    function pioStep(P, dt, now) {
+      P.ents.forEach(function (e) {
+        if (!e.alive) {
+          if (e.bot && e.respawn && now >= e.respawn) { e.respawn = 0; pioSpawn(P, e); }
+          return;
+        }
+        if (P.state !== "play" && !e.bot) return;
+        e.t += e.speed * dt;
+        var guard = 0;
+        while (e.t >= 1 && e.alive && guard++ < 4) {
+          if (e.bot) pioBot(P, e);
+          e.t -= 1;
+          pioArrive(P, e);
+        }
+      });
+      for (var k = P.fx.length - 1; k >= 0; k--) {
+        var f = P.fx[k]; f.life -= dt; f.x += f.vx * dt; f.y += f.vy * dt;
+        if (f.life <= 0) P.fx.splice(k, 1);
+      }
+      if (P.shake > 0) P.shake -= dt;
+    }
+
+    function pioStart(P) {
+      P.owner.fill(0); P.trail.fill(0); P.fx = [];
+      P.ents.forEach(function (e) { e.alive = false; e.trail = []; e.respawn = 0; });
+      P.ents.forEach(function (e) { pioSpawn(P, e); });
+      P.state = "play"; P.over = null; P.score = 0; P.peak = 0;
+      var me = P.ents[0]; P.cam.x = me.x + 0.5; P.cam.y = me.y + 0.5;
+      if (P.root) P.root.classList.remove("menu", "over");
+    }
+
+    function pioPct(P) { return P.ents[0].area / (PIO_GW * PIO_GH) * 100; }
+    function pioOver(P) {
+      var pct = pioPct(P.ents[0] ? P : P);
+      P.over = { pct: P.peak || 0 };
+      var score = Math.round((P.peak || 0) * 10);
+      P.state = "over";
+      if (P.root) { P.root.classList.add("over"); pioPaintOver(P); }
+      if (inTG) request("/api/vgame/score", { game: "paperio", score: score }).then(function (d) { P.top = d.top; P.mine = d.mine; pioPaintOver(P); }).catch(function () {});
+    }
+
+    function pioAvatar(P, e) {
+      if (e.id !== 1 || !P.photo) return null;
+      var im = PIO_IMG[P.photo];
+      if (!im) { im = PIO_IMG[P.photo] = new Image(); im.onerror = function () { im.bad = true; }; im.src = P.photo; }
+      return im.complete && im.naturalWidth && !im.bad ? im : null;
+    }
+    function pioDraw(P, now, dt) {
+      var ctx = P.ctx, W = P.w, H = P.h, cs = PIO_CS, me = P.ents[0], green = PIO_THEME === "green";
+      var tx = me.x + 0.5 + me.dx * me.t, ty = me.y + 0.5 + me.dy * me.t;
+      if (!me.alive) { tx = P.cam.x; ty = P.cam.y; }
+      var k = Math.min(1, dt * 7);
+      P.cam.x += (tx - P.cam.x) * k; P.cam.y += (ty - P.cam.y) * k;
+      var hx = W / 2 / cs, hy = H / 2 / cs;
+      var cx = Math.max(hx - 1.5, Math.min(PIO_GW - hx + 1.5, P.cam.x)), cy = Math.max(hy - 1.5, Math.min(PIO_GH - hy + 1.5, P.cam.y));
+      var sx = 0, sy = 0;
+      if (P.shake > 0) { sx = (Math.random() - 0.5) * 8 * P.shake; sy = (Math.random() - 0.5) * 8 * P.shake; }
+      var ox = Math.round(W / 2 - cx * cs + sx), oy = Math.round(H / 2 - cy * cs + sy);
+      ctx.fillStyle = green ? "#6fbf8a" : "#aeb9cc"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = green ? "#e6faee" : "#ffffff"; ctx.fillRect(ox, oy, PIO_GW * cs, PIO_GH * cs);
+      var x0 = Math.max(0, Math.floor(-ox / cs)), y0 = Math.max(0, Math.floor(-oy / cs));
+      var x1 = Math.min(PIO_GW - 1, Math.ceil((W - ox) / cs)), y1 = Math.min(PIO_GH - 1, Math.ceil((H - oy) / cs));
+      ctx.strokeStyle = green ? "rgba(40,120,80,.10)" : "rgba(60,80,120,.08)"; ctx.lineWidth = 1; ctx.beginPath();
+      for (var gx = x0; gx <= x1 + 1; gx++) { ctx.moveTo(ox + gx * cs + 0.5, oy + y0 * cs); ctx.lineTo(ox + gx * cs + 0.5, oy + (y1 + 1) * cs); }
+      for (var gy = y0; gy <= y1 + 1; gy++) { ctx.moveTo(ox + x0 * cs, oy + gy * cs + 0.5); ctx.lineTo(ox + (x1 + 1) * cs, oy + gy * cs + 0.5); }
+      ctx.stroke();
+      var own = P.owner, x, y, i, o, last = 0;
+      // hududlar: silliq ko'rinish uchun hujayralar biroz kengaytiriladi
+      for (y = y0; y <= y1; y++) for (x = x0; x <= x1; x++) {
+        i = y * PIO_GW + x; o = own[i]; if (!o) continue;
+        if (o !== last) { ctx.fillStyle = PIO_COL[o].b; last = o; }
+        ctx.fillRect(ox + x * cs - 0.5, oy + y * cs - 0.5, cs + 1, cs + 1);
+      }
+      // hudud chegarasi: aniq chiziq
+      ctx.lineWidth = 3; ctx.lineCap = "round"; last = 0; ctx.beginPath();
+      var curCol = null;
+      function flush() { if (curCol) { ctx.strokeStyle = curCol; ctx.stroke(); ctx.beginPath(); } }
+      for (var oo = 1; oo <= 21; oo++) {
+        var any = false; ctx.beginPath(); ctx.strokeStyle = PIO_COL[oo] ? PIO_COL[oo].d : "#000";
+        if (!PIO_COL[oo]) break;
+        for (y = y0; y <= y1; y++) for (x = x0; x <= x1; x++) {
+          i = y * PIO_GW + x; if (own[i] !== oo) continue;
+          var px = ox + x * cs, py = oy + y * cs;
+          if (y === 0 || own[i - PIO_GW] !== oo) { ctx.moveTo(px, py); ctx.lineTo(px + cs, py); any = true; }
+          if (y === PIO_GH - 1 || own[i + PIO_GW] !== oo) { ctx.moveTo(px, py + cs); ctx.lineTo(px + cs, py + cs); any = true; }
+          if (x === 0 || own[i - 1] !== oo) { ctx.moveTo(px, py); ctx.lineTo(px, py + cs); any = true; }
+          if (x === PIO_GW - 1 || own[i + 1] !== oo) { ctx.moveTo(px + cs, py); ctx.lineTo(px + cs, py + cs); any = true; }
+        }
+        if (any) ctx.stroke();
+      }
+      // devor
+      ctx.strokeStyle = green ? "#2f8a55" : "#7d8aa6"; ctx.lineWidth = 5; ctx.strokeRect(ox, oy, PIO_GW * cs, PIO_GH * cs);
+      // izlar: uzluksiz yo'g'on chiziq
+      ctx.lineJoin = "round"; ctx.lineCap = "round";
+      P.ents.forEach(function (e) {
+        if (!e.alive || !e.trail.length) return;
+        var c = PIO_COL[e.id];
+        ctx.beginPath();
+        var t0 = e.trail[0], hx0 = (t0 % PIO_GW), hy0 = (t0 / PIO_GW) | 0;
+        ctx.moveTo(ox + (hx0 - e.dx * 0 + 0.5) * cs, oy + (hy0 + 0.5) * cs);
+        for (var q = 1; q < e.trail.length; q++) { var ti = e.trail[q]; ctx.lineTo(ox + ((ti % PIO_GW) + 0.5) * cs, oy + (((ti / PIO_GW) | 0) + 0.5) * cs); }
+        ctx.lineTo(ox + (e.x + 0.5 + e.dx * e.t) * cs, oy + (e.y + 0.5 + e.dy * e.t) * cs);
+        ctx.strokeStyle = c.l; ctx.lineWidth = cs * 0.62; ctx.globalAlpha = 0.9; ctx.stroke();
+        ctx.globalAlpha = 1;
+      });
+      // o'yinchilar: profil rasmi (doira)
+      var list = P.ents.filter(function (e) { return e.alive; }).sort(function (a, b) { return a.y - b.y; });
+      list.forEach(function (e) {
+        var px = ox + (e.x + 0.5 + e.dx * e.t) * cs, py = oy + (e.y + 0.5 + e.dy * e.t) * cs, r = cs * 0.78, c = PIO_COL[e.id];
+        if (px < -40 || py < -40 || px > W + 40 || py > H + 40) return;
+        ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.beginPath(); ctx.ellipse(px, py + r * 0.95, r * 0.9, r * 0.35, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(px, py, r + 3, 0, 7); ctx.fill();
+        ctx.fillStyle = c.t; ctx.beginPath(); ctx.arc(px, py, r + 1, 0, 7); ctx.fill();
+        var im = pioAvatar(P, e);
+        ctx.save(); ctx.beginPath(); ctx.arc(px, py, r - 1.5, 0, 7); ctx.clip();
+        if (im) ctx.drawImage(im, px - r, py - r, r * 2, r * 2);
+        else {
+          ctx.fillStyle = c.b; ctx.fillRect(px - r, py - r, r * 2, r * 2);
+          ctx.fillStyle = "#fff"; ctx.font = "900 " + Math.round(r * 1.15) + "px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText((e.name || "?").charAt(0).toUpperCase(), px, py + 1);
+        }
+        ctx.restore(); ctx.textBaseline = "alphabetic";
+        ctx.font = "800 11px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.lineWidth = 3; ctx.strokeStyle = "rgba(0,0,0,.5)"; ctx.fillStyle = "#fff";
+        ctx.strokeText(e.name, px, py - r - 7); ctx.fillText(e.name, px, py - r - 7);
+      });
+      P.fx.forEach(function (f) {
+        ctx.globalAlpha = Math.max(0, f.life / 0.7); ctx.fillStyle = f.c;
+        ctx.beginPath(); ctx.arc(ox + f.x * cs, oy + f.y * cs, 4, 0, 7); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function pioPaintOver(P) {
+      var box = P.refs.over; box.textContent = "";
+      var pct = (P.peak || 0);
+      box.appendChild(h("div", { class: "pio-card" },
+        h("div", { class: "pio-t" }, "O‘yin tugadi"),
+        h("div", { class: "pio-big" }, pct.toFixed(1) + "%"),
+        h("div", { class: "pio-s" }, "Eng yuqori egallangan hudud" + (P.mine && P.mine.best ? " · Rekord: " + (P.mine.best / 10).toFixed(1) + "%" : "")),
+        h("button", { class: "btn primary big", onclick: function () { haptic(); pioStart(P); } }, "Qayta o‘ynash"),
+        h("button", { class: "btn", onclick: function () { go(state.lastTab || "games"); } }, "Chiqish")));
+    }
+    function pioPaintMenu(P) {
+      var box = P.refs.menu; box.textContent = "";
+      var top = (P.top || []).slice(0, 5).map(function (r, i) {
+        return h("div", { class: "pio-row" + (r.me ? " me" : "") }, h("span", null, (i + 1) + ". " + r.name), h("b", null, (r.best / 10).toFixed(1) + "%"));
+      });
+      box.appendChild(h("div", { class: "pio-card" },
+        h("div", { class: "pio-logo" }, "BULL ", h("span", null, "paper.io")),
+        h("div", { class: "pio-s" }, "Hududingizdan chiqing, izni yopib qaytib keling — o‘rab olingan maydon sizniki. Izingizga tegsalar yutqazasiz. Surish (swipe) yoki strelkalar bilan boshqaring."),
+        h("div", { class: "pio-th" }, h("span", null, "Yer rangi:"),
+          ["white", "green"].map(function (t) { return h("button", { class: "pio-thb " + t + (PIO_THEME === t ? " sel" : ""), onclick: function () { PIO_THEME = t; try { localStorage.setItem("pio_theme", t); } catch (e) {} pioPaintMenu(P); } }, t === "white" ? "Oq" : "Yashil"); })),
+        h("button", { class: "btn primary big", onclick: function () { haptic(); pioStart(P); } }, "O‘ynash"),
+        top.length ? h("div", { class: "pio-top" }, h("b", null, "Reyting"), top) : null,
+        h("button", { class: "btn", onclick: function () { go(state.lastTab || "games"); } }, "Orqaga")));
+    }
+
+    function viewPaperio() {
+      document.body.classList.add("imm");
+      var P = pioNew(); PIO = P;
+      var canvas = h("canvas", { class: "pio-cv" });
+      var score = h("div", { class: "pio-score" }, "0.0%");
+      var best = h("div", { class: "pio-best" }, "");
+      var board = h("div", { class: "pio-board" });
+      var back = h("button", { class: "pio-back", "aria-label": "Orqaga", onclick: function () { go(state.lastTab || "games"); } });
+      back.innerHTML = icoHtml("back");
+      var menu = h("div", { class: "pio-ov pio-menu" }), over = h("div", { class: "pio-ov pio-over" });
+      var root = h("div", { class: "pio menu" }, canvas, back, h("div", { class: "pio-hud" }, score, best), board, menu, over);
+      P.root = root; P.ctx = canvas.getContext("2d"); P.refs = { menu: menu, over: over, score: score, best: best, board: board, canvas: canvas };
+      P.peak = 0;
+      // ayrim surish boshqaruvi
+      var sx = 0, sy = 0, active = false;
+      function dir(dx, dy) { var me = P.ents[0]; if (P.state !== "play" || !me.alive) return; if (dx === -me.dx && dy === -me.dy && (me.dx || me.dy)) return; me.pdx = dx; me.pdy = dy; }
+      canvas.addEventListener("pointerdown", function (e) { sx = e.clientX; sy = e.clientY; active = true; });
+      canvas.addEventListener("pointermove", function (e) {
+        if (!active) return;
+        var ax = e.clientX - sx, ay = e.clientY - sy;
+        if (Math.abs(ax) < 16 && Math.abs(ay) < 16) return;
+        if (Math.abs(ax) > Math.abs(ay)) dir(ax > 0 ? 1 : -1, 0); else dir(0, ay > 0 ? 1 : -1);
+        sx = e.clientX; sy = e.clientY;
+      });
+      window.addEventListener("pointerup", function () { active = false; });
+      function onKey(ev) {
+        var m = { ArrowLeft: [-1, 0], a: [-1, 0], ArrowRight: [1, 0], d: [1, 0], ArrowUp: [0, -1], w: [0, -1], ArrowDown: [0, 1], s: [0, 1] }[ev.key];
+        if (m) { dir(m[0], m[1]); ev.preventDefault(); }
+      }
+      window.addEventListener("keydown", onKey);
+      pioPaintMenu(P);
+      if (inTG) request("/api/vgame/top", { game: "paperio" }).then(function (d) { P.top = d.top; P.mine = d.mine; pioPaintMenu(P); }).catch(function () {});
+      // fon uchun botlar menyuda ham harakatlanadi
+      pioStart(P); P.state = "menu"; root.classList.add("menu");
+      P.ents[0].alive = true;
+      P.last = performance.now();
+      function frame(ts) {
+        if (!document.body.contains(root)) { window.removeEventListener("keydown", onKey); PIO = null; return; }
+        var dt = Math.min(0.05, (ts - P.last) / 1000); P.last = ts;
+        var w = root.clientWidth, hh = root.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+        if (w !== P.w || hh !== P.h || canvas.width !== Math.round(w * dpr)) {
+          P.w = w; P.h = hh; canvas.width = Math.round(w * dpr); canvas.height = Math.round(hh * dpr);
+          canvas.style.width = w + "px"; canvas.style.height = hh + "px"; P.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        pioStep(P, dt, ts / 1000);
+        pioDraw(P, ts / 1000, dt);
+        P.hudT -= dt;
+        if (P.hudT <= 0) {
+          P.hudT = 0.2;
+          var me = P.ents[0], pct = me.area / (PIO_GW * PIO_GH) * 100;
+          if (P.state === "play" && pct > (P.peak || 0)) P.peak = pct;
+          score.textContent = pct.toFixed(1) + "%";
+          best.textContent = P.mine && P.mine.best ? "Rekord " + (P.mine.best / 10).toFixed(1) + "%" : "";
+          var rows = P.ents.filter(function (e) { return e.alive; }).sort(function (a, b) { return b.area - a.area; }).slice(0, 5);
+          board.textContent = "";
+          rows.forEach(function (e, n) {
+            board.appendChild(h("div", { class: "pio-lr" + (e.id === 1 ? " me" : "") }, h("i", { style: "background:" + PIO_COL[e.id].b }), h("span", null, e.name), h("b", null, (e.area / (PIO_GW * PIO_GH) * 100).toFixed(0) + "%")));
+          });
+        }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+      return root;
     }
 
     function viewWheel() {
@@ -2668,14 +3106,17 @@
     }
 
     /* ===================== ADMIN (Mini App ichida) ===================== */
-    var ADM = { tab: "stat", cases: null, rarities: {}, openCase: 0, ads: null, sig: null, user: null, q: "" };
-    var ADM_TABS = [["stat", "Statistika"], ["cases", "Qutilar"], ["ads", "Reklama"], ["sig", "Signal"], ["user", "Foydalanuvchi"]];
+    var ADM = { welcome: null, bonus: null, chan: null, msg: "", tab: "stat", cases: null, rarities: {}, openCase: 0, ads: null, sig: null, user: null, q: "" };
+    var ADM_TABS = [["stat", "Statistika"], ["cases", "Qutilar"], ["ads", "Reklama"], ["sig", "Signal"], ["user", "Foydalanuvchi"], ["gift", "Sovg‘a"], ["bonus", "Bonus"], ["chan", "Kanal"], ["msg", "Xabar"]];
 
     function admLoad() {
       if (!(state.me && state.me.is_admin)) return;
       if (ADM.tab === "stat") request("/api/admin/overview", {}).then(function (d) { state.adminData = d; render(); }).catch(function (e) { toast(e.message); });
       if (ADM.tab === "cases") request("/api/admin/cases", {}).then(function (d) { ADM.cases = d.cases; ADM.rarities = d.rarities; render(); }).catch(function (e) { toast(e.message); });
       if (ADM.tab === "ads") request("/api/admin/ads", {}).then(function (d) { ADM.ads = d; render(); }).catch(function (e) { toast(e.message); });
+      if (ADM.tab === "gift") request("/api/admin/welcome", {}).then(function (d) { ADM.welcome = d; render(); }).catch(function (e) { toast(e.message); });
+      if (ADM.tab === "bonus") request("/api/admin/bonus", {}).then(function (d) { ADM.bonus = d; render(); }).catch(function (e) { toast(e.message); });
+      if (ADM.tab === "chan") request("/api/admin/channel", {}).then(function (d) { ADM.chan = d.channel; render(); }).catch(function (e) { toast(e.message); });
       if (ADM.tab === "sig") request("/api/admin/signals", {}).then(function (d) { ADM.sig = d; render(); }).catch(function (e) { toast(e.message); });
     }
     function admInp(val, ph, type) {
@@ -2720,11 +3161,95 @@
       else if (ADM.tab === "ads") body = admAds();
       else if (ADM.tab === "sig") body = admSignals();
       else if (ADM.tab === "user") body = admUsers();
+      else if (ADM.tab === "gift") body = admGift();
+      else if (ADM.tab === "bonus") body = admBonus();
+      else if (ADM.tab === "chan") body = admChan();
+      else if (ADM.tab === "msg") body = admMsg();
       else body = admStats();
       page.appendChild(body);
       return page;
     }
 
+
+    /* ---- Kirish sovg'asi ---- */
+    function admGift() {
+      var d = ADM.welcome, box = h("div");
+      if (!d) { box.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Yuklanmoqda..."))); return box; }
+      var sel = h("select", { class: "betinput ain" }, [h("option", { value: "0" }, "Avto — eng arzon quti")].concat(d.cases.map(function (c) { return h("option", { value: String(c.id) }, c.name + " · " + coin(c.price)); })));
+      sel.value = String(d.chosen || 0);
+      var lim = admInp(d.free_limit, "Bepul ochishlar soni", "number");
+      var cur = d.cases.filter(function (c) { return c.id === d.case_id; })[0];
+      box.appendChild(h("div", { class: "card apad" },
+        h("b", null, "🎁 Birinchi marta kirganga bepul quti"),
+        h("p", { class: "note" }, "Hozir: " + (cur ? cur.name : "yo‘q") + ". Yangi foydalanuvchi shu qutini bepul ochadi."),
+        admFld("Qaysi quti", sel), admFld("Bepul ochish soni", lim),
+        admBtn("Saqlash", "primary", function () {
+          request("/api/admin/welcome/save", { case_id: parseInt(sel.value, 10) || 0, free_limit: lim.value }).then(function (r) { ADM.welcome = r; toast("Saqlandi ✓"); render(); }).catch(function (e) { toast(e.message); });
+        })));
+      return box;
+    }
+    /* ---- Bonus ---- */
+    function admBonus() {
+      var d = ADM.bonus, box = h("div");
+      if (!d) { box.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Yuklanmoqda..."))); return box; }
+      function set(r) { ADM.bonus = r; render(); }
+      var rr = admInp(d.ref_reward, "Taklif uchun coin", "number");
+      box.appendChild(h("div", { class: "card apad" }, admFld("Do‘st taklif qilgani uchun mukofot (coin)", rr),
+        admBtn("Saqlash", "primary", function () { request("/api/admin/bonus/save", { ref_reward: rr.value }).then(function (r) { set(r); toast("Saqlandi ✓"); }).catch(function (e) { toast(e.message); }); })));
+      var all = admInp("", "Hammaga coin", "number");
+      box.appendChild(h("div", { class: "card apad" }, admFld("🎁 Hammaga coin berish", all),
+        admBtn("Yuborish", "", function () {
+          if (!(parseInt(all.value, 10) > 0)) { toast("Miqdorni kiriting"); return; }
+          if (!confirm("Barcha foydalanuvchilarga " + all.value + " coin beriladi. Davom etasizmi?")) return;
+          request("/api/admin/coins_all", { amount: all.value }).then(function (r) { toast(r.users + " kishiga berildi ✓"); all.value = ""; }).catch(function (e) { toast(e.message); });
+        })));
+      var nt = admInp("", "Shart nomi"), nu = admInp("", "Havola (https://...)"), nr = admInp("", "Mukofot", "number"), nc = admInp("", "Kanal @username (ixtiyoriy)");
+      box.appendChild(h("div", { class: "card apad" }, h("b", null, "➕ Yangi shart"), nt, nu, nc, nr,
+        admBtn("Qo‘shish", "primary", function () {
+          if (!nt.value.trim()) { toast("Nomini kiriting"); return; }
+          request("/api/admin/task/save", { title: nt.value, url: nu.value, channel: nc.value, reward: nr.value || 0, active: true }).then(function (r) { set(r.tasks ? r : _bonusFrom(r)); toast("Qo‘shildi ✓"); }).catch(function (e) { toast(e.message); });
+        })));
+      d.tasks.forEach(function (t) {
+        box.appendChild(h("div", { class: "card apad" },
+          h("b", null, t.title + (t.active ? "" : " (o‘chiq)")), h("div", { class: "note" }, coin(t.reward) + (t.channel ? " · " + t.channel : "")),
+          h("div", { class: "arow" },
+            admBtn(t.active ? "O‘chirish" : "Yoqish", "small", function () { request("/api/admin/task/save", { id: t.id, title: t.title, description: t.description, url: t.url, channel: t.channel, reward: t.reward, active: !t.active }).then(function () { admLoad(); }).catch(function (e) { toast(e.message); }); }),
+            admBtn("🗑", "small danger", function () { if (confirm("O‘chirilsinmi?")) request("/api/admin/task/delete", { id: t.id }).then(function () { admLoad(); }).catch(function (e) { toast(e.message); }); }))));
+      });
+      if (d.pending.length) box.appendChild(h("h3", { class: "sec" }, "Tasdiq kutayotganlar"));
+      d.pending.forEach(function (c) {
+        box.appendChild(h("div", { class: "card apad" }, h("b", null, c.title), h("div", { class: "note" }, (c.username ? "@" + c.username : c.user_id) + " · " + coin(c.reward)),
+          h("div", { class: "arow" },
+            admBtn("✅", "primary small", function () { request("/api/admin/claim", { id: c.id, approve: true }).then(set).catch(function (e) { toast(e.message); }); }),
+            admBtn("❌", "small danger", function () { request("/api/admin/claim", { id: c.id, approve: false }).then(set).catch(function (e) { toast(e.message); }); }))));
+      });
+      return box;
+    }
+    function _bonusFrom(r) { admLoad(); return ADM.bonus; }
+    /* ---- Kanal ---- */
+    function admChan() {
+      var box = h("div"), inp = admInp(ADM.chan || "", "@kanal_username");
+      box.appendChild(h("div", { class: "card apad" }, h("b", null, "📢 Majburiy kanal"),
+        h("p", { class: "note" }, "Hozir: " + (ADM.chan || "o‘rnatilmagan") + ". Bot kanalda admin bo‘lishi kerak."),
+        admFld("Kanal", inp),
+        h("div", { class: "arow" },
+          admBtn("Saqlash", "primary", function () { request("/api/admin/channel", { channel: inp.value }).then(function (r) { ADM.chan = r.channel; toast("Saqlandi ✓"); render(); }).catch(function (e) { toast(e.message); }); }),
+          admBtn("O‘chirish", "danger", function () { request("/api/admin/channel", { channel: "" }).then(function (r) { ADM.chan = r.channel; toast("O‘chirildi"); render(); }).catch(function (e) { toast(e.message); }); }))));
+      return box;
+    }
+    /* ---- Xabar ---- */
+    function admMsg() {
+      var box = h("div"), t = h("textarea", { class: "betinput ain", rows: "5", placeholder: "Hammaga yuboriladigan matn" });
+      t.value = ADM.msg || ""; t.addEventListener("input", function () { ADM.msg = t.value; });
+      box.appendChild(h("div", { class: "card apad" }, h("b", null, "📣 Xabar yuborish"), t,
+        admBtn("Hammaga yuborish", "primary", function () {
+          if (!t.value.trim()) { toast("Matn kiriting"); return; }
+          if (!confirm("Xabar barcha foydalanuvchilarga yuboriladi. Davom etasizmi?")) return;
+          request("/api/admin/broadcast", { text: t.value }).then(function (r) { toast(r.total + " kishiga yuborilmoqda…"); ADM.msg = ""; render(); }).catch(function (e) { toast(e.message); });
+        }),
+        h("p", { class: "note" }, "Rasm/GIF/video bilan xabar uchun botdagi /admin dan foydalaning.")));
+      return box;
+    }
     function admStats() {
       var d = state.adminData, box = h("div");
       if (!d) { box.appendChild(h("div", { class: "card empty" }, h("p", { class: "muted" }, "Yuklanmoqda..."))); return box; }
@@ -2738,7 +3263,7 @@
         h("div", { class: "kv" }, h("span", null, "Sotilgan buyumlar"), h("b", null, String(s.sold || 0))),
         h("div", { class: "kv" }, h("span", null, "Jami coin balanslari"), h("b", null, coin(s.coins || 0)))
       ));
-      box.appendChild(h("p", { class: "note" }, "Boshqa sozlamalar (bonus shartlari, majburiy kanal, bot menyusi, maxsus belgilar) hozircha botdagi /admin da."));
+      box.appendChild(h("p", { class: "note" }, "Bosh sahifa matni/rasmi, g‘ildirak sozlamalari, bot menyu ranglari va maxsus belgilar hozircha botdagi /admin da."));
       return box;
     }
 
@@ -3253,7 +3778,7 @@
         var me = state.me;
         var label, disabled = false, hintText = "";
         var freeN = 0, paidN = count, cost = 0;
-        if (me) { freeN = c.price > 0 ? Math.min(count, Math.max(0, me.free_left)) : count; paidN = count - freeN; cost = paidN * c.price; }
+        if (me) { freeN = c.price <= 0 ? count : (c.id === state.freeCase ? Math.min(count, Math.max(0, me.free_left)) : 0); paidN = count - freeN; cost = paidN * c.price; }
         var mult = count > 1 ? " ×" + count : "";
         if (!inTG) { label = "Telegram ichida oching"; disabled = true; }
         else if (!me || me.gate !== "ok") { label = "Avval ro‘yxatdan o‘ting"; disabled = true; }
@@ -3421,7 +3946,7 @@
       tabbar.textContent = "";
       tabbar.style.gridTemplateColumns = "repeat(" + list.length + ", 1fr)";
       list.forEach(function (t) {
-        var b = h("button", { class: "tab", "data-tab": t.id, onclick: function () { if (t.id === "games") toggleGames(); else go(t.id); } });
+        var b = h("button", { class: "tab", "data-tab": t.id, onclick: function () { go(t.id); } });
         b.innerHTML = ICONS[t.icon];
         b.appendChild(h("span", null, t.label));
         tabbar.appendChild(b);
@@ -3442,7 +3967,7 @@
 
     function go(tab) {
       if (tab !== state.tab) haptic();
-      if (GAME_TABS.indexOf(tab) < 0 && tab !== "games") state.lastTab = tab;
+      if (GAME_TABS.indexOf(tab) < 0) state.lastTab = tab;
       closeGames();
       state.tab = tab;
       syncBack();
@@ -3478,6 +4003,8 @@
         else if (state.tab === "ladder") view.appendChild(viewLadder());
         else if (state.tab === "build") view.appendChild(viewBuild());
         else if (state.tab === "signal") view.appendChild(viewSignal());
+        else if (state.tab === "paperio") view.appendChild(viewPaperio());
+        else if (state.tab === "games") view.appendChild(viewGames());
         else view.appendChild(viewHome());
       } catch (e) {
         view.appendChild(h("div", { class: "card empty" }, h("p", null, "Xatolik: " + e.message)));
@@ -3518,6 +4045,7 @@
           state.banner = d.banner || null;
           state.freeLimit = d.free_limit || state.freeLimit;
           state.hero = d.hero || null;
+          state.freeCase = d.free_case || 0;
         })
         .catch(function () { state.error = "Qutilarni yuklab bo‘lmadi. Internetni tekshiring."; })
         .then(function () { state.loaded = true; render(); });
@@ -3532,7 +4060,7 @@
     load();
     try {
       var gm = new URLSearchParams(location.search).get("game");
-      if (gm === "wheel" || gm === "mines" || gm === "tower" || gm === "ladder" || gm === "build" || gm === "signal") go(gm);
+      if (gm === "wheel" || gm === "mines" || gm === "tower" || gm === "ladder" || gm === "build" || gm === "signal" || gm === "paperio" || gm === "games") go(gm);
     } catch (e) {}
   })();
   </script>

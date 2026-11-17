@@ -100,6 +100,9 @@ def init_db():
             con.execute("ALTER TABLE users ADD COLUMN last_daily TEXT")
         if "ref_paid" not in cols:
             con.execute("ALTER TABLE users ADD COLUMN ref_paid INTEGER NOT NULL DEFAULT 0")
+        if "free_used" not in cols:
+            con.execute("ALTER TABLE users ADD COLUMN free_used INTEGER NOT NULL DEFAULT 0")
+            con.execute("UPDATE users SET free_used = MIN(opens, ?)", (DEFAULT_FREE_OPENS,))
         ccols = [row["name"] for row in con.execute("PRAGMA table_info(cases)")]
         if "bg_color" not in ccols:
             con.execute("ALTER TABLE cases ADD COLUMN bg_color TEXT NOT NULL DEFAULT ''")
@@ -181,6 +184,29 @@ def _free_limit(con) -> int:
         return max(0, int(row["value"])) if row and row["value"] is not None else DEFAULT_FREE_OPENS
     except (TypeError, ValueError):
         return DEFAULT_FREE_OPENS
+
+
+def free_case_id() -> int:
+    """Birinchi kirganlar tekin ochadigan quti: admin tanlagan, bo'lmasa eng arzon (sovg'ali) quti."""
+    with connect() as con:
+        row = con.execute("SELECT value FROM settings WHERE key='free_case_id'").fetchone()
+        try:
+            chosen = int(row["value"]) if row and row["value"] else 0
+        except (TypeError, ValueError):
+            chosen = 0
+        base = ("SELECT c.id FROM cases c WHERE c.is_active=1 AND EXISTS "
+                "(SELECT 1 FROM case_items i WHERE i.case_id=c.id AND i.is_active=1)")
+        if chosen:
+            ok = con.execute(base + " AND c.id=?", (chosen,)).fetchone()
+            if ok:
+                return chosen
+        cheapest = con.execute(base + " ORDER BY c.price ASC, c.id ASC LIMIT 1").fetchone()
+        return int(cheapest["id"]) if cheapest else 0
+
+
+def set_free_case(case_id: int) -> None:
+    """0 — avtomatik (eng arzon quti)."""
+    set_setting("free_case_id", int(case_id) or None)
 
 
 def free_limit() -> int:
@@ -267,10 +293,11 @@ def all_user_ids():
 
 
 def _wallet(con, user_id) -> dict:
-    row = con.execute("SELECT coins, opens FROM users WHERE user_id=?", (user_id,)).fetchone()
+    row = con.execute("SELECT coins, opens, free_used FROM users WHERE user_id=?", (user_id,)).fetchone()
     coins = int(row["coins"]) if row else 0
     opens = int(row["opens"]) if row else 0
-    return {"coins": coins, "opens": opens, "free_left": max(0, _free_limit(con) - opens)}
+    used = int(row["free_used"]) if row else 0
+    return {"coins": coins, "opens": opens, "free_left": max(0, _free_limit(con) - used)}
 
 
 def wallet(user_id) -> dict:
@@ -490,6 +517,7 @@ def open_case(user_id, case_id, count=1) -> dict:
         return {"ok": False, "error": "bad_count"}
     if count not in OPEN_COUNTS:
         return {"ok": False, "error": "bad_count"}
+    fcid = free_case_id()
     con = connect()
     try:
         con.execute("BEGIN IMMEDIATE")
@@ -508,13 +536,21 @@ def open_case(user_id, case_id, count=1) -> dict:
 
         wallet_before = _wallet(con, user_id)
         price = int(case["price"])
-        free_n = count if price <= 0 else min(count, wallet_before["free_left"])
+        # tekin ochishlar faqat "kirish sovg'asi" qutisida ishlaydi (admin tanlaydi, aks holda eng arzon quti)
+        if price <= 0:
+            free_n, quota_used = count, 0
+        elif int(case_id) == fcid:
+            free_n = min(count, wallet_before["free_left"])
+            quota_used = free_n
+        else:
+            free_n, quota_used = 0, 0
         cost = (count - free_n) * price
         if wallet_before["coins"] < cost:
             con.rollback()
             return {"ok": False, "error": "no_funds", "price": price, "coins": wallet_before["coins"]}
 
-        con.execute("UPDATE users SET coins = coins - ?, opens = opens + ? WHERE user_id=?", (cost, count, user_id))
+        con.execute("UPDATE users SET coins = coins - ?, opens = opens + ?, free_used = free_used + ? WHERE user_id=?",
+                    (cost, count, quota_used, user_id))
         won = []
         for _ in range(count):
             winner = _pick(items)
