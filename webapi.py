@@ -16,6 +16,7 @@ import crane
 import ladder
 import mines
 import signals
+import pioarena
 import vgames
 import tower
 import wheel
@@ -866,6 +867,9 @@ async def api_admin_upload(request):
         db.set_setting(HERO_KEYS["image"], ref)
     elif target == "banner":
         db.set_setting("banner_image", ref)
+    elif target == "pioad":
+        if not pioarena.ad_set_video(_int(fields.get("id")), ref):
+            raise ApiError(404, "not_found", "Reklama topilmadi.")
     elif target == "item":
         item_id = _int(fields.get("id"))
         if not db.get_case_item(item_id):
@@ -925,6 +929,72 @@ async def api_admin_coins(request):
     db.add_coins(target, delta)
     logging.info("admin %s coin %+d -> user %s", admin_id, delta, target)
     return web.json_response({"user": _user_json(db.user_card(target))}, headers=NO_STORE)
+
+
+PIO_ERRORS = {
+    "bad_request": (400, "Noto‘g‘ri so‘rov."),
+    "no_funds": (402, "Coin yetarli emas (1000 kerak). Tekin rejimda o‘ynang."),
+    "no_game": (404, "Faol o‘yin yo‘q."),
+}
+_pio_error = _game_api(pioarena, pioarena.PioError, PIO_ERRORS)
+
+
+@api
+async def api_pio_lobby(request):
+    user_id, _, _, _ = await _auth(request)
+    return web.json_response(pioarena.lobby(user_id), headers=NO_STORE)
+
+
+@api
+async def api_pio_start(request):
+    user_id, _, _, _ = await _auth(request)
+    try:
+        return web.json_response(pioarena.start(user_id), headers=NO_STORE)
+    except pioarena.PioError as exc:
+        raise _pio_error(exc)
+
+
+@api
+async def api_pio_finish(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        return web.json_response(pioarena.finish(user_id, body.get("game_id"), body.get("areas"), bool(body.get("quit"))), headers=NO_STORE)
+    except pioarena.PioError as exc:
+        raise _pio_error(exc)
+
+
+def _pio_ad_json(r) -> dict:
+    return {"id": r["id"], "video": media_url(r["video"]), "has_video": bool(r["video"]), "link": r["link"], "active": bool(r["active"]), "views": r["views"]}
+
+
+@api
+async def api_pio_ad(request):
+    await _auth(request)
+    ad = pioarena.ad_pick()
+    return web.json_response({"ad": {"id": ad["id"], "video": media_url(ad["video"]), "link": ad["link"]} if ad and media_url(ad["video"]) else None}, headers=NO_STORE)
+
+
+@api
+async def api_admin_pio_ads(request):
+    await _admin(request)
+    return web.json_response({"ads": [_pio_ad_json(r) for r in pioarena.ads_all()]}, headers=NO_STORE)
+
+
+@api
+async def api_admin_pio_ad_save(request):
+    _, body = await _admin(request)
+    try:
+        pioarena.ad_save(_int(body.get("id")), body.get("video"), body.get("link"), bool(body.get("active", True)))
+    except pioarena.PioError:
+        raise ApiError(400, "bad_request", "Havola https:// bilan boshlanishi kerak.")
+    return web.json_response({"ads": [_pio_ad_json(r) for r in pioarena.ads_all()]}, headers=NO_STORE)
+
+
+@api
+async def api_admin_pio_ad_delete(request):
+    _, body = await _admin(request)
+    pioarena.ad_delete(_int(body.get("id")))
+    return web.json_response({"ads": [_pio_ad_json(r) for r in pioarena.ads_all()]}, headers=NO_STORE)
 
 
 # ------------------------------------------------------------------ Virtual o'yinlar (reyting)
@@ -1126,6 +1196,13 @@ def setup_routes(app: web.Application) -> None:
 
 
     app.router.add_post("/api/admin/overview", api_admin_overview)
+    app.router.add_post("/api/pio/lobby", api_pio_lobby)
+    app.router.add_post("/api/pio/ad", api_pio_ad)
+    app.router.add_post("/api/admin/pio_ads", api_admin_pio_ads)
+    app.router.add_post("/api/admin/pio_ads/save", api_admin_pio_ad_save)
+    app.router.add_post("/api/admin/pio_ads/delete", api_admin_pio_ad_delete)
+    app.router.add_post("/api/pio/start", api_pio_start)
+    app.router.add_post("/api/pio/finish", api_pio_finish)
     app.router.add_post("/api/vgame/top", api_vgame_top)
     app.router.add_post("/api/vgame/score", api_vgame_score)
     app.router.add_post("/api/admin/welcome", api_admin_welcome)

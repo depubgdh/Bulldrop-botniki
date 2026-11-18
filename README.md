@@ -50,3 +50,9 @@ python main.py
 ```
 
 Bot tokeni yoki to‘lov sirlarini GitHub’ga commit qilmang. To‘lov va withdrawal ulashdan oldin qonuniy talablar, provayderlar, foydalanuvchi verifikatsiyasi, audit va xatolarni qayta tiklash mexanizmlarini mustaqil tekshirish zarur.
+
+## Bull paper.io (coin / tekin) va majburiy reklama
+- O‘yin dizayni (Paper Arena) `index.html` ichidagi `#pio-css / #pio-body / #pio-js` bloklarida; iframe orqali ishlaydi.
+- Coin rejimi: stavka 1000, 8 ta bot (ularga coin to‘lanmaydi), g‘olib har raqibdan 30% oladi, yutqazgan 20% qaytarib oladi. Doimiylar: `pioarena.py` tepasida (`STAKE`, `WIN_TAKE`, `LOSE_REFUND`).
+- Tekin rejim: coin harakatlanmaydi.
+- Har 3 marta yutqazgandan keyin majburiy video reklama: Admin → «O‘yin videosi» (MP4 havola yoki yuklash + bosilganda ochiladigan havola).
