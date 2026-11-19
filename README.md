@@ -59,3 +59,9 @@ Bot tokeni yoki to‘lov sirlarini GitHub’ga commit qilmang. To‘lov va withd
 
 ## Apple of Fortune (demo)
 - `apple.py`: 10 qator x 5 olma, chirigan olmalar soni `BAD = [1,1,1,1,2,2,2,3,3,4]`, `RTP = 0.99` (oxirgi qator x349.68). Chirigan joylar serverda o‘yin boshida tanlanadi.
+
+## Google Cloud Run (webhook rejimi)
+`Dockerfile` tayyor (`WEBHOOK=1`). Muhit o‘zgaruvchilari: `BOT_TOKEN`, `ADMIN_IDS`, `WEBAPP_URL` (Cloud Run manzili, `https://…run.app`), ixtiyoriy `WEBHOOK_URL` (bo‘lmasa `WEBAPP_URL` ishlatiladi). Zaxira `ADMIN_IDS` dagi eng kichik ID ga yuboriladi.
+Deploy: `gcloud run deploy bulldrop --source . --region europe-west1 --allow-unauthenticated --max-instances 1 --memory 512Mi --set-env-vars BOT_TOKEN=...,ADMIN_IDS=...,WEBAPP_URL=https://...`
+Birinchi deploydan keyin Cloud Run manzilini `WEBAPP_URL` ga yozib qayta deploy qiling (webhook shu manzilga o‘rnatiladi) va BotFather'da Mini App manzilini yangilang.
+Polling rejimi (Render/VPS) uchun `WEBHOOK` ni o‘rnatmang.
