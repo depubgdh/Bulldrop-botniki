@@ -56,3 +56,6 @@ Bot tokeni yoki to‘lov sirlarini GitHub’ga commit qilmang. To‘lov va withd
 - Coin rejimi: stavka 1000, 8 ta bot (ularga coin to‘lanmaydi), g‘olib har raqibdan 30% oladi, yutqazgan 20% qaytarib oladi. Doimiylar: `pioarena.py` tepasida (`STAKE`, `WIN_TAKE`, `LOSE_REFUND`).
 - Tekin rejim: coin harakatlanmaydi.
 - Har 3 marta yutqazgandan keyin majburiy video reklama: Admin → «O‘yin videosi» (MP4 havola yoki yuklash + bosilganda ochiladigan havola).
+
+## Apple of Fortune (demo)
+- `apple.py`: 10 qator x 5 olma, chirigan olmalar soni `BAD = [1,1,1,1,2,2,2,3,3,4]`, `RTP = 0.99` (oxirgi qator x349.68). Chirigan joylar serverda o‘yin boshida tanlanadi.

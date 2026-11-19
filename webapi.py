@@ -16,6 +16,7 @@ import crane
 import ladder
 import mines
 import signals
+import apple
 import pioarena
 import vgames
 import tower
@@ -931,6 +932,42 @@ async def api_admin_coins(request):
     return web.json_response({"user": _user_json(db.user_card(target))}, headers=NO_STORE)
 
 
+_apple_error = _game_api(apple, apple.AppleError, dict(TOWER_ERRORS, nothing_opened=(409, "Avval kamida bitta olmani oching.")))
+
+
+@api
+async def api_apple_state(request):
+    user_id, _, _, _ = await _auth(request)
+    return web.json_response(apple.state_for(user_id), headers=NO_STORE)
+
+
+@api
+async def api_apple_start(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        return web.json_response(apple.start(user_id, body.get("bet"), body.get("request_id")), headers=NO_STORE)
+    except apple.AppleError as exc:
+        raise _apple_error(exc)
+
+
+@api
+async def api_apple_step(request):
+    user_id, _, body, _ = await _auth(request)
+    try:
+        return web.json_response(apple.step(user_id, body.get("col")), headers=NO_STORE)
+    except apple.AppleError as exc:
+        raise _apple_error(exc)
+
+
+@api
+async def api_apple_cashout(request):
+    user_id, _, _, _ = await _auth(request)
+    try:
+        return web.json_response(apple.cashout(user_id), headers=NO_STORE)
+    except apple.AppleError as exc:
+        raise _apple_error(exc)
+
+
 PIO_ERRORS = {
     "bad_request": (400, "Noto‘g‘ri so‘rov."),
     "no_funds": (402, "Coin yetarli emas (1000 kerak). Tekin rejimda o‘ynang."),
@@ -1196,6 +1233,10 @@ def setup_routes(app: web.Application) -> None:
 
 
     app.router.add_post("/api/admin/overview", api_admin_overview)
+    app.router.add_post("/api/apple/state", api_apple_state)
+    app.router.add_post("/api/apple/start", api_apple_start)
+    app.router.add_post("/api/apple/step", api_apple_step)
+    app.router.add_post("/api/apple/cashout", api_apple_cashout)
     app.router.add_post("/api/pio/lobby", api_pio_lobby)
     app.router.add_post("/api/pio/ad", api_pio_ad)
     app.router.add_post("/api/admin/pio_ads", api_admin_pio_ads)
